@@ -1,0 +1,2290 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:15:12
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\uc-terminal\src\usb_core.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome -
+#        RF69w\uc-terminal\src\usb_core.c" -lCN "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\usb_core.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\usb_core.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uc-terminal\src\usb_core.c
+      1          /******************** (C) COPYRIGHT 2011 STMicroelectronics ********************
+      2          * File Name          : usb_core.c
+      3          * Author             : MCD Application Team
+      4          * Version            : V3.3.0
+      5          * Date               : 21-March-2011
+      6          * Description        : Standard protocol processing (USB v2.0)
+      7          ********************************************************************************
+      8          * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+      9          * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE TIME.
+     10          * AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY DIRECT,
+     11          * INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING FROM THE
+     12          * CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE CODING
+     13          * INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+     14          *******************************************************************************/
+     15          
+     16          /* Includes ------------------------------------------------------------------*/
+     17          #include "includes.h"
+     18          #if USBD_MODULE == DEF_ENABLED
+     19          
+     20          /* Private typedef -----------------------------------------------------------*/
+     21          /* Private define ------------------------------------------------------------*/
+     22          #define ValBit(VAR,Place)    (VAR & (1 << Place))
+     23          #define SetBit(VAR,Place)    (VAR |= (1 << Place))
+     24          #define ClrBit(VAR,Place)    (VAR &= ((1 << Place) ^ 255))
+     25          
+     26          #ifdef STM32F10X_CL
+     27           #define Send0LengthData()  {PCD_EP_Write (0, 0, 0) ; vSetEPTxStatus(EP_TX_VALID);}
+     28          #else
+     29          #define Send0LengthData() { _SetEPTxCount(ENDP0, 0); \
+     30              vSetEPTxStatus(EP_TX_VALID); \
+     31            }
+     32          #endif /* STM32F10X_CL */
+     33          
+     34          #define vSetEPRxStatus(st) (SaveRState = st)
+     35          #define vSetEPTxStatus(st) (SaveTState = st)
+     36          
+     37          #define USB_StatusIn() Send0LengthData()
+     38          #define USB_StatusOut() vSetEPRxStatus(EP_RX_VALID)
+     39          
+     40          #define StatusInfo0 StatusInfo.bw.bb1 /* Reverse bb0 & bb1 */
+     41          #define StatusInfo1 StatusInfo.bw.bb0
+     42          
+     43          /* Private macro -------------------------------------------------------------*/
+     44          /* Private variables ---------------------------------------------------------*/
+
+   \                                 In section .bss, align 4
+     45          INT16U_INT8U StatusInfo;
+   \                     StatusInfo:
+   \   00000000                      DS8 4
+     46          
+
+   \                                 In section .bss, align 1
+     47          bool Data_Mul_MaxPacketSize = FALSE;
+   \                     Data_Mul_MaxPacketSize:
+   \   00000000                      DS8 1
+     48          /* Private function prototypes -----------------------------------------------*/
+     49          static void DataStageOut(void);
+     50          static void DataStageIn(void);
+     51          static void NoData_Setup0(void);
+     52          static void Data_Setup0(void);
+     53          /* Private functions ---------------------------------------------------------*/
+     54          
+     55          /*******************************************************************************
+     56          * Function Name  : Standard_GetConfiguration.
+     57          * Description    : Return the current configuration variable address.
+     58          * Input          : Length - How many bytes are needed.
+     59          * Output         : None.
+     60          * Return         : Return 1 , if the request is invalid when "Length" is 0.
+     61          *                  Return "Buffer" if the "Length" is not 0.
+     62          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+     63          INT8U *Standard_GetConfiguration(INT16U Length)
+     64          {
+   \                     Standard_GetConfiguration: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+     65            if (Length == 0)
+   \   00000002   0x.... 0x....      LDR.W    R4,??DataTable15
+   \   00000006   0xB900             CBNZ.N   R0,??Standard_GetConfiguration_0
+     66            {
+     67              pInformation->Ctrl_Info.Usb_wLength =
+     68                sizeof(pInformation->Current_Configuration);
+   \   00000008   0x....             B.N      ?Subroutine0
+     69              return 0;
+     70            }
+     71            pUser_Standard_Requests->User_GetConfiguration();
+   \                     ??Standard_GetConfiguration_0: (+1)
+   \   0000000A   0x.... 0x....      LDR.W    R0,??DataTable15_1
+   \   0000000E   0x6800             LDR      R0,[R0, #+0]
+   \   00000010   0x6800             LDR      R0,[R0, #+0]
+   \   00000012   0x4780             BLX      R0
+     72            return (INT8U *)&pInformation->Current_Configuration;
+   \   00000014   0x6820             LDR      R0,[R4, #+0]
+   \   00000016   0x300A             ADDS     R0,R0,#+10
+   \   00000018   0xBD10             POP      {R4,PC}          ;; return
+     73          }
+
+   \                                 In section .text, align 2, keep-with-next
+   \                     ?Subroutine0: (+1)
+   \   00000000   0x6821             LDR      R1,[R4, #+0]
+   \   00000002   0x2001             MOVS     R0,#+1
+   \   00000004   0x8208             STRH     R0,[R1, #+16]
+   \   00000006   0x2000             MOVS     R0,#+0
+   \   00000008   0xBD10             POP      {R4,PC}
+     74          
+     75          /*******************************************************************************
+     76          * Function Name  : Standard_SetConfiguration.
+     77          * Description    : This routine is called to set the configuration value
+     78          *                  Then each class should configure device itself.
+     79          * Input          : None.
+     80          * Output         : None.
+     81          * Return         : Return USB_SUCCESS, if the request is performed.
+     82          *                  Return USB_UNSUPPORT, if the request is invalid.
+     83          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+     84          RESULT Standard_SetConfiguration(void)
+     85          {
+   \                     Standard_SetConfiguration: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+     86          
+     87            if ((pInformation->USBwValue0 <=
+     88                Device_Table.Total_Configuration) && (pInformation->USBwValue1 == 0)
+     89                && (pInformation->USBwIndex == 0)) /*call Back usb spec 2.0*/
+   \   00000002   0x.... 0x....      LDR.W    R0,??DataTable15
+   \   00000006   0x.... 0x....      LDR.W    R2,??DataTable15_2
+   \   0000000A   0x6800             LDR      R0,[R0, #+0]
+   \   0000000C   0x7852             LDRB     R2,[R2, #+1]
+   \   0000000E   0x78C1             LDRB     R1,[R0, #+3]
+   \   00000010   0x428A             CMP      R2,R1
+   \   00000012   0xD30D             BCC.N    ??Standard_SetConfiguration_0
+   \   00000014   0x7882             LDRB     R2,[R0, #+2]
+   \   00000016   0x2A00             CMP      R2,#+0
+   \   00000018   0xBF04             ITT      EQ 
+   \   0000001A   0x8882             LDRHEQ   R2,[R0, #+4]
+   \   0000001C   0x2A00             CMPEQ    R2,#+0
+   \   0000001E   0xD107             BNE.N    ??Standard_SetConfiguration_0
+     90            {
+     91              pInformation->Current_Configuration = pInformation->USBwValue0;
+   \   00000020   0x7281             STRB     R1,[R0, #+10]
+     92              pUser_Standard_Requests->User_SetConfiguration();
+   \   00000022   0x.... 0x....      LDR.W    R0,??DataTable15_1
+   \   00000026   0x6800             LDR      R0,[R0, #+0]
+   \   00000028   0x6840             LDR      R0,[R0, #+4]
+   \   0000002A   0x4780             BLX      R0
+     93              return USB_SUCCESS;
+   \   0000002C   0x2000             MOVS     R0,#+0
+   \   0000002E   0xBD02             POP      {R1,PC}
+     94            }
+     95            else
+     96            {
+     97              return USB_UNSUPPORT;
+   \                     ??Standard_SetConfiguration_0: (+1)
+   \   00000030   0x2002             MOVS     R0,#+2
+   \   00000032   0xBD02             POP      {R1,PC}          ;; return
+     98            }
+     99          }
+    100          
+    101          /*******************************************************************************
+    102          * Function Name  : Standard_GetInterface.
+    103          * Description    : Return the Alternate Setting of the current interface.
+    104          * Input          : Length - How many bytes are needed.
+    105          * Output         : None.
+    106          * Return         : Return 0, if the request is invalid when "Length" is 0.
+    107          *                  Return "Buffer" if the "Length" is not 0.
+    108          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+    109          INT8U *Standard_GetInterface(INT16U Length)
+    110          {
+   \                     Standard_GetInterface: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    111            if (Length == 0)
+   \   00000002   0x.... 0x....      LDR.W    R4,??DataTable15
+   \   00000006   0xB900             CBNZ.N   R0,??Standard_GetInterface_0
+    112            {
+    113              pInformation->Ctrl_Info.Usb_wLength =
+    114                sizeof(pInformation->Current_AlternateSetting);
+   \   00000008   0x....             B.N      ?Subroutine0
+    115              return 0;
+    116            }
+    117            pUser_Standard_Requests->User_GetInterface();
+   \                     ??Standard_GetInterface_0: (+1)
+   \   0000000A   0x.... 0x....      LDR.W    R0,??DataTable15_1
+   \   0000000E   0x6800             LDR      R0,[R0, #+0]
+   \   00000010   0x6880             LDR      R0,[R0, #+8]
+   \   00000012   0x4780             BLX      R0
+    118            return (INT8U *)&pInformation->Current_AlternateSetting;
+   \   00000014   0x6820             LDR      R0,[R4, #+0]
+   \   00000016   0x300C             ADDS     R0,R0,#+12
+   \   00000018   0xBD10             POP      {R4,PC}          ;; return
+    119          }
+    120          
+    121          /*******************************************************************************
+    122          * Function Name  : Standard_SetInterface.
+    123          * Description    : This routine is called to set the interface.
+    124          *                  Then each class should configure the interface them self.
+    125          * Input          : None.
+    126          * Output         : None.
+    127          * Return         : - Return USB_SUCCESS, if the request is performed.
+    128          *                  - Return USB_UNSUPPORT, if the request is invalid.
+    129          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+    130          RESULT Standard_SetInterface(void)
+    131          {
+   \                     Standard_SetInterface: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    132            RESULT Re;
+    133            /*Test if the specified Interface and Alternate Setting are supported by
+    134              the application Firmware*/
+    135            Re = (*pProperty->Class_Get_Interface_Setting)(pInformation->USBwIndex0, pInformation->USBwValue0);
+   \   00000002   0x.... 0x....      LDR.W    R4,??DataTable15
+   \   00000006   0x.... 0x....      LDR.W    R2,??DataTable15_3
+   \   0000000A   0x6820             LDR      R0,[R4, #+0]
+   \   0000000C   0x6812             LDR      R2,[R2, #+0]
+   \   0000000E   0x78C1             LDRB     R1,[R0, #+3]
+   \   00000010   0x7940             LDRB     R0,[R0, #+5]
+   \   00000012   0x6992             LDR      R2,[R2, #+24]
+   \   00000014   0x4790             BLX      R2
+    136          
+    137            if (pInformation->Current_Configuration != 0)
+   \   00000016   0x6821             LDR      R1,[R4, #+0]
+   \   00000018   0x7A8A             LDRB     R2,[R1, #+10]
+   \   0000001A   0xB19A             CBZ.N    R2,??Standard_SetInterface_0
+    138            {
+    139              if ((Re != USB_SUCCESS) || (pInformation->USBwIndex1 != 0)
+    140                  || (pInformation->USBwValue1 != 0))
+   \   0000001C   0x2800             CMP      R0,#+0
+   \   0000001E   0xBF04             ITT      EQ 
+   \   00000020   0x7908             LDRBEQ   R0,[R1, #+4]
+   \   00000022   0x2800             CMPEQ    R0,#+0
+   \   00000024   0xD10E             BNE.N    ??Standard_SetInterface_0
+   \   00000026   0x7888             LDRB     R0,[R1, #+2]
+   \   00000028   0xB960             CBNZ.N   R0,??Standard_SetInterface_0
+    141              {
+    142                return  USB_UNSUPPORT;
+    143              }
+    144              else if (Re == USB_SUCCESS)
+    145              {
+    146                pUser_Standard_Requests->User_SetInterface();
+   \   0000002A   0x.... 0x....      LDR.W    R0,??DataTable15_1
+   \   0000002E   0x6800             LDR      R0,[R0, #+0]
+   \   00000030   0x68C0             LDR      R0,[R0, #+12]
+   \   00000032   0x4780             BLX      R0
+    147                pInformation->Current_Interface = pInformation->USBwIndex0;
+   \   00000034   0x6820             LDR      R0,[R4, #+0]
+   \   00000036   0x7941             LDRB     R1,[R0, #+5]
+   \   00000038   0x72C1             STRB     R1,[R0, #+11]
+    148                pInformation->Current_AlternateSetting = pInformation->USBwValue0;
+   \   0000003A   0x6820             LDR      R0,[R4, #+0]
+   \   0000003C   0x78C1             LDRB     R1,[R0, #+3]
+   \   0000003E   0x7301             STRB     R1,[R0, #+12]
+    149                return USB_SUCCESS;
+   \   00000040   0x2000             MOVS     R0,#+0
+   \   00000042   0xBD10             POP      {R4,PC}
+    150              }
+    151          
+    152            }
+    153          
+    154            return USB_UNSUPPORT;
+   \                     ??Standard_SetInterface_0: (+1)
+   \   00000044   0x2002             MOVS     R0,#+2
+   \   00000046   0xBD10             POP      {R4,PC}          ;; return
+    155          }
+    156          
+    157          /*******************************************************************************
+    158          * Function Name  : Standard_GetStatus.
+    159          * Description    : Copy the device request data to "StatusInfo buffer".
+    160          * Input          : - Length - How many bytes are needed.
+    161          * Output         : None.
+    162          * Return         : Return 0, if the request is at end of data block,
+    163          *                  or is invalid when "Length" is 0.
+    164          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+    165          INT8U *Standard_GetStatus(INT16U Length)
+    166          {
+   \                     Standard_GetStatus: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    167            if (Length == 0)
+   \   00000002   0x.... 0x....      LDR.W    R1,??DataTable15
+   \   00000006   0x6809             LDR      R1,[R1, #+0]
+   \   00000008   0xB918             CBNZ.N   R0,??Standard_GetStatus_0
+    168            {
+    169              pInformation->Ctrl_Info.Usb_wLength = 2;
+   \   0000000A   0x2002             MOVS     R0,#+2
+   \   0000000C   0x8208             STRH     R0,[R1, #+16]
+    170              return 0;
+   \                     ??Standard_GetStatus_1: (+1)
+   \   0000000E   0x2000             MOVS     R0,#+0
+   \   00000010   0xBD10             POP      {R4,PC}
+    171            }
+    172          
+    173            /* Reset Status Information */
+    174            StatusInfo.w = 0;
+   \                     ??Standard_GetStatus_0: (+1)
+   \   00000012   0x.... 0x....      LDR.W    R4,??DataTable15_4
+   \   00000016   0x2000             MOVS     R0,#+0
+   \   00000018   0x8020             STRH     R0,[R4, #+0]
+    175          
+    176            if (Type_Recipient == (STANDARD_REQUEST | DEVICE_RECIPIENT))
+   \   0000001A   0x227F             MOVS     R2,#+127
+   \   0000001C   0x7808             LDRB     R0,[R1, #+0]
+   \   0000001E   0x4210             TST      R0,R2
+   \   00000020   0xD115             BNE.N    ??Standard_GetStatus_2
+    177            {
+    178              /*Get Device Status */
+    179              INT8U Feature = pInformation->Current_Feature;
+   \   00000022   0x7A48             LDRB     R0,[R1, #+9]
+    180          
+    181              /* Remote Wakeup enabled */
+    182              if (ValBit(Feature, 5))
+   \   00000024   0x2100             MOVS     R1,#+0
+   \   00000026   0x0682             LSLS     R2,R0,#+26
+   \   00000028   0xBF48             IT       MI 
+   \   0000002A   0xF041 0x0102      ORRMI    R1,R1,#0x2
+    183              {
+    184                SetBit(StatusInfo0, 1);
+    185              }
+    186              else
+    187              {
+    188                ClrBit(StatusInfo0, 1);
+   \   0000002E   0x7021             STRB     R1,[R4, #+0]
+    189              }      
+    190          
+    191              /* Bus-powered */
+    192              if (ValBit(Feature, 6))
+   \   00000030   0x0640             LSLS     R0,R0,#+25
+   \   00000032   0x7821             LDRB     R1,[R4, #+0]
+   \   00000034   0xBF54             ITE      PL 
+   \   00000036   0xF001 0x00FE      ANDPL    R0,R1,#0xFE
+   \   0000003A   0xF041 0x0001      ORRMI    R0,R1,#0x1
+    193              {
+    194                SetBit(StatusInfo0, 0);
+    195              }
+    196              else /* Self-powered */
+    197              {
+    198                ClrBit(StatusInfo0, 0);
+   \                     ??Standard_GetStatus_3: (+1)
+   \   0000003E   0x7020             STRB     R0,[R4, #+0]
+    199              }
+    200            }
+    201            /*Interface Status*/
+    202            else if (Type_Recipient == (STANDARD_REQUEST | INTERFACE_RECIPIENT))
+    203            {
+    204              return (INT8U *)&StatusInfo;
+    205            }
+    206            /*Get EndPoint Status*/
+    207            else if (Type_Recipient == (STANDARD_REQUEST | ENDPOINT_RECIPIENT))
+    208            {
+    209              INT8U Related_Endpoint;
+    210              INT8U wIndex0 = pInformation->USBwIndex0;
+    211          
+    212              Related_Endpoint = (wIndex0 & 0x0f);
+    213              if (ValBit(wIndex0, 7))
+    214              {
+    215                /* IN endpoint */
+    216                if (_GetTxStallStatus(Related_Endpoint))
+    217                {
+    218                  SetBit(StatusInfo0, 0); /* IN Endpoint stalled */
+    219                }
+    220              }
+    221              else
+    222              {
+    223                /* OUT endpoint */
+    224                if (_GetRxStallStatus(Related_Endpoint))
+    225                {
+    226                  SetBit(StatusInfo0, 0); /* OUT Endpoint stalled */
+    227                }
+    228              }
+    229          
+    230            }
+    231            else
+    232            {
+    233              return NULL;
+    234            }
+    235            pUser_Standard_Requests->User_GetStatus();
+   \                     ??Standard_GetStatus_4: (+1)
+   \   00000040   0x.... 0x....      LDR.W    R0,??DataTable15_1
+   \   00000044   0x6800             LDR      R0,[R0, #+0]
+   \   00000046   0x6900             LDR      R0,[R0, #+16]
+   \   00000048   0x4780             BLX      R0
+    236            return (INT8U *)&StatusInfo;
+   \                     ??Standard_GetStatus_5: (+1)
+   \   0000004A   0x4620             MOV      R0,R4
+   \   0000004C   0xBD10             POP      {R4,PC}          ;; return
+   \                     ??Standard_GetStatus_2: (+1)
+   \   0000004E   0xF000 0x027F      AND      R2,R0,#0x7F
+   \   00000052   0x2A01             CMP      R2,#+1
+   \   00000054   0xD0F9             BEQ.N    ??Standard_GetStatus_5
+   \   00000056   0xF000 0x007F      AND      R0,R0,#0x7F
+   \   0000005A   0x2802             CMP      R0,#+2
+   \   0000005C   0xD1D7             BNE.N    ??Standard_GetStatus_1
+   \   0000005E   0x7948             LDRB     R0,[R1, #+5]
+   \   00000060   0x.... 0x....      LDR.W    R2,??DataTable15_5  ;; 0x40005c00
+   \   00000064   0xF000 0x010F      AND      R1,R0,#0xF
+   \   00000068   0x0600             LSLS     R0,R0,#+24
+   \   0000006A   0xF852 0x0021      LDR      R0,[R2, R1, LSL #+2]
+   \   0000006E   0xD507             BPL.N    ??Standard_GetStatus_6
+   \   00000070   0xF000 0x0030      AND      R0,R0,#0x30
+   \   00000074   0x2810             CMP      R0,#+16
+   \   00000076   0xD1E3             BNE.N    ??Standard_GetStatus_4
+   \   00000078   0x2000             MOVS     R0,#+0
+   \   0000007A   0xF040 0x0001      ORR      R0,R0,#0x1
+   \   0000007E   0xE7DE             B.N      ??Standard_GetStatus_3
+   \                     ??Standard_GetStatus_6: (+1)
+   \   00000080   0xF400 0x5040      AND      R0,R0,#0x3000
+   \   00000084   0xF5B0 0x5F80      CMP      R0,#+4096
+   \   00000088   0xD1DA             BNE.N    ??Standard_GetStatus_4
+   \   0000008A   0x2000             MOVS     R0,#+0
+   \   0000008C   0xF040 0x0001      ORR      R0,R0,#0x1
+   \   00000090   0xE7D5             B.N      ??Standard_GetStatus_3
+    237          }
+    238          
+    239          /*******************************************************************************
+    240          * Function Name  : Standard_ClearFeature.
+    241          * Description    : Clear or disable a specific feature.
+    242          * Input          : None.
+    243          * Output         : None.
+    244          * Return         : - Return USB_SUCCESS, if the request is performed.
+    245          *                  - Return USB_UNSUPPORT, if the request is invalid.
+    246          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+    247          RESULT Standard_ClearFeature(void)
+    248          {
+   \                     Standard_ClearFeature: (+1)
+   \   00000000   0xB5F8             PUSH     {R3-R7,LR}
+    249            INT32U     Type_Rec = Type_Recipient;
+   \   00000002   0x.... 0x....      LDR.W    R0,??DataTable15
+   \   00000006   0x6800             LDR      R0,[R0, #+0]
+   \   00000008   0x7801             LDRB     R1,[R0, #+0]
+   \   0000000A   0xF011 0x017F      ANDS     R1,R1,#0x7F
+    250            INT32U     Status;
+    251          
+    252          
+    253            if (Type_Rec == (STANDARD_REQUEST | DEVICE_RECIPIENT))
+   \   0000000E   0xD104             BNE.N    ??Standard_ClearFeature_0
+    254            {/*Device Clear Feature*/
+    255              ClrBit(pInformation->Current_Feature, 5);
+   \   00000010   0x7A41             LDRB     R1,[R0, #+9]
+   \   00000012   0xF001 0x01DF      AND      R1,R1,#0xDF
+   \   00000016   0x7241             STRB     R1,[R0, #+9]
+    256              return USB_SUCCESS;
+   \   00000018   0xE055             B.N      ??Standard_ClearFeature_1
+    257            }
+    258            else if (Type_Rec == (STANDARD_REQUEST | ENDPOINT_RECIPIENT))
+   \                     ??Standard_ClearFeature_0: (+1)
+   \   0000001A   0x2902             CMP      R1,#+2
+   \   0000001C   0xBF01             ITTTT    EQ 
+   \   0000001E   0x8841             LDRHEQ   R1,[R0, #+2]
+   \   00000020   0x2900             CMPEQ    R1,#+0
+   \   00000022   0x7901             LDRBEQ   R1,[R0, #+4]
+   \   00000024   0x2900             CMPEQ    R1,#+0
+    259            {/*EndPoint Clear Feature*/
+    260              DEVICE* pDev;
+    261              INT32U Related_Endpoint;
+    262              INT32U wIndex0;
+    263              INT32U rEP;
+    264          
+    265              if ((pInformation->USBwValue != ENDPOINT_STALL)
+    266                  || (pInformation->USBwIndex1 != 0))
+   \   00000026   0xD150             BNE.N    ??Standard_ClearFeature_2
+    267              {
+    268                return USB_UNSUPPORT;
+    269              }
+    270          
+    271              pDev = &Device_Table;
+    272              wIndex0 = pInformation->USBwIndex0;
+   \   00000028   0x7941             LDRB     R1,[R0, #+5]
+    273              rEP = wIndex0 & ~0x80;
+    274              Related_Endpoint = ENDP0 + rEP;
+    275          
+    276              if (ValBit(pInformation->USBwIndex0, 7))
+   \   0000002A   0x.... 0x....      LDR.W    R4,??DataTable15_5  ;; 0x40005c00
+   \   0000002E   0xF021 0x0580      BIC      R5,R1,#0x80
+   \   00000032   0x060A             LSLS     R2,R1,#+24
+   \   00000034   0xF854 0x2025      LDR      R2,[R4, R5, LSL #+2]
+    277              {
+    278                /*Get Status of endpoint & stall the request if the related_ENdpoint
+    279                is Disabled*/
+    280                Status = _GetEPTxStatus(Related_Endpoint);
+    281              }
+    282              else
+    283              {
+    284                Status = _GetEPRxStatus(Related_Endpoint);
+    285              }
+    286          
+    287              if ((rEP >= pDev->Total_Endpoint) || (Status == 0)
+    288                  || (pInformation->Current_Configuration == 0))
+   \   00000038   0x.... 0x....      LDR.W    R3,??DataTable15_2
+   \   0000003C   0xBF4C             ITE      MI 
+   \   0000003E   0xF002 0x0230      ANDMI    R2,R2,#0x30
+   \   00000042   0xF402 0x5240      ANDPL    R2,R2,#0x3000
+   \   00000046   0x781B             LDRB     R3,[R3, #+0]
+   \   00000048   0x429D             CMP      R5,R3
+   \   0000004A   0xD23E             BCS.N    ??Standard_ClearFeature_2
+   \   0000004C   0x2A00             CMP      R2,#+0
+   \   0000004E   0xBF1C             ITT      NE 
+   \   00000050   0x7A80             LDRBNE   R0,[R0, #+10]
+   \   00000052   0x2800             CMPNE    R0,#+0
+   \   00000054   0xD039             BEQ.N    ??Standard_ClearFeature_2
+    289              {
+    290                return USB_UNSUPPORT;
+    291              }
+    292          
+    293          
+    294              if (wIndex0 & 0x80)
+   \   00000056   0x0608             LSLS     R0,R1,#+24
+   \   00000058   0xF854 0x0025      LDR      R0,[R4, R5, LSL #+2]
+   \   0000005C   0xD50B             BPL.N    ??Standard_ClearFeature_3
+    295              {
+    296                /* IN endpoint */
+    297                if (_GetTxStallStatus(Related_Endpoint ))
+   \   0000005E   0xF000 0x0030      AND      R0,R0,#0x30
+   \   00000062   0x2810             CMP      R0,#+16
+   \   00000064   0xD12A             BNE.N    ??Standard_ClearFeature_4
+    298                {
+    299                #ifndef STM32F10X_CL
+    300                  ClearDTOG_TX(Related_Endpoint);
+   \   00000066   0x4628             MOV      R0,R5
+   \   00000068   0x.... 0x....      BL       ClearDTOG_TX
+    301                #endif /* STM32F10X_CL */
+    302                  SetEPTxStatus(Related_Endpoint, EP_TX_VALID);
+   \   0000006C   0x2130             MOVS     R1,#+48
+   \   0000006E   0x4628             MOV      R0,R5
+   \   00000070   0x.... 0x....      BL       SetEPTxStatus
+   \   00000074   0xE022             B.N      ??Standard_ClearFeature_4
+    303                }
+    304              }
+    305              else
+    306              {
+    307                /* OUT endpoint */
+    308                if (_GetRxStallStatus(Related_Endpoint))
+   \                     ??Standard_ClearFeature_3: (+1)
+   \   00000076   0xF400 0x5040      AND      R0,R0,#0x3000
+   \   0000007A   0xF5B0 0x5F80      CMP      R0,#+4096
+   \   0000007E   0xD11D             BNE.N    ??Standard_ClearFeature_4
+    309                {
+    310                  if (Related_Endpoint == ENDP0)
+   \   00000080   0xF248 0x0680      MOVW     R6,#+32896
+   \   00000084   0xF64B 0x778F      MOVW     R7,#+49039
+   \   00000088   0xB96D             CBNZ.N   R5,??Standard_ClearFeature_5
+    311                  {
+    312                    /* After clear the STALL, enable the default endpoint receiver */
+    313                    SetEPRxCount(Related_Endpoint, Device_Property.MaxPacketSize);
+   \   0000008A   0x.... 0x....      LDR.W    R0,??DataTable15_6
+   \   0000008E   0xF890 0x102C      LDRB     R1,[R0, #+44]
+   \   00000092   0x2000             MOVS     R0,#+0
+   \   00000094   0x.... 0x....      BL       SetEPRxCount
+    314                    _SetEPRxStatus(Related_Endpoint, EP_RX_VALID);
+   \   00000098   0x6820             LDR      R0,[R4, #+0]
+   \   0000009A   0x4038             ANDS     R0,R7,R0
+   \   0000009C   0xF480 0x5040      EOR      R0,R0,#0x3000
+   \   000000A0   0x4330             ORRS     R0,R6,R0
+   \   000000A2   0x6020             STR      R0,[R4, #+0]
+   \   000000A4   0xE00A             B.N      ??Standard_ClearFeature_4
+    315                  }
+    316                  else
+    317                  {
+    318                  #ifndef STM32F10X_CL
+    319                    ClearDTOG_RX(Related_Endpoint);
+   \                     ??Standard_ClearFeature_5: (+1)
+   \   000000A6   0x4628             MOV      R0,R5
+   \   000000A8   0x.... 0x....      BL       ClearDTOG_RX
+    320                  #endif /* STM32F10X_CL */
+    321                    _SetEPRxStatus(Related_Endpoint, EP_RX_VALID);
+   \   000000AC   0xF854 0x0025      LDR      R0,[R4, R5, LSL #+2]
+   \   000000B0   0x4038             ANDS     R0,R7,R0
+   \   000000B2   0xF480 0x5040      EOR      R0,R0,#0x3000
+   \   000000B6   0x4330             ORRS     R0,R6,R0
+   \   000000B8   0xF844 0x0025      STR      R0,[R4, R5, LSL #+2]
+    322                  }
+    323                }
+    324              }
+    325              pUser_Standard_Requests->User_ClearFeature();
+   \                     ??Standard_ClearFeature_4: (+1)
+   \   000000BC   0x.... 0x....      LDR.W    R0,??DataTable15_1
+   \   000000C0   0x6800             LDR      R0,[R0, #+0]
+   \   000000C2   0x6940             LDR      R0,[R0, #+20]
+   \   000000C4   0x4780             BLX      R0
+    326              return USB_SUCCESS;
+   \                     ??Standard_ClearFeature_1: (+1)
+   \   000000C6   0x2000             MOVS     R0,#+0
+   \   000000C8   0xBDF2             POP      {R1,R4-R7,PC}
+    327            }
+    328          
+    329            return USB_UNSUPPORT;
+   \                     ??Standard_ClearFeature_2: (+1)
+   \   000000CA   0x2002             MOVS     R0,#+2
+   \   000000CC   0xBDF2             POP      {R1,R4-R7,PC}    ;; return
+    330          }
+    331          
+    332          /*******************************************************************************
+    333          * Function Name  : Standard_SetEndPointFeature
+    334          * Description    : Set or enable a specific feature of EndPoint
+    335          * Input          : None.
+    336          * Output         : None.
+    337          * Return         : - Return USB_SUCCESS, if the request is performed.
+    338          *                  - Return USB_UNSUPPORT, if the request is invalid.
+    339          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+    340          RESULT Standard_SetEndPointFeature(void)
+    341          {
+   \                     Standard_SetEndPointFeature: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+    342            INT32U    wIndex0;
+    343            INT32U    Related_Endpoint;
+    344            INT32U    rEP;
+    345            INT32U    Status;
+    346          
+    347            wIndex0 = pInformation->USBwIndex0;
+   \   00000002   0x.... 0x....      LDR.W    R0,??DataTable15
+    348            rEP = wIndex0 & ~0x80;
+    349            Related_Endpoint = ENDP0 + rEP;
+    350          
+    351            if (ValBit(pInformation->USBwIndex0, 7))
+   \   00000006   0x.... 0x....      LDR.W    R1,??DataTable15_5  ;; 0x40005c00
+   \   0000000A   0x6802             LDR      R2,[R0, #+0]
+    352            {
+    353              /* get Status of endpoint & stall the request if the related_ENdpoint
+    354              is Disabled*/
+    355              Status = _GetEPTxStatus(Related_Endpoint);
+    356            }
+    357            else
+    358            {
+    359              Status = _GetEPRxStatus(Related_Endpoint);
+    360            }
+    361          
+    362            if (Related_Endpoint >= Device_Table.Total_Endpoint
+    363                || pInformation->USBwValue != 0 || Status == 0
+    364                || pInformation->Current_Configuration == 0)
+   \   0000000C   0x.... 0x....      LDR.W    R5,??DataTable15_2
+   \   00000010   0x7953             LDRB     R3,[R2, #+5]
+   \   00000012   0xF023 0x0080      BIC      R0,R3,#0x80
+   \   00000016   0x061C             LSLS     R4,R3,#+24
+   \   00000018   0xF851 0x4020      LDR      R4,[R1, R0, LSL #+2]
+   \   0000001C   0xBF4C             ITE      MI 
+   \   0000001E   0xF004 0x0430      ANDMI    R4,R4,#0x30
+   \   00000022   0xF404 0x5440      ANDPL    R4,R4,#0x3000
+   \   00000026   0x782D             LDRB     R5,[R5, #+0]
+   \   00000028   0x42A8             CMP      R0,R5
+   \   0000002A   0xD206             BCS.N    ??Standard_SetEndPointFeature_0
+   \   0000002C   0x8855             LDRH     R5,[R2, #+2]
+   \   0000002E   0xB925             CBNZ.N   R5,??Standard_SetEndPointFeature_0
+   \   00000030   0x2C00             CMP      R4,#+0
+   \   00000032   0xBF1C             ITT      NE 
+   \   00000034   0x7A92             LDRBNE   R2,[R2, #+10]
+   \   00000036   0x2A00             CMPNE    R2,#+0
+   \   00000038   0xD101             BNE.N    ??Standard_SetEndPointFeature_1
+    365            {
+    366              return USB_UNSUPPORT;
+   \                     ??Standard_SetEndPointFeature_0: (+1)
+   \   0000003A   0x2002             MOVS     R0,#+2
+   \   0000003C   0xBD32             POP      {R1,R4,R5,PC}
+    367            }
+    368            else
+    369            {
+    370              if (wIndex0 & 0x80)
+   \                     ??Standard_SetEndPointFeature_1: (+1)
+   \   0000003E   0x061B             LSLS     R3,R3,#+24
+   \   00000040   0xF851 0x3020      LDR      R3,[R1, R0, LSL #+2]
+   \   00000044   0xF248 0x0280      MOVW     R2,#+32896
+   \   00000048   0xD505             BPL.N    ??Standard_SetEndPointFeature_2
+    371              {
+    372                /* IN endpoint */
+    373                _SetEPTxStatus(Related_Endpoint, EP_TX_STALL);
+   \   0000004A   0xF648 0x74BF      MOVW     R4,#+36799
+   \   0000004E   0x4023             ANDS     R3,R4,R3
+   \   00000050   0xF083 0x0310      EOR      R3,R3,#0x10
+   \   00000054   0xE004             B.N      ??Standard_SetEndPointFeature_3
+    374              }
+    375          
+    376              else
+    377              {
+    378                /* OUT endpoint */
+    379                _SetEPRxStatus(Related_Endpoint, EP_RX_STALL);
+   \                     ??Standard_SetEndPointFeature_2: (+1)
+   \   00000056   0xF64B 0x748F      MOVW     R4,#+49039
+   \   0000005A   0x4023             ANDS     R3,R4,R3
+   \   0000005C   0xF483 0x5380      EOR      R3,R3,#0x1000
+   \                     ??Standard_SetEndPointFeature_3: (+1)
+   \   00000060   0x431A             ORRS     R2,R2,R3
+   \   00000062   0xF841 0x2020      STR      R2,[R1, R0, LSL #+2]
+    380              }
+    381            }
+    382            pUser_Standard_Requests->User_SetEndPointFeature();
+   \   00000066   0x.... 0x....      LDR.W    R0,??DataTable15_1
+   \   0000006A   0x6800             LDR      R0,[R0, #+0]
+   \   0000006C   0x6980             LDR      R0,[R0, #+24]
+   \   0000006E   0x4780             BLX      R0
+    383            return USB_SUCCESS;
+   \   00000070   0x2000             MOVS     R0,#+0
+   \   00000072   0xBD32             POP      {R1,R4,R5,PC}    ;; return
+    384          }
+    385          
+    386          /*******************************************************************************
+    387          * Function Name  : Standard_SetDeviceFeature.
+    388          * Description    : Set or enable a specific feature of Device.
+    389          * Input          : None.
+    390          * Output         : None.
+    391          * Return         : - Return USB_SUCCESS, if the request is performed.
+    392          *                  - Return USB_UNSUPPORT, if the request is invalid.
+    393          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+    394          RESULT Standard_SetDeviceFeature(void)
+    395          {
+   \                     Standard_SetDeviceFeature: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    396            SetBit(pInformation->Current_Feature, 5);
+   \   00000002   0x.... 0x....      LDR.W    R0,??DataTable15
+   \   00000006   0x6800             LDR      R0,[R0, #+0]
+   \   00000008   0x7A41             LDRB     R1,[R0, #+9]
+   \   0000000A   0xF041 0x0120      ORR      R1,R1,#0x20
+   \   0000000E   0x7241             STRB     R1,[R0, #+9]
+    397            pUser_Standard_Requests->User_SetDeviceFeature();
+   \   00000010   0x.... 0x....      LDR.W    R0,??DataTable15_1
+   \   00000014   0x6800             LDR      R0,[R0, #+0]
+   \   00000016   0x69C0             LDR      R0,[R0, #+28]
+   \   00000018   0x4780             BLX      R0
+    398            return USB_SUCCESS;
+   \   0000001A   0x2000             MOVS     R0,#+0
+   \   0000001C   0xBD02             POP      {R1,PC}          ;; return
+    399          }
+    400          
+    401          /*******************************************************************************
+    402          * Function Name  : Standard_GetDescriptorData.
+    403          * Description    : Standard_GetDescriptorData is used for descriptors transfer.
+    404          *                : This routine is used for the descriptors resident in Flash
+    405          *                  or RAM
+    406          *                  pDesc can be in either Flash or RAM
+    407          *                  The purpose of this routine is to have a versatile way to
+    408          *                  response descriptors request. It allows user to generate
+    409          *                  certain descriptors with software or read descriptors from
+    410          *                  external storage part by part.
+    411          * Input          : - Length - Length of the data in this transfer.
+    412          *                  - pDesc - A pointer points to descriptor struct.
+    413          *                  The structure gives the initial address of the descriptor and
+    414          *                  its original size.
+    415          * Output         : None.
+    416          * Return         : Address of a part of the descriptor pointed by the Usb_
+    417          *                  wOffset The buffer pointed by this address contains at least
+    418          *                  Length bytes.
+    419          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+    420          INT8U *Standard_GetDescriptorData(INT16U Length, ONE_DESCRIPTOR *pDesc)
+    421          {
+    422            INT32U  wOffset;
+    423          
+    424            wOffset = pInformation->Ctrl_Info.Usb_wOffset;
+   \                     Standard_GetDescriptorData: (+1)
+   \   00000000   0x.... 0x....      LDR.W    R2,??DataTable15
+   \   00000004   0x6812             LDR      R2,[R2, #+0]
+   \   00000006   0x8A53             LDRH     R3,[R2, #+18]
+    425            if (Length == 0)
+   \   00000008   0xB920             CBNZ.N   R0,??Standard_GetDescriptorData_0
+    426            {
+    427              pInformation->Ctrl_Info.Usb_wLength = pDesc->Descriptor_Size - wOffset;
+   \   0000000A   0x8888             LDRH     R0,[R1, #+4]
+   \   0000000C   0x1AC0             SUBS     R0,R0,R3
+   \   0000000E   0x8210             STRH     R0,[R2, #+16]
+    428              return 0;
+   \   00000010   0x2000             MOVS     R0,#+0
+   \   00000012   0x4770             BX       LR
+    429            }
+    430          
+    431            return pDesc->Descriptor + wOffset;
+   \                     ??Standard_GetDescriptorData_0: (+1)
+   \   00000014   0x6808             LDR      R0,[R1, #+0]
+   \   00000016   0x1818             ADDS     R0,R3,R0
+   \   00000018   0x4770             BX       LR               ;; return
+    432          }
+    433          
+    434          /*******************************************************************************
+    435          * Function Name  : DataStageOut.
+    436          * Description    : Data stage of a Control Write Transfer.
+    437          * Input          : None.
+    438          * Output         : None.
+    439          * Return         : None.
+    440          *******************************************************************************/
+    441          void DataStageOut(void)
+    442          {
+    443            ENDPOINT_INFO *pEPinfo = &pInformation->Ctrl_Info;
+    444            INT32U save_rLength;
+    445          
+    446            save_rLength = pEPinfo->Usb_rLength;
+    447          
+    448            if (pEPinfo->CopyData && save_rLength)
+    449            {
+    450              INT8U *Buffer;
+    451              INT32U Length;
+    452          
+    453              Length = pEPinfo->PacketSize;
+    454              if (Length > save_rLength)
+    455              {
+    456                Length = save_rLength;
+    457              }
+    458          
+    459              Buffer = (*pEPinfo->CopyData)(Length);
+    460              pEPinfo->Usb_rLength -= Length;
+    461              pEPinfo->Usb_rOffset += Length;
+    462          
+    463            #ifdef STM32F10X_CL  
+    464              PCD_EP_Read(ENDP0, Buffer, Length); 
+    465            #else  
+    466              PMAToUserBufferCopy(Buffer, GetEPRxAddr(ENDP0), Length);
+    467            #endif  /* STM32F10X_CL */
+    468            }
+    469          
+    470            if (pEPinfo->Usb_rLength != 0)
+    471            {
+    472              vSetEPRxStatus(EP_RX_VALID);/* re-enable for next data reception */
+    473              SetEPTxCount(ENDP0, 0);
+    474              vSetEPTxStatus(EP_TX_VALID);/* Expect the host to abort the data OUT stage */
+    475            }
+    476            /* Set the next State*/
+    477            if (pEPinfo->Usb_rLength >= pEPinfo->PacketSize)
+    478            {
+    479              pInformation->ControlState = OUT_DATA;
+    480            }
+    481            else
+    482            {
+    483              if (pEPinfo->Usb_rLength > 0)
+    484              {
+    485                pInformation->ControlState = LAST_OUT_DATA;
+    486              }
+    487              else if (pEPinfo->Usb_rLength == 0)
+    488              {
+    489                pInformation->ControlState = WAIT_STATUS_IN;
+    490                USB_StatusIn();
+    491              }
+    492            }
+    493          }
+    494          
+    495          /*******************************************************************************
+    496          * Function Name  : DataStageIn.
+    497          * Description    : Data stage of a Control Read Transfer.
+    498          * Input          : None.
+    499          * Output         : None.
+    500          * Return         : None.
+    501          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+    502          void DataStageIn(void)
+    503          {
+   \                     DataStageIn: (+1)
+   \   00000000   0xE92D 0x41F0      PUSH     {R4-R8,LR}
+    504            ENDPOINT_INFO *pEPinfo = &pInformation->Ctrl_Info;
+   \   00000004   0x.... 0x....      LDR.W    R4,??DataTable15
+   \   00000008   0x6820             LDR      R0,[R4, #+0]
+   \   0000000A   0xF100 0x0610      ADD      R6,R0,#+16
+    505            INT32U save_wLength = pEPinfo->Usb_wLength;
+   \   0000000E   0x8831             LDRH     R1,[R6, #+0]
+    506            INT32U ControlState = pInformation->ControlState;
+    507          
+    508            INT8U *DataBuffer;
+    509            INT32U Length;
+    510          
+    511            if ((save_wLength == 0) && (ControlState == LAST_IN_DATA))
+   \   00000010   0x2900             CMP      R1,#+0
+   \   00000012   0xBF04             ITT      EQ 
+   \   00000014   0x7A00             LDRBEQ   R0,[R0, #+8]
+   \   00000016   0x2804             CMPEQ    R0,#+4
+   \   00000018   0xD114             BNE.N    ??DataStageIn_0
+    512            {
+    513              if(Data_Mul_MaxPacketSize == TRUE)
+   \   0000001A   0x.... 0x....      LDR.W    R0,??DataTable15_7
+   \   0000001E   0x7801             LDRB     R1,[R0, #+0]
+   \   00000020   0xB169             CBZ.N    R1,??DataStageIn_1
+    514              {
+    515                /* No more data to send and empty packet */
+    516                Send0LengthData();
+   \   00000022   0x.... 0x....      LDR.W    R2,??DataTable15_8  ;; 0x40005c50
+   \   00000026   0x.... 0x....      LDR.W    R3,??DataTable15_9  ;; 0x40006004
+   \   0000002A   0x6812             LDR      R2,[R2, #+0]
+   \   0000002C   0x2100             MOVS     R1,#+0
+   \   0000002E   0xB292             UXTH     R2,R2
+   \   00000030   0xF843 0x1012      STR      R1,[R3, R2, LSL #+1]
+    517                ControlState = LAST_IN_DATA;
+    518                Data_Mul_MaxPacketSize = FALSE;
+   \   00000034   0x2200             MOVS     R2,#+0
+   \   00000036   0x2130             MOVS     R1,#+48
+   \   00000038   0x2504             MOVS     R5,#+4
+   \   0000003A   0x7002             STRB     R2,[R0, #+0]
+   \   0000003C   0xE028             B.N      ??DataStageIn_2
+    519              }
+    520              else 
+    521              {
+    522                /* No more data to send so STALL the TX Status*/
+    523                ControlState = WAIT_STATUS_OUT;
+   \                     ??DataStageIn_1: (+1)
+   \   0000003E   0x2507             MOVS     R5,#+7
+    524          
+    525              #ifdef STM32F10X_CL      
+    526                PCD_EP_Read (ENDP0, 0, 0);
+    527              #endif  /* STM32F10X_CL */ 
+    528              
+    529              #ifndef STM32F10X_CL 
+    530                vSetEPTxStatus(EP_TX_STALL);
+   \   00000040   0x2110             MOVS     R1,#+16
+   \   00000042   0xE025             B.N      ??DataStageIn_2
+    531              #endif  /* STM32F10X_CL */ 
+    532              }
+    533              
+    534              goto Expect_Status_Out;
+    535            }
+    536          
+    537            Length = pEPinfo->PacketSize;
+   \                     ??DataStageIn_0: (+1)
+   \   00000044   0x88B7             LDRH     R7,[R6, #+4]
+    538            ControlState = (save_wLength <= Length) ? LAST_IN_DATA : IN_DATA;
+   \   00000046   0x428F             CMP      R7,R1
+   \   00000048   0xD305             BCC.N    ??DataStageIn_3
+   \   0000004A   0x2504             MOVS     R5,#+4
+    539          
+    540            if (Length > save_wLength)
+   \   0000004C   0x42B9             CMP      R1,R7
+   \   0000004E   0xBF88             IT       HI 
+   \   00000050   0x4639             MOVHI    R1,R7
+   \   00000052   0x460F             MOV      R7,R1
+   \   00000054   0xE000             B.N      ??DataStageIn_4
+   \                     ??DataStageIn_3: (+1)
+   \   00000056   0x2502             MOVS     R5,#+2
+    541            {
+    542              Length = save_wLength;
+    543            }
+    544          
+    545            DataBuffer = (*pEPinfo->CopyData)(Length);
+   \                     ??DataStageIn_4: (+1)
+   \   00000058   0x68B1             LDR      R1,[R6, #+8]
+   \   0000005A   0x4638             MOV      R0,R7
+   \   0000005C   0x4788             BLX      R1
+   \   0000005E   0x4680             MOV      R8,R0
+    546          
+    547          #ifdef STM32F10X_CL
+    548            PCD_EP_Write (ENDP0, DataBuffer, Length);
+    549          #else   
+    550            UserToPMABufferCopy(DataBuffer, GetEPTxAddr(ENDP0), Length);
+   \   00000060   0x2000             MOVS     R0,#+0
+   \   00000062   0x.... 0x....      BL       GetEPTxAddr
+   \   00000066   0x4601             MOV      R1,R0
+   \   00000068   0x463A             MOV      R2,R7
+   \   0000006A   0x4640             MOV      R0,R8
+   \   0000006C   0x.... 0x....      BL       UserToPMABufferCopy
+    551          #endif /* STM32F10X_CL */ 
+    552          
+    553            SetEPTxCount(ENDP0, Length);
+   \   00000070   0x4639             MOV      R1,R7
+   \   00000072   0x2000             MOVS     R0,#+0
+   \   00000074   0x.... 0x....      BL       SetEPTxCount
+    554          
+    555            pEPinfo->Usb_wLength -= Length;
+   \   00000078   0x8830             LDRH     R0,[R6, #+0]
+    556            pEPinfo->Usb_wOffset += Length;
+    557            vSetEPTxStatus(EP_TX_VALID);
+    558          
+    559            USB_StatusOut();/* Expect the host to abort the data IN stage */
+   \   0000007A   0x.... 0x....      LDR.W    R2,??DataTable15_10
+   \   0000007E   0x1BC0             SUBS     R0,R0,R7
+   \   00000080   0x8030             STRH     R0,[R6, #+0]
+   \   00000082   0x2130             MOVS     R1,#+48
+   \   00000084   0x8870             LDRH     R0,[R6, #+2]
+   \   00000086   0x1838             ADDS     R0,R7,R0
+   \   00000088   0x8070             STRH     R0,[R6, #+2]
+   \   0000008A   0xF44F 0x5040      MOV      R0,#+12288
+   \   0000008E   0x8010             STRH     R0,[R2, #+0]
+   \                     ??DataStageIn_2: (+1)
+   \   00000090   0x.... 0x....      LDR.W    R0,??DataTable15_11
+   \   00000094   0x8001             STRH     R1,[R0, #+0]
+    560          
+    561          Expect_Status_Out:
+    562            pInformation->ControlState = ControlState;
+   \   00000096   0x6820             LDR      R0,[R4, #+0]
+   \   00000098   0x7205             STRB     R5,[R0, #+8]
+    563          }
+   \   0000009A   0xE8BD 0x81F0      POP      {R4-R8,PC}       ;; return
+    564          
+    565          /*******************************************************************************
+    566          * Function Name  : NoData_Setup0.
+    567          * Description    : Proceed the processing of setup request without data stage.
+    568          * Input          : None.
+    569          * Output         : None.
+    570          * Return         : None.
+    571          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+    572          void NoData_Setup0(void)
+    573          {
+   \                     NoData_Setup0: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+    574            RESULT Result = USB_UNSUPPORT;
+    575            INT32U RequestNo = pInformation->USBbRequest;
+   \   00000002   0x.... 0x....      LDR.W    R4,??DataTable15
+   \   00000006   0x6820             LDR      R0,[R4, #+0]
+    576            INT32U ControlState;
+    577          
+    578            if (Type_Recipient == (STANDARD_REQUEST | DEVICE_RECIPIENT))
+   \   00000008   0x7801             LDRB     R1,[R0, #+0]
+   \   0000000A   0x7845             LDRB     R5,[R0, #+1]
+   \   0000000C   0x227F             MOVS     R2,#+127
+   \   0000000E   0x4211             TST      R1,R2
+   \   00000010   0xD13F             BNE.N    ??NoData_Setup0_0
+    579            {
+    580              /* Device Request*/
+    581              /* SET_CONFIGURATION*/
+    582              if (RequestNo == SET_CONFIGURATION)
+   \   00000012   0x2D09             CMP      R5,#+9
+   \   00000014   0xD102             BNE.N    ??NoData_Setup0_1
+    583              {
+    584                Result = Standard_SetConfiguration();
+   \   00000016   0x.... 0x....      BL       Standard_SetConfiguration
+   \   0000001A   0xE04E             B.N      ??NoData_Setup0_2
+    585              }
+    586          
+    587              /*SET ADDRESS*/
+    588              else if (RequestNo == SET_ADDRESS)
+   \                     ??NoData_Setup0_1: (+1)
+   \   0000001C   0x2D05             CMP      R5,#+5
+   \   0000001E   0xD11B             BNE.N    ??NoData_Setup0_3
+    589              {
+    590                if ((pInformation->USBwValue0 > 127) || (pInformation->USBwValue1 != 0)
+    591                    || (pInformation->USBwIndex != 0)
+    592                    || (pInformation->Current_Configuration != 0))
+   \   00000020   0x78C1             LDRB     R1,[R0, #+3]
+   \   00000022   0x2980             CMP      R1,#+128
+   \   00000024   0xDA57             BGE.N    ??NoData_Setup0_4
+   \   00000026   0x7881             LDRB     R1,[R0, #+2]
+   \   00000028   0x2900             CMP      R1,#+0
+   \   0000002A   0xBF01             ITTTT    EQ 
+   \   0000002C   0x8881             LDRHEQ   R1,[R0, #+4]
+   \   0000002E   0x2900             CMPEQ    R1,#+0
+   \   00000030   0x7A80             LDRBEQ   R0,[R0, #+10]
+   \   00000032   0x2800             CMPEQ    R0,#+0
+   \   00000034   0xD14F             BNE.N    ??NoData_Setup0_4
+    593                  /* Device Address should be 127 or less*/
+    594                {
+    595                  ControlState = STALLED;
+    596                  goto exit_NoData_Setup0;
+    597                }
+    598                else
+    599                {
+    600                  Result = USB_SUCCESS;
+    601          
+    602                #ifdef STM32F10X_CL
+    603                   SetDeviceAddress(pInformation->USBwValue0);
+    604                #endif  /* STM32F10X_CL */
+    605                }
+    606              }
+    607              /*SET FEATURE for Device*/
+    608              else if (RequestNo == SET_FEATURE)
+    609              {
+    610                if ((pInformation->USBwValue0 == DEVICE_REMOTE_WAKEUP) \
+    611                    && (pInformation->USBwIndex == 0))
+    612                {
+    613                  Result = Standard_SetDeviceFeature();
+    614                }
+    615                else
+    616                {
+    617                  Result = USB_UNSUPPORT;
+    618                }
+    619              }
+    620              /*Clear FEATURE for Device */
+    621              else if (RequestNo == CLEAR_FEATURE)
+    622              {
+    623                if (pInformation->USBwValue0 == DEVICE_REMOTE_WAKEUP
+    624                    && pInformation->USBwIndex == 0
+    625                    && ValBit(pInformation->Current_Feature, 5))
+    626                {
+    627                  Result = Standard_ClearFeature();
+    628                }
+    629                else
+    630                {
+    631                  Result = USB_UNSUPPORT;
+    632                }
+    633              }
+    634          
+    635            }
+    636          
+    637            /* Interface Request*/
+    638            else if (Type_Recipient == (STANDARD_REQUEST | INTERFACE_RECIPIENT))
+    639            {
+    640              /*SET INTERFACE*/
+    641              if (RequestNo == SET_INTERFACE)
+    642              {
+    643                Result = Standard_SetInterface();
+    644              }
+    645            }
+    646          
+    647            /* EndPoint Request*/
+    648            else if (Type_Recipient == (STANDARD_REQUEST | ENDPOINT_RECIPIENT))
+    649            {
+    650              /*CLEAR FEATURE for EndPoint*/
+    651              if (RequestNo == CLEAR_FEATURE)
+    652              {
+    653                Result = Standard_ClearFeature();
+    654              }
+    655              /* SET FEATURE for EndPoint*/
+    656              else if (RequestNo == SET_FEATURE)
+    657              {
+    658                Result = Standard_SetEndPointFeature();
+    659              }
+    660            }
+    661            else
+    662            {
+    663              Result = USB_UNSUPPORT;
+    664            }
+    665          
+    666          
+    667            if (Result != USB_SUCCESS)
+    668            {
+    669              Result = (*pProperty->Class_NoData_Setup)(RequestNo);
+    670              if (Result == USB_NOT_READY)
+    671              {
+    672                ControlState = PAUSE;
+    673                goto exit_NoData_Setup0;
+    674              }
+    675            }
+    676          
+    677            if (Result != USB_SUCCESS)
+    678            {
+    679              ControlState = STALLED;
+    680              goto exit_NoData_Setup0;
+    681            }
+    682          
+    683            ControlState = WAIT_STATUS_IN;/* After no data stage SETUP */
+    684          
+    685            USB_StatusIn();
+   \                     ??NoData_Setup0_5: (+1)
+   \   00000036   0x.... 0x....      LDR.W    R2,??DataTable15_8  ;; 0x40005c50
+   \   0000003A   0x.... 0x....      LDR.W    R3,??DataTable15_9  ;; 0x40006004
+   \   0000003E   0x6812             LDR      R2,[R2, #+0]
+   \   00000040   0x2100             MOVS     R1,#+0
+   \   00000042   0xB292             UXTH     R2,R2
+   \   00000044   0xF843 0x1012      STR      R1,[R3, R2, LSL #+1]
+   \   00000048   0x2130             MOVS     R1,#+48
+   \   0000004A   0x.... 0x....      LDR.W    R2,??DataTable15_11
+   \   0000004E   0x2006             MOVS     R0,#+6
+   \   00000050   0x8011             STRH     R1,[R2, #+0]
+    686          
+    687          exit_NoData_Setup0:
+    688            pInformation->ControlState = ControlState;
+   \                     ??NoData_Setup0_6: (+1)
+   \   00000052   0x6821             LDR      R1,[R4, #+0]
+   \   00000054   0x7208             STRB     R0,[R1, #+8]
+    689            return;
+   \   00000056   0xBD31             POP      {R0,R4,R5,PC}    ;; return
+   \                     ??NoData_Setup0_3: (+1)
+   \   00000058   0x2D03             CMP      R5,#+3
+   \   0000005A   0xD10F             BNE.N    ??NoData_Setup0_7
+   \   0000005C   0x78C1             LDRB     R1,[R0, #+3]
+   \   0000005E   0x2901             CMP      R1,#+1
+   \   00000060   0xBF04             ITT      EQ 
+   \   00000062   0x8881             LDRHEQ   R1,[R0, #+4]
+   \   00000064   0x2900             CMPEQ    R1,#+0
+   \   00000066   0xD12A             BNE.N    ??NoData_Setup0_8
+   \   00000068   0x7A41             LDRB     R1,[R0, #+9]
+   \   0000006A   0xF041 0x0120      ORR      R1,R1,#0x20
+   \   0000006E   0x7241             STRB     R1,[R0, #+9]
+   \   00000070   0x.... 0x....      LDR.W    R0,??DataTable15_1
+   \   00000074   0x6800             LDR      R0,[R0, #+0]
+   \   00000076   0x69C0             LDR      R0,[R0, #+28]
+   \   00000078   0x4780             BLX      R0
+   \   0000007A   0xE7DC             B.N      ??NoData_Setup0_5
+   \                     ??NoData_Setup0_7: (+1)
+   \   0000007C   0x2D01             CMP      R5,#+1
+   \   0000007E   0xBF04             ITT      EQ 
+   \   00000080   0x78C1             LDRBEQ   R1,[R0, #+3]
+   \   00000082   0x2901             CMPEQ    R1,#+1
+   \   00000084   0xD11B             BNE.N    ??NoData_Setup0_8
+   \   00000086   0x8881             LDRH     R1,[R0, #+4]
+   \   00000088   0xB9C9             CBNZ.N   R1,??NoData_Setup0_8
+   \   0000008A   0x7A40             LDRB     R0,[R0, #+9]
+   \   0000008C   0x0680             LSLS     R0,R0,#+26
+   \   0000008E   0xD40D             BMI.N    ??NoData_Setup0_9
+   \   00000090   0xE015             B.N      ??NoData_Setup0_8
+   \                     ??NoData_Setup0_0: (+1)
+   \   00000092   0xF001 0x007F      AND      R0,R1,#0x7F
+   \   00000096   0x2801             CMP      R0,#+1
+   \   00000098   0xD104             BNE.N    ??NoData_Setup0_10
+   \   0000009A   0x2D0B             CMP      R5,#+11
+   \   0000009C   0xD10F             BNE.N    ??NoData_Setup0_8
+   \   0000009E   0x.... 0x....      BL       Standard_SetInterface
+   \   000000A2   0xE00A             B.N      ??NoData_Setup0_2
+   \                     ??NoData_Setup0_10: (+1)
+   \   000000A4   0x2802             CMP      R0,#+2
+   \   000000A6   0xD10A             BNE.N    ??NoData_Setup0_8
+   \   000000A8   0x2D01             CMP      R5,#+1
+   \   000000AA   0xD102             BNE.N    ??NoData_Setup0_11
+   \                     ??NoData_Setup0_9: (+1)
+   \   000000AC   0x.... 0x....      BL       Standard_ClearFeature
+   \   000000B0   0xE003             B.N      ??NoData_Setup0_2
+   \                     ??NoData_Setup0_11: (+1)
+   \   000000B2   0x2D03             CMP      R5,#+3
+   \   000000B4   0xD103             BNE.N    ??NoData_Setup0_8
+   \   000000B6   0x.... 0x....      BL       Standard_SetEndPointFeature
+   \                     ??NoData_Setup0_2: (+1)
+   \   000000BA   0x2800             CMP      R0,#+0
+   \   000000BC   0xD0BB             BEQ.N    ??NoData_Setup0_5
+   \                     ??NoData_Setup0_8: (+1)
+   \   000000BE   0x.... 0x....      LDR.W    R1,??DataTable15_3
+   \   000000C2   0x6809             LDR      R1,[R1, #+0]
+   \   000000C4   0x6949             LDR      R1,[R1, #+20]
+   \   000000C6   0x4628             MOV      R0,R5
+   \   000000C8   0x4788             BLX      R1
+   \   000000CA   0x2803             CMP      R0,#+3
+   \   000000CC   0xBF08             IT       EQ 
+   \   000000CE   0x2009             MOVEQ    R0,#+9
+   \   000000D0   0xD0BF             BEQ.N    ??NoData_Setup0_6
+   \   000000D2   0x2800             CMP      R0,#+0
+   \   000000D4   0xD0AF             BEQ.N    ??NoData_Setup0_5
+   \                     ??NoData_Setup0_4: (+1)
+   \   000000D6   0x2008             MOVS     R0,#+8
+   \   000000D8   0xE7BB             B.N      ??NoData_Setup0_6
+    690          }
+    691          
+    692          /*******************************************************************************
+    693          * Function Name  : Data_Setup0.
+    694          * Description    : Proceed the processing of setup request with data stage.
+    695          * Input          : None.
+    696          * Output         : None.
+    697          * Return         : None.
+    698          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+    699          void Data_Setup0(void)
+    700          {
+   \                     Data_Setup0: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    701            INT8U *(*CopyRoutine)(INT16U);
+    702            RESULT Result;
+    703            INT32U Request_No = pInformation->USBbRequest;
+   \   00000002   0x.... 0x....      LDR.W    R4,??DataTable15
+   \   00000006   0x6820             LDR      R0,[R4, #+0]
+   \   00000008   0x7841             LDRB     R1,[R0, #+1]
+    704          
+    705            INT32U Related_Endpoint, Reserved;
+    706            INT32U wOffset, Status;
+    707          
+    708          
+    709          
+    710            CopyRoutine = NULL;
+    711            wOffset = 0;
+    712          
+    713            /*GET DESCRIPTOR*/
+    714            if (Request_No == GET_DESCRIPTOR)
+   \   0000000A   0x2906             CMP      R1,#+6
+   \   0000000C   0xD119             BNE.N    ??Data_Setup0_0
+    715            {
+    716              if (Type_Recipient == (STANDARD_REQUEST | DEVICE_RECIPIENT))
+   \   0000000E   0x7801             LDRB     R1,[R0, #+0]
+   \   00000010   0x227F             MOVS     R2,#+127
+   \   00000012   0x4211             TST      R1,R2
+   \   00000014   0xD134             BNE.N    ??Data_Setup0_1
+    717              {
+    718                INT8U wValue1 = pInformation->USBwValue1;
+   \   00000016   0x7880             LDRB     R0,[R0, #+2]
+    719                if (wValue1 == DEVICE_DESCRIPTOR)
+   \   00000018   0x2801             CMP      R0,#+1
+   \   0000001A   0xD104             BNE.N    ??Data_Setup0_2
+    720                {
+    721                  CopyRoutine = pProperty->GetDeviceDescriptor;
+   \   0000001C   0x.... 0x....      LDR.W    R0,??DataTable15_3
+   \   00000020   0x6800             LDR      R0,[R0, #+0]
+   \   00000022   0x69C1             LDR      R1,[R0, #+28]
+   \   00000024   0xE076             B.N      ??Data_Setup0_3
+    722                }
+    723                else if (wValue1 == CONFIG_DESCRIPTOR)
+   \                     ??Data_Setup0_2: (+1)
+   \   00000026   0x2802             CMP      R0,#+2
+   \   00000028   0xD104             BNE.N    ??Data_Setup0_4
+    724                {
+    725                  CopyRoutine = pProperty->GetConfigDescriptor;
+   \   0000002A   0x.... 0x....      LDR.W    R0,??DataTable15_3
+   \   0000002E   0x6800             LDR      R0,[R0, #+0]
+   \   00000030   0x6A01             LDR      R1,[R0, #+32]
+   \   00000032   0xE06F             B.N      ??Data_Setup0_3
+    726                }
+    727                else if (wValue1 == STRING_DESCRIPTOR)
+   \                     ??Data_Setup0_4: (+1)
+   \   00000034   0x2803             CMP      R0,#+3
+   \   00000036   0xD123             BNE.N    ??Data_Setup0_1
+    728                {
+    729                  CopyRoutine = pProperty->GetStringDescriptor;
+   \   00000038   0x.... 0x....      LDR.W    R0,??DataTable15_3
+   \   0000003C   0x6800             LDR      R0,[R0, #+0]
+   \   0000003E   0x6A41             LDR      R1,[R0, #+36]
+   \   00000040   0xE068             B.N      ??Data_Setup0_3
+    730                }  /* End of GET_DESCRIPTOR */
+    731              }
+    732            }
+    733          
+    734            /*GET STATUS*/
+    735            else if ((Request_No == GET_STATUS) && (pInformation->USBwValue == 0)
+    736                     && (pInformation->USBwLength == 0x0002)
+    737                     && (pInformation->USBwIndex1 == 0))
+   \                     ??Data_Setup0_0: (+1)
+   \   00000042   0x2900             CMP      R1,#+0
+   \   00000044   0xD143             BNE.N    ??Data_Setup0_5
+   \   00000046   0x8841             LDRH     R1,[R0, #+2]
+   \   00000048   0x2900             CMP      R1,#+0
+   \   0000004A   0xBF04             ITT      EQ 
+   \   0000004C   0x88C1             LDRHEQ   R1,[R0, #+6]
+   \   0000004E   0x2902             CMPEQ    R1,#+2
+   \   00000050   0xD116             BNE.N    ??Data_Setup0_1
+   \   00000052   0x7901             LDRB     R1,[R0, #+4]
+   \   00000054   0xB9A1             CBNZ.N   R1,??Data_Setup0_1
+    738            {
+    739              /* GET STATUS for Device*/
+    740              if ((Type_Recipient == (STANDARD_REQUEST | DEVICE_RECIPIENT))
+    741                  && (pInformation->USBwIndex == 0))
+   \   00000056   0x7801             LDRB     R1,[R0, #+0]
+   \   00000058   0x227F             MOVS     R2,#+127
+   \   0000005A   0x4211             TST      R1,R2
+   \   0000005C   0xBF04             ITT      EQ 
+   \   0000005E   0x8882             LDRHEQ   R2,[R0, #+4]
+   \   00000060   0x2A00             CMPEQ    R2,#+0
+   \   00000062   0xD032             BEQ.N    ??Data_Setup0_6
+    742              {
+    743                CopyRoutine = Standard_GetStatus;
+    744              }
+    745          
+    746              /* GET STATUS for Interface*/
+    747              else if (Type_Recipient == (STANDARD_REQUEST | INTERFACE_RECIPIENT))
+   \   00000064   0xF001 0x027F      AND      R2,R1,#0x7F
+   \   00000068   0x2A01             CMP      R2,#+1
+   \   0000006A   0xD114             BNE.N    ??Data_Setup0_7
+    748              {
+    749                if (((*pProperty->Class_Get_Interface_Setting)(pInformation->USBwIndex0, 0) == USB_SUCCESS)
+    750                    && (pInformation->Current_Configuration != 0))
+   \   0000006C   0x....             LDR.N    R2,??DataTable15_3
+   \   0000006E   0x6812             LDR      R2,[R2, #+0]
+   \   00000070   0x7940             LDRB     R0,[R0, #+5]
+   \   00000072   0x6992             LDR      R2,[R2, #+24]
+   \   00000074   0x2100             MOVS     R1,#+0
+   \   00000076   0x4790             BLX      R2
+   \   00000078   0xB910             CBNZ.N   R0,??Data_Setup0_1
+   \   0000007A   0x6820             LDR      R0,[R4, #+0]
+   \   0000007C   0x7A80             LDRB     R0,[R0, #+10]
+   \   0000007E   0xBB20             CBNZ.N   R0,??Data_Setup0_6
+    751                {
+    752                  CopyRoutine = Standard_GetStatus;
+    753                }
+    754              }
+    755          
+    756              /* GET STATUS for EndPoint*/
+    757              else if (Type_Recipient == (STANDARD_REQUEST | ENDPOINT_RECIPIENT))
+    758              {
+    759                Related_Endpoint = (pInformation->USBwIndex0 & 0x0f);
+    760                Reserved = pInformation->USBwIndex0 & 0x70;
+    761          
+    762                if (ValBit(pInformation->USBwIndex0, 7))
+    763                {
+    764                  /*Get Status of endpoint & stall the request if the related_ENdpoint
+    765                  is Disabled*/
+    766                  Status = _GetEPTxStatus(Related_Endpoint);
+    767                }
+    768                else
+    769                {
+    770                  Status = _GetEPRxStatus(Related_Endpoint);
+    771                }
+    772          
+    773                if ((Related_Endpoint < Device_Table.Total_Endpoint) && (Reserved == 0)
+    774                    && (Status != 0))
+    775                {
+    776                  CopyRoutine = Standard_GetStatus;
+    777                }
+    778              }
+    779          
+    780            }
+    781          
+    782            /*GET CONFIGURATION*/
+    783            else if (Request_No == GET_CONFIGURATION)
+    784            {
+    785              if (Type_Recipient == (STANDARD_REQUEST | DEVICE_RECIPIENT))
+    786              {
+    787                CopyRoutine = Standard_GetConfiguration;
+    788              }
+    789            }
+    790            /*GET INTERFACE*/
+    791            else if (Request_No == GET_INTERFACE)
+    792            {
+    793              if ((Type_Recipient == (STANDARD_REQUEST | INTERFACE_RECIPIENT))
+    794                  && (pInformation->Current_Configuration != 0) && (pInformation->USBwValue == 0)
+    795                  && (pInformation->USBwIndex1 == 0) && (pInformation->USBwLength == 0x0001)
+    796                  && ((*pProperty->Class_Get_Interface_Setting)(pInformation->USBwIndex0, 0) == USB_SUCCESS))
+    797              {
+    798                CopyRoutine = Standard_GetInterface;
+    799              }
+    800          
+    801            }
+    802            
+    803            if (CopyRoutine)
+    804            {
+    805              pInformation->Ctrl_Info.Usb_wOffset = wOffset;
+    806              pInformation->Ctrl_Info.CopyData = CopyRoutine;
+    807              /* sb in the original the cast to word was directly */
+    808              /* now the cast is made step by step */
+    809              (*CopyRoutine)(0);
+    810              Result = USB_SUCCESS;
+    811            }
+    812            else
+    813            {
+    814              Result = (*pProperty->Class_Data_Setup)(pInformation->USBbRequest);
+   \                     ??Data_Setup0_1: (+1)
+   \   00000080   0x....             LDR.N    R1,??DataTable15_3
+   \   00000082   0x6820             LDR      R0,[R4, #+0]
+   \   00000084   0x6809             LDR      R1,[R1, #+0]
+   \   00000086   0x7840             LDRB     R0,[R0, #+1]
+   \   00000088   0x6909             LDR      R1,[R1, #+16]
+   \   0000008A   0x4788             BLX      R1
+    815              if (Result == USB_NOT_READY)
+   \   0000008C   0x2803             CMP      R0,#+3
+   \   0000008E   0xD14A             BNE.N    ??Data_Setup0_8
+    816              {
+    817                pInformation->ControlState = PAUSE;
+   \   00000090   0x6821             LDR      R1,[R4, #+0]
+   \   00000092   0x2009             MOVS     R0,#+9
+   \   00000094   0xE055             B.N      ??Data_Setup0_9
+    818                return;
+    819              }
+    820            }
+   \                     ??Data_Setup0_7: (+1)
+   \   00000096   0xF001 0x017F      AND      R1,R1,#0x7F
+   \   0000009A   0x2902             CMP      R1,#+2
+   \   0000009C   0xD1F0             BNE.N    ??Data_Setup0_1
+   \   0000009E   0x7940             LDRB     R0,[R0, #+5]
+   \   000000A0   0x....             LDR.N    R3,??DataTable15_5  ;; 0x40005c00
+   \   000000A2   0xF000 0x010F      AND      R1,R0,#0xF
+   \   000000A6   0xF000 0x0270      AND      R2,R0,#0x70
+   \   000000AA   0x0600             LSLS     R0,R0,#+24
+   \   000000AC   0xF853 0x0021      LDR      R0,[R3, R1, LSL #+2]
+   \   000000B0   0x....             LDR.N    R3,??DataTable15_2
+   \   000000B2   0xBF4C             ITE      MI 
+   \   000000B4   0xF000 0x0030      ANDMI    R0,R0,#0x30
+   \   000000B8   0xF400 0x5040      ANDPL    R0,R0,#0x3000
+   \   000000BC   0x781B             LDRB     R3,[R3, #+0]
+   \   000000BE   0x4299             CMP      R1,R3
+   \   000000C0   0xD2DE             BCS.N    ??Data_Setup0_1
+   \   000000C2   0x2A00             CMP      R2,#+0
+   \   000000C4   0xD1DC             BNE.N    ??Data_Setup0_1
+   \   000000C6   0x2800             CMP      R0,#+0
+   \   000000C8   0xD0DA             BEQ.N    ??Data_Setup0_1
+   \                     ??Data_Setup0_6: (+1)
+   \   000000CA   0x....             LDR.N    R1,??DataTable15_12
+   \   000000CC   0xE022             B.N      ??Data_Setup0_3
+   \                     ??Data_Setup0_5: (+1)
+   \   000000CE   0x2908             CMP      R1,#+8
+   \   000000D0   0xD105             BNE.N    ??Data_Setup0_10
+   \   000000D2   0x7800             LDRB     R0,[R0, #+0]
+   \   000000D4   0x217F             MOVS     R1,#+127
+   \   000000D6   0x4208             TST      R0,R1
+   \   000000D8   0xD1D2             BNE.N    ??Data_Setup0_1
+   \   000000DA   0x....             LDR.N    R1,??DataTable15_13
+   \   000000DC   0xE01A             B.N      ??Data_Setup0_3
+   \                     ??Data_Setup0_10: (+1)
+   \   000000DE   0x290A             CMP      R1,#+10
+   \   000000E0   0xBF02             ITTT     EQ 
+   \   000000E2   0x7801             LDRBEQ   R1,[R0, #+0]
+   \   000000E4   0xF001 0x017F      ANDEQ    R1,R1,#0x7F
+   \   000000E8   0x2901             CMPEQ    R1,#+1
+   \   000000EA   0xD1C9             BNE.N    ??Data_Setup0_1
+   \   000000EC   0x7A81             LDRB     R1,[R0, #+10]
+   \   000000EE   0x2900             CMP      R1,#+0
+   \   000000F0   0xD0C6             BEQ.N    ??Data_Setup0_1
+   \   000000F2   0x8841             LDRH     R1,[R0, #+2]
+   \   000000F4   0x2900             CMP      R1,#+0
+   \   000000F6   0xBF01             ITTTT    EQ 
+   \   000000F8   0x7901             LDRBEQ   R1,[R0, #+4]
+   \   000000FA   0x2900             CMPEQ    R1,#+0
+   \   000000FC   0x88C1             LDRHEQ   R1,[R0, #+6]
+   \   000000FE   0x2901             CMPEQ    R1,#+1
+   \   00000100   0xD1BE             BNE.N    ??Data_Setup0_1
+   \   00000102   0x....             LDR.N    R2,??DataTable15_3
+   \   00000104   0x6812             LDR      R2,[R2, #+0]
+   \   00000106   0x7940             LDRB     R0,[R0, #+5]
+   \   00000108   0x6992             LDR      R2,[R2, #+24]
+   \   0000010A   0x2100             MOVS     R1,#+0
+   \   0000010C   0x4790             BLX      R2
+   \   0000010E   0x2800             CMP      R0,#+0
+   \   00000110   0xD1B6             BNE.N    ??Data_Setup0_1
+   \   00000112   0x....             LDR.N    R1,??DataTable15_14
+   \                     ??Data_Setup0_3: (+1)
+   \   00000114   0x0008             MOVS     R0,R1
+   \   00000116   0xD0B3             BEQ.N    ??Data_Setup0_1
+   \   00000118   0x6820             LDR      R0,[R4, #+0]
+   \   0000011A   0x2200             MOVS     R2,#+0
+   \   0000011C   0x8242             STRH     R2,[R0, #+18]
+   \   0000011E   0x6181             STR      R1,[R0, #+24]
+   \   00000120   0x2000             MOVS     R0,#+0
+   \   00000122   0x4788             BLX      R1
+   \   00000124   0x2000             MOVS     R0,#+0
+    821          
+    822            if (pInformation->Ctrl_Info.Usb_wLength == 0xFFFF)
+   \                     ??Data_Setup0_8: (+1)
+   \   00000126   0x6821             LDR      R1,[R4, #+0]
+   \   00000128   0x8A0A             LDRH     R2,[R1, #+16]
+   \   0000012A   0x4613             MOV      R3,R2
+   \   0000012C   0xF64F 0x74FF      MOVW     R4,#+65535
+   \   00000130   0x42A3             CMP      R3,R4
+   \   00000132   0xBF08             IT       EQ 
+   \   00000134   0x2009             MOVEQ    R0,#+9
+    823            {
+    824              /* Data is not ready, wait it */
+    825              pInformation->ControlState = PAUSE;
+   \   00000136   0xD004             BEQ.N    ??Data_Setup0_9
+    826              return;
+    827            }
+    828            if ((Result == USB_UNSUPPORT) || (pInformation->Ctrl_Info.Usb_wLength == 0))
+   \   00000138   0x2802             CMP      R0,#+2
+   \   0000013A   0xBF18             IT       NE 
+   \   0000013C   0x2A00             CMPNE    R2,#+0
+   \   0000013E   0xD102             BNE.N    ??Data_Setup0_11
+    829            {
+    830              /* Unsupported request */
+    831              pInformation->ControlState = STALLED;
+   \   00000140   0x2008             MOVS     R0,#+8
+   \                     ??Data_Setup0_9: (+1)
+   \   00000142   0x7208             STRB     R0,[R1, #+8]
+    832              return;
+   \   00000144   0xBD10             POP      {R4,PC}
+    833            }
+    834          
+    835          
+    836            if (ValBit(pInformation->USBbmRequestType, 7))
+   \                     ??Data_Setup0_11: (+1)
+   \   00000146   0x7808             LDRB     R0,[R1, #+0]
+   \   00000148   0x0600             LSLS     R0,R0,#+24
+   \   0000014A   0xD51E             BPL.N    ??Data_Setup0_12
+    837            {
+    838              /* Device ==> Host */
+    839              INT32U wLength = pInformation->USBwLength;
+   \   0000014C   0x88C8             LDRH     R0,[R1, #+6]
+    840               
+    841              /* Restrict the data length to be the one host asks for */
+    842              if (pInformation->Ctrl_Info.Usb_wLength > wLength)
+   \   0000014E   0x4290             CMP      R0,R2
+   \   00000150   0xBF38             IT       CC 
+   \   00000152   0x8208             STRHCC   R0,[R1, #+16]
+    843              {
+    844                pInformation->Ctrl_Info.Usb_wLength = wLength;
+   \   00000154   0xD311             BCC.N    ??Data_Setup0_13
+    845              }
+    846              
+    847              else if (pInformation->Ctrl_Info.Usb_wLength < pInformation->USBwLength)
+   \   00000156   0x4282             CMP      R2,R0
+   \   00000158   0xD20F             BCS.N    ??Data_Setup0_13
+   \   0000015A   0x....             LDR.N    R0,??DataTable15_3
+   \   0000015C   0x6800             LDR      R0,[R0, #+0]
+   \   0000015E   0xF890 0x002C      LDRB     R0,[R0, #+44]
+   \   00000162   0x4282             CMP      R2,R0
+   \   00000164   0xBF38             IT       CC 
+   \   00000166   0x2000             MOVCC    R0,#+0
+    848              {
+    849                if (pInformation->Ctrl_Info.Usb_wLength < pProperty->MaxPacketSize)
+    850                {
+    851                  Data_Mul_MaxPacketSize = FALSE;
+   \   00000168   0xD305             BCC.N    ??Data_Setup0_14
+    852                }
+    853                else if ((pInformation->Ctrl_Info.Usb_wLength % pProperty->MaxPacketSize) == 0)
+   \   0000016A   0xFB93 0xF2F0      SDIV     R2,R3,R0
+   \   0000016E   0xFB00 0x3012      MLS      R0,R0,R2,R3
+   \   00000172   0xB910             CBNZ.N   R0,??Data_Setup0_13
+    854                {
+    855                  Data_Mul_MaxPacketSize = TRUE;
+   \   00000174   0x2001             MOVS     R0,#+1
+   \                     ??Data_Setup0_14: (+1)
+   \   00000176   0x....             LDR.N    R2,??DataTable15_7
+   \   00000178   0x7010             STRB     R0,[R2, #+0]
+    856                }
+    857              }   
+    858          
+    859              pInformation->Ctrl_Info.PacketSize = pProperty->MaxPacketSize;
+   \                     ??Data_Setup0_13: (+1)
+   \   0000017A   0x....             LDR.N    R0,??DataTable15_3
+   \   0000017C   0x6800             LDR      R0,[R0, #+0]
+   \   0000017E   0xF890 0x002C      LDRB     R0,[R0, #+44]
+   \   00000182   0x8288             STRH     R0,[R1, #+20]
+    860              DataStageIn();
+   \   00000184   0xE8BD 0x4010      POP      {R4,LR}
+   \   00000188   0x....             B.N      DataStageIn
+    861            }
+    862            else
+    863            {
+    864              pInformation->ControlState = OUT_DATA;
+   \                     ??Data_Setup0_12: (+1)
+   \   0000018A   0x2003             MOVS     R0,#+3
+   \   0000018C   0x7208             STRB     R0,[R1, #+8]
+    865              vSetEPRxStatus(EP_RX_VALID); /* enable for next data reception */
+   \   0000018E   0xF44F 0x5040      MOV      R0,#+12288
+   \   00000192   0x....             LDR.N    R1,??DataTable15_10
+   \   00000194   0x8008             STRH     R0,[R1, #+0]
+    866            }
+    867          
+    868            return;
+   \   00000196   0xBD10             POP      {R4,PC}          ;; return
+    869          }
+    870          
+    871          /*******************************************************************************
+    872          * Function Name  : Setup0_Process
+    873          * Description    : Get the device request data and dispatch to individual process.
+    874          * Input          : None.
+    875          * Output         : None.
+    876          * Return         : Post0_Process.
+    877          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+    878          INT8U Setup0_Process(void)
+    879          {
+   \                     Setup0_Process: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+    880          
+    881            union
+    882            {
+    883              INT8U* b;
+    884              INT16U* w;
+    885            } pBuf;
+    886          
+    887          #ifdef STM32F10X_CL
+    888            USB_OTG_EP *ep;
+    889            INT16U offset = 0;
+    890           
+    891            ep = PCD_GetOutEP(ENDP0);
+    892            pBuf.b = ep->xfer_buff;
+    893          #else  
+    894            INT16U offset = 1;
+    895            
+    896            pBuf.b = PMAAddr + (INT8U *)(_GetEPRxAddr(ENDP0) * 2); /* *2 for 32 bits addr */
+   \   00000002   0x....             LDR.N    R0,??DataTable15_8  ;; 0x40005c50
+    897          #endif /* STM32F10X_CL */
+    898          
+    899            if (pInformation->ControlState != PAUSE)
+   \   00000004   0x....             LDR.N    R4,??DataTable15
+   \   00000006   0x6800             LDR      R0,[R0, #+0]
+   \   00000008   0x....             LDR.N    R1,??DataTable15_15  ;; 0x40006008
+   \   0000000A   0xB280             UXTH     R0,R0
+   \   0000000C   0xF831 0x0010      LDRH     R0,[R1, R0, LSL #+1]
+   \   00000010   0x6821             LDR      R1,[R4, #+0]
+   \   00000012   0x7A0A             LDRB     R2,[R1, #+8]
+   \   00000014   0x0040             LSLS     R0,R0,#+1
+   \   00000016   0xF100 0x4080      ADD      R0,R0,#+1073741824
+   \   0000001A   0x2A09             CMP      R2,#+9
+   \   0000001C   0xF500 0x40C0      ADD      R0,R0,#+24576
+   \   00000020   0xD012             BEQ.N    ??Setup0_Process_0
+    900            {
+    901              pInformation->USBbmRequestType = *pBuf.b++; /* bmRequestType */
+   \   00000022   0x7802             LDRB     R2,[R0, #+0]
+   \   00000024   0x700A             STRB     R2,[R1, #+0]
+    902              pInformation->USBbRequest = *pBuf.b++; /* bRequest */
+    903              pBuf.w += offset;  /* word not accessed because of 32 bits addressing */
+    904              pInformation->USBwValue = ByteSwap(*pBuf.w++); /* wValue */
+   \   00000026   0x1D05             ADDS     R5,R0,#+4
+   \   00000028   0x6822             LDR      R2,[R4, #+0]
+   \   0000002A   0x7841             LDRB     R1,[R0, #+1]
+   \   0000002C   0x7051             STRB     R1,[R2, #+1]
+   \   0000002E   0xF835 0x0B04      LDRH     R0,[R5], #+4
+   \   00000032   0x.... 0x....      BL       ByteSwap
+   \   00000036   0x6821             LDR      R1,[R4, #+0]
+   \   00000038   0x8048             STRH     R0,[R1, #+2]
+    905              pBuf.w += offset;  /* word not accessed because of 32 bits addressing */
+    906              pInformation->USBwIndex  = ByteSwap(*pBuf.w++); /* wIndex */
+   \   0000003A   0x8828             LDRH     R0,[R5, #+0]
+   \   0000003C   0x.... 0x....      BL       ByteSwap
+   \   00000040   0x6821             LDR      R1,[R4, #+0]
+   \   00000042   0x8088             STRH     R0,[R1, #+4]
+    907              pBuf.w += offset;  /* word not accessed because of 32 bits addressing */
+    908              pInformation->USBwLength = *pBuf.w; /* wLength */
+   \   00000044   0x88A8             LDRH     R0,[R5, #+4]
+   \   00000046   0x80C8             STRH     R0,[R1, #+6]
+    909            }
+    910          
+    911            pInformation->ControlState = SETTING_UP;
+   \                     ??Setup0_Process_0: (+1)
+   \   00000048   0x2001             MOVS     R0,#+1
+   \   0000004A   0x6821             LDR      R1,[R4, #+0]
+   \   0000004C   0x7208             STRB     R0,[R1, #+8]
+    912            if (pInformation->USBwLength == 0)
+   \   0000004E   0x6820             LDR      R0,[R4, #+0]
+   \   00000050   0x88C0             LDRH     R0,[R0, #+6]
+   \   00000052   0xB910             CBNZ.N   R0,??Setup0_Process_1
+    913            {
+    914              /* Setup with no data stage */
+    915              NoData_Setup0();
+   \   00000054   0x.... 0x....      BL       NoData_Setup0
+   \   00000058   0xE001             B.N      ??Setup0_Process_2
+    916            }
+    917            else
+    918            {
+    919              /* Setup with data stage */
+    920              Data_Setup0();
+   \                     ??Setup0_Process_1: (+1)
+   \   0000005A   0x.... 0x....      BL       Data_Setup0
+    921            }
+    922            return Post0_Process();
+   \                     ??Setup0_Process_2: (+1)
+   \   0000005E   0xE8BD 0x4031      POP      {R0,R4,R5,LR}
+   \   00000062   0x....             B.N      Post0_Process
+    923          }
+    924          
+    925          /*******************************************************************************
+    926          * Function Name  : In0_Process
+    927          * Description    : Process the IN token on all default endpoint.
+    928          * Input          : None.
+    929          * Output         : None.
+    930          * Return         : Post0_Process.
+    931          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+    932          INT8U In0_Process(void)
+    933          {
+   \                     In0_Process: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    934            INT32U ControlState = pInformation->ControlState;
+   \   00000002   0x....             LDR.N    R4,??DataTable15
+   \   00000004   0x6820             LDR      R0,[R4, #+0]
+   \   00000006   0x7A01             LDRB     R1,[R0, #+8]
+    935          
+    936            if ((ControlState == IN_DATA) || (ControlState == LAST_IN_DATA))
+   \   00000008   0x2902             CMP      R1,#+2
+   \   0000000A   0xBF18             IT       NE 
+   \   0000000C   0x2904             CMPNE    R1,#+4
+   \   0000000E   0xD104             BNE.N    ??In0_Process_0
+    937            {
+    938              DataStageIn();
+   \   00000010   0x.... 0x....      BL       DataStageIn
+    939              /* ControlState may be changed outside the function */
+    940              ControlState = pInformation->ControlState;
+   \   00000014   0x6820             LDR      R0,[R4, #+0]
+   \   00000016   0x7A00             LDRB     R0,[R0, #+8]
+   \   00000018   0xE014             B.N      ??In0_Process_1
+    941            }
+    942          
+    943            else if (ControlState == WAIT_STATUS_IN)
+   \                     ??In0_Process_0: (+1)
+   \   0000001A   0x2906             CMP      R1,#+6
+   \   0000001C   0xD111             BNE.N    ??In0_Process_2
+    944            {
+    945              if ((pInformation->USBbRequest == SET_ADDRESS) &&
+    946                  (Type_Recipient == (STANDARD_REQUEST | DEVICE_RECIPIENT)))
+   \   0000001E   0x7841             LDRB     R1,[R0, #+1]
+   \   00000020   0x2905             CMP      R1,#+5
+   \   00000022   0xBF02             ITTT     EQ 
+   \   00000024   0x7801             LDRBEQ   R1,[R0, #+0]
+   \   00000026   0x227F             MOVEQ    R2,#+127
+   \   00000028   0x4211             TSTEQ    R1,R2
+   \   0000002A   0xD106             BNE.N    ??In0_Process_3
+    947              {
+    948                SetDeviceAddress(pInformation->USBwValue0);
+   \   0000002C   0x78C0             LDRB     R0,[R0, #+3]
+   \   0000002E   0x.... 0x....      BL       SetDeviceAddress
+    949                pUser_Standard_Requests->User_SetDeviceAddress();
+   \   00000032   0x....             LDR.N    R0,??DataTable15_1
+   \   00000034   0x6800             LDR      R0,[R0, #+0]
+   \   00000036   0x6A00             LDR      R0,[R0, #+32]
+   \   00000038   0x4780             BLX      R0
+    950              }
+    951              (*pProperty->Process_Status_IN)();
+   \                     ??In0_Process_3: (+1)
+   \   0000003A   0x....             LDR.N    R0,??DataTable15_3
+   \   0000003C   0x6800             LDR      R0,[R0, #+0]
+   \   0000003E   0x6880             LDR      R0,[R0, #+8]
+   \   00000040   0x4780             BLX      R0
+    952              ControlState = STALLED;
+    953            }
+    954          
+    955            else
+    956            {
+    957              ControlState = STALLED;
+   \                     ??In0_Process_2: (+1)
+   \   00000042   0x2008             MOVS     R0,#+8
+    958            }
+    959          
+    960            pInformation->ControlState = ControlState;
+   \                     ??In0_Process_1: (+1)
+   \   00000044   0x6821             LDR      R1,[R4, #+0]
+   \   00000046   0x7208             STRB     R0,[R1, #+8]
+    961          
+    962            return Post0_Process();
+   \   00000048   0xE8BD 0x4010      POP      {R4,LR}
+   \   0000004C   0x....             B.N      Post0_Process
+    963          }
+    964          
+    965          /*******************************************************************************
+    966          * Function Name  : Out0_Process
+    967          * Description    : Process the OUT token on all default endpoint.
+    968          * Input          : None.
+    969          * Output         : None.
+    970          * Return         : Post0_Process.
+    971          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+    972          INT8U Out0_Process(void)
+    973          {
+   \                     Out0_Process: (+1)
+   \   00000000   0xB5F8             PUSH     {R3-R7,LR}
+    974            INT32U ControlState = pInformation->ControlState;
+   \   00000002   0x....             LDR.N    R4,??DataTable15
+   \   00000004   0x6820             LDR      R0,[R4, #+0]
+   \   00000006   0x7A01             LDRB     R1,[R0, #+8]
+    975          
+    976            if ((ControlState == IN_DATA) || (ControlState == LAST_IN_DATA))
+   \   00000008   0x2902             CMP      R1,#+2
+   \   0000000A   0xBF18             IT       NE 
+   \   0000000C   0x2904             CMPNE    R1,#+4
+   \   0000000E   0xD04D             BEQ.N    ??Out0_Process_0
+    977            {
+    978              /* host aborts the transfer before finish */
+    979              ControlState = STALLED;
+    980            }
+    981            else if ((ControlState == OUT_DATA) || (ControlState == LAST_OUT_DATA))
+   \   00000010   0x2903             CMP      R1,#+3
+   \   00000012   0xBF18             IT       NE 
+   \   00000014   0x2905             CMPNE    R1,#+5
+   \   00000016   0xD143             BNE.N    ??Out0_Process_1
+    982            {
+    983              DataStageOut();
+   \   00000018   0xF100 0x0510      ADD      R5,R0,#+16
+   \   0000001C   0x68A9             LDR      R1,[R5, #+8]
+   \   0000001E   0x882E             LDRH     R6,[R5, #+0]
+   \   00000020   0x0008             MOVS     R0,R1
+   \   00000022   0xBF18             IT       NE 
+   \   00000024   0x2E00             CMPNE    R6,#+0
+   \   00000026   0xD014             BEQ.N    ??Out0_Process_2
+   \   00000028   0x88A8             LDRH     R0,[R5, #+4]
+   \   0000002A   0x4286             CMP      R6,R0
+   \   0000002C   0xBF88             IT       HI 
+   \   0000002E   0x4606             MOVHI    R6,R0
+   \   00000030   0x4630             MOV      R0,R6
+   \   00000032   0x4788             BLX      R1
+   \   00000034   0x4607             MOV      R7,R0
+   \   00000036   0x8828             LDRH     R0,[R5, #+0]
+   \   00000038   0x1B80             SUBS     R0,R0,R6
+   \   0000003A   0x8028             STRH     R0,[R5, #+0]
+   \   0000003C   0x8868             LDRH     R0,[R5, #+2]
+   \   0000003E   0x1830             ADDS     R0,R6,R0
+   \   00000040   0x8068             STRH     R0,[R5, #+2]
+   \   00000042   0x2000             MOVS     R0,#+0
+   \   00000044   0x.... 0x....      BL       GetEPRxAddr
+   \   00000048   0x4601             MOV      R1,R0
+   \   0000004A   0x4632             MOV      R2,R6
+   \   0000004C   0x4638             MOV      R0,R7
+   \   0000004E   0x.... 0x....      BL       PMAToUserBufferCopy
+   \                     ??Out0_Process_2: (+1)
+   \   00000052   0x8828             LDRH     R0,[R5, #+0]
+   \   00000054   0xB150             CBZ.N    R0,??Out0_Process_3
+   \   00000056   0x....             LDR.N    R1,??DataTable15_10
+   \   00000058   0xF44F 0x5040      MOV      R0,#+12288
+   \   0000005C   0x8008             STRH     R0,[R1, #+0]
+   \   0000005E   0x2100             MOVS     R1,#+0
+   \   00000060   0x2000             MOVS     R0,#+0
+   \   00000062   0x.... 0x....      BL       SetEPTxCount
+   \   00000066   0x....             LDR.N    R1,??DataTable15_11
+   \   00000068   0x2030             MOVS     R0,#+48
+   \   0000006A   0x8008             STRH     R0,[R1, #+0]
+   \                     ??Out0_Process_3: (+1)
+   \   0000006C   0x8828             LDRH     R0,[R5, #+0]
+   \   0000006E   0x88AA             LDRH     R2,[R5, #+4]
+   \   00000070   0x6821             LDR      R1,[R4, #+0]
+   \   00000072   0x4290             CMP      R0,R2
+   \   00000074   0xBF28             IT       CS 
+   \   00000076   0x2003             MOVCS    R0,#+3
+   \   00000078   0xD201             BCS.N    ??Out0_Process_4
+   \   0000007A   0xB110             CBZ.N    R0,??Out0_Process_5
+   \   0000007C   0x2005             MOVS     R0,#+5
+   \                     ??Out0_Process_4: (+1)
+   \   0000007E   0x7208             STRB     R0,[R1, #+8]
+   \   00000080   0xE00B             B.N      ??Out0_Process_6
+   \                     ??Out0_Process_5: (+1)
+   \   00000082   0x2006             MOVS     R0,#+6
+   \   00000084   0x7208             STRB     R0,[R1, #+8]
+   \   00000086   0x2000             MOVS     R0,#+0
+   \   00000088   0x....             LDR.N    R1,??DataTable15_8  ;; 0x40005c50
+   \   0000008A   0x....             LDR.N    R2,??DataTable15_9  ;; 0x40006004
+   \   0000008C   0x6809             LDR      R1,[R1, #+0]
+   \   0000008E   0xB289             UXTH     R1,R1
+   \   00000090   0xF842 0x0011      STR      R0,[R2, R1, LSL #+1]
+   \   00000094   0x2030             MOVS     R0,#+48
+   \   00000096   0x....             LDR.N    R1,??DataTable15_11
+   \   00000098   0x8008             STRH     R0,[R1, #+0]
+    984              ControlState = pInformation->ControlState; /* may be changed outside the function */
+   \                     ??Out0_Process_6: (+1)
+   \   0000009A   0x6820             LDR      R0,[R4, #+0]
+   \   0000009C   0x7A00             LDRB     R0,[R0, #+8]
+   \   0000009E   0xE006             B.N      ??Out0_Process_7
+    985            }
+    986          
+    987            else if (ControlState == WAIT_STATUS_OUT)
+   \                     ??Out0_Process_1: (+1)
+   \   000000A0   0x2907             CMP      R1,#+7
+   \   000000A2   0xD103             BNE.N    ??Out0_Process_0
+    988            {
+    989              (*pProperty->Process_Status_OUT)();
+   \   000000A4   0x....             LDR.N    R0,??DataTable15_3
+   \   000000A6   0x6800             LDR      R0,[R0, #+0]
+   \   000000A8   0x68C0             LDR      R0,[R0, #+12]
+   \   000000AA   0x4780             BLX      R0
+    990            #ifndef STM32F10X_CL
+    991              ControlState = STALLED;
+    992            #endif /* STM32F10X_CL */
+    993            }
+    994          
+    995          
+    996            /* Unexpect state, STALL the endpoint */
+    997            else
+    998            {
+    999              ControlState = STALLED;
+   \                     ??Out0_Process_0: (+1)
+   \   000000AC   0x2008             MOVS     R0,#+8
+   1000            }
+   1001          
+   1002            pInformation->ControlState = ControlState;
+   \                     ??Out0_Process_7: (+1)
+   \   000000AE   0x6821             LDR      R1,[R4, #+0]
+   \   000000B0   0x7208             STRB     R0,[R1, #+8]
+   1003          
+   1004            return Post0_Process();
+   \   000000B2   0xE8BD 0x40F1      POP      {R0,R4-R7,LR}
+   \   000000B6                      REQUIRE Post0_Process
+   \   000000B6                      ;; // Fall through to label Post0_Process
+   1005          }
+   1006          
+   1007          /*******************************************************************************
+   1008          * Function Name  : Post0_Process
+   1009          * Description    : Stall the Endpoint 0 in case of error.
+   1010          * Input          : None.
+   1011          * Output         : None.
+   1012          * Return         : - 0 if the control State is in PAUSE
+   1013          *                  - 1 if not.
+   1014          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+   1015          INT8U Post0_Process(void)
+   1016          {
+   \                     Post0_Process: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+   1017          #ifdef STM32F10X_CL  
+   1018            USB_OTG_EP *ep;
+   1019          #endif /* STM32F10X_CL */
+   1020                
+   1021            SetEPRxCount(ENDP0, Device_Property.MaxPacketSize);
+   \   00000002   0x....             LDR.N    R0,??DataTable15_6
+   \   00000004   0xF890 0x102C      LDRB     R1,[R0, #+44]
+   \   00000008   0x2000             MOVS     R0,#+0
+   \   0000000A   0x.... 0x....      BL       SetEPRxCount
+   1022          
+   1023            if (pInformation->ControlState == STALLED)
+   \   0000000E   0x....             LDR.N    R0,??DataTable15
+   \   00000010   0x6800             LDR      R0,[R0, #+0]
+   \   00000012   0x7A01             LDRB     R1,[R0, #+8]
+   \   00000014   0x2908             CMP      R1,#+8
+   \   00000016   0xD106             BNE.N    ??Post0_Process_0
+   1024            {
+   1025              vSetEPRxStatus(EP_RX_STALL);
+   \   00000018   0x....             LDR.N    R2,??DataTable15_10
+   \   0000001A   0xF44F 0x5180      MOV      R1,#+4096
+   \   0000001E   0x8011             STRH     R1,[R2, #+0]
+   1026              vSetEPTxStatus(EP_TX_STALL);
+   \   00000020   0x2110             MOVS     R1,#+16
+   \   00000022   0x....             LDR.N    R2,??DataTable15_11
+   \   00000024   0x8011             STRH     R1,[R2, #+0]
+   1027            }
+   1028          
+   1029          #ifdef STM32F10X_CL
+   1030            else if ((pInformation->ControlState == OUT_DATA) ||
+   1031                (pInformation->ControlState == WAIT_STATUS_OUT))
+   1032            {
+   1033              ep = PCD_GetInEP(0);
+   1034              ep->is_in = 0;
+   1035              OTGD_FS_EP0StartXfer(ep);
+   1036              
+   1037              vSetEPTxStatus(EP_TX_VALID);
+   1038            }
+   1039            
+   1040            else if ((pInformation->ControlState == IN_DATA) || 
+   1041                (pInformation->ControlState == WAIT_STATUS_IN))
+   1042            {
+   1043              ep = PCD_GetInEP(0);
+   1044              ep->is_in = 1;
+   1045              OTGD_FS_EP0StartXfer(ep);    
+   1046            }  
+   1047          #endif /* STM32F10X_CL */
+   1048          
+   1049            return (pInformation->ControlState == PAUSE);
+   \                     ??Post0_Process_0: (+1)
+   \   00000026   0x7A00             LDRB     R0,[R0, #+8]
+   \   00000028   0x2809             CMP      R0,#+9
+   \   0000002A   0xBF0C             ITE      EQ 
+   \   0000002C   0x2001             MOVEQ    R0,#+1
+   \   0000002E   0x2000             MOVNE    R0,#+0
+   \   00000030   0xBD02             POP      {R1,PC}
+   1050          }
+   1051          
+   1052          /*******************************************************************************
+   1053          * Function Name  : SetDeviceAddress.
+   1054          * Description    : Set the device and all the used Endpoints addresses.
+   1055          * Input          : - Val: device address.
+   1056          * Output         : None.
+   1057          * Return         : None.
+   1058          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+   1059          void SetDeviceAddress(INT8U Val)
+   1060          {
+   \                     SetDeviceAddress: (+1)
+   \   00000000   0xB4F0             PUSH     {R4-R7}
+   1061          #ifdef STM32F10X_CL 
+   1062            PCD_EP_SetAddress ((INT8U)Val);
+   1063          #else 
+   1064            INT32U i;
+   1065            INT32U nEP = Device_Table.Total_Endpoint;
+   \   00000002   0x....             LDR.N    R1,??DataTable15_2
+   1066          
+   1067            /* set address in every used endpoint */
+   1068            for (i = 0; i < nEP; i++)
+   \   00000004   0x....             LDR.N    R3,??DataTable15_5  ;; 0x40005c00
+   \   00000006   0x7809             LDRB     R1,[R1, #+0]
+   \   00000008   0x2200             MOVS     R2,#+0
+   \   0000000A   0xB181             CBZ.N    R1,??SetDeviceAddress_0
+   \   0000000C   0x461C             MOV      R4,R3
+   \   0000000E   0xF248 0x0580      MOVW     R5,#+32896
+   \   00000012   0xF648 0x768F      MOVW     R6,#+36751
+   1069            {
+   1070              _SetEPAddress((INT8U)i, (INT8U)i);
+   \                     ??SetDeviceAddress_1: (+1)
+   \   00000016   0x6827             LDR      R7,[R4, #+0]
+   \   00000018   0x4037             ANDS     R7,R6,R7
+   \   0000001A   0xFA5F 0xFC82      UXTB     R12,R2
+   \   0000001E   0xEA4C 0x0707      ORR      R7,R12,R7
+   1071            } /* for */
+   \   00000022   0x1C52             ADDS     R2,R2,#+1
+   \   00000024   0x432F             ORRS     R7,R5,R7
+   \   00000026   0x428A             CMP      R2,R1
+   \   00000028   0xF844 0x7B04      STR      R7,[R4], #+4
+   \   0000002C   0xD3F3             BCC.N    ??SetDeviceAddress_1
+   1072            _SetDADDR(Val | DADDR_EF); /* set device address and enable function */
+   \                     ??SetDeviceAddress_0: (+1)
+   \   0000002E   0xF040 0x0080      ORR      R0,R0,#0x80
+   \   00000032   0x64D8             STR      R0,[R3, #+76]
+   1073          #endif  /* STM32F10X_CL */  
+   1074          }
+   \   00000034   0xBCF0             POP      {R4-R7}
+   \   00000036   0x4770             BX       LR               ;; return
+   1075          
+   1076          /*******************************************************************************
+   1077          * Function Name  : NOP_Process
+   1078          * Description    : No operation function.
+   1079          * Input          : None.
+   1080          * Output         : None.
+   1081          * Return         : None.
+   1082          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+   1083          void NOP_Process(void)
+   1084          {
+   1085          }
+   \                     NOP_Process: (+1)
+   \   00000000   0x4770             BX       LR               ;; return
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable15:
+   \   00000000   0x........         DC32     pInformation
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable15_1:
+   \   00000000   0x........         DC32     pUser_Standard_Requests
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable15_2:
+   \   00000000   0x........         DC32     Device_Table
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable15_3:
+   \   00000000   0x........         DC32     pProperty
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable15_4:
+   \   00000000   0x........         DC32     StatusInfo
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable15_5:
+   \   00000000   0x40005C00         DC32     0x40005c00
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable15_6:
+   \   00000000   0x........         DC32     Device_Property
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable15_7:
+   \   00000000   0x........         DC32     Data_Mul_MaxPacketSize
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable15_8:
+   \   00000000   0x40005C50         DC32     0x40005c50
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable15_9:
+   \   00000000   0x40006004         DC32     0x40006004
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable15_10:
+   \   00000000   0x........         DC32     SaveRState
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable15_11:
+   \   00000000   0x........         DC32     SaveTState
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable15_12:
+   \   00000000   0x........         DC32     Standard_GetStatus
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable15_13:
+   \   00000000   0x........         DC32     Standard_GetConfiguration
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable15_14:
+   \   00000000   0x........         DC32     Standard_GetInterface
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable15_15:
+   \   00000000   0x40006008         DC32     0x40006008
+   1086          
+   1087          /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
+   1088          #endif
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      24   DataStageIn
+        24   -- Indirect call
+        24   -> GetEPTxAddr
+        24   -> SetEPTxCount
+        24   -> UserToPMABufferCopy
+       8   Data_Setup0
+         8   -- Indirect call
+         0   -> DataStageIn
+       8   In0_Process
+         8   -- Indirect call
+         8   -> DataStageIn
+         0   -> Post0_Process
+         8   -> SetDeviceAddress
+       0   NOP_Process
+      16   NoData_Setup0
+        16   -- Indirect call
+        16   -> Standard_ClearFeature
+        16   -> Standard_SetConfiguration
+        16   -> Standard_SetEndPointFeature
+        16   -> Standard_SetInterface
+      24   Out0_Process
+        24   -- Indirect call
+        24   -> GetEPRxAddr
+        24   -> PMAToUserBufferCopy
+         0   -> Post0_Process
+        24   -> SetEPTxCount
+       8   Post0_Process
+         8   -> SetEPRxCount
+      16   SetDeviceAddress
+      16   Setup0_Process
+        16   -> ByteSwap
+        16   -> Data_Setup0
+        16   -> NoData_Setup0
+         0   -> Post0_Process
+      24   Standard_ClearFeature
+        24   -- Indirect call
+        24   -> ClearDTOG_RX
+        24   -> ClearDTOG_TX
+        24   -> SetEPRxCount
+        24   -> SetEPTxStatus
+       8   Standard_GetConfiguration
+         8   -- Indirect call
+       0   Standard_GetDescriptorData
+       8   Standard_GetInterface
+         8   -- Indirect call
+       8   Standard_GetStatus
+         8   -- Indirect call
+       8   Standard_SetConfiguration
+         8   -- Indirect call
+       8   Standard_SetDeviceFeature
+         8   -- Indirect call
+      16   Standard_SetEndPointFeature
+        16   -- Indirect call
+       8   Standard_SetInterface
+         8   -- Indirect call
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable15
+       4  ??DataTable15_1
+       4  ??DataTable15_10
+       4  ??DataTable15_11
+       4  ??DataTable15_12
+       4  ??DataTable15_13
+       4  ??DataTable15_14
+       4  ??DataTable15_15
+       4  ??DataTable15_2
+       4  ??DataTable15_3
+       4  ??DataTable15_4
+       4  ??DataTable15_5
+       4  ??DataTable15_6
+       4  ??DataTable15_7
+       4  ??DataTable15_8
+       4  ??DataTable15_9
+      10  ?Subroutine0
+     158  DataStageIn
+       1  Data_Mul_MaxPacketSize
+     408  Data_Setup0
+      78  In0_Process
+       2  NOP_Process
+     218  NoData_Setup0
+     182  Out0_Process
+      50  Post0_Process
+      56  SetDeviceAddress
+     100  Setup0_Process
+     206  Standard_ClearFeature
+      26  Standard_GetConfiguration
+      26  Standard_GetDescriptorData
+      26  Standard_GetInterface
+     146  Standard_GetStatus
+      52  Standard_SetConfiguration
+      30  Standard_SetDeviceFeature
+     116  Standard_SetEndPointFeature
+      72  Standard_SetInterface
+       4  StatusInfo
+
+ 
+     5 bytes in section .bss
+ 2 026 bytes in section .text
+ 
+ 2 026 bytes of CODE memory
+     5 bytes of DATA memory
+
+Errors: none
+Warnings: none

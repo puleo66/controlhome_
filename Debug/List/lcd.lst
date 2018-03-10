@@ -1,0 +1,1067 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:14:57
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  E:\HW Projects\ControlHome\CntrHome - RF69w\uC-LCD\lcd.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\uC-LCD\lcd.c" -lCN "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\lcd.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\lcd.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uC-LCD\lcd.c
+      1          /*
+      2          *********************************************************************************************************
+      3          *                                        LCD MODULE SOURCE FILE
+      4          *
+      5          * Filename      : lcd.c
+      6          * Version       : V0.1
+      7          * Programmer(s) : Puleo
+      8          *********************************************************************************************************
+      9          */
+     10          
+     11          /*
+     12          *********************************************************************************************************
+     13          *                                              INCLUDE FILES
+     14          *********************************************************************************************************
+     15          */
+     16          
+     17          #include "includes.h"
+     18          #if LCD_MODULE == DEF_ENABLED
+     19          /*
+     20          *********************************************************************************************************
+     21          *                                            LOCAL CONSTANTS
+     22          *********************************************************************************************************
+     23          */
+     24          
+     25          
+     26          /*
+     27          *********************************************************************************************************
+     28          *                                            LOCAL VARIABLES
+     29          *********************************************************************************************************
+     30          */
+     31          
+     32          /* Cache buffer in SRAM 84*48 bits or 504 bytes */
+     33          static CPU_CHAR  LcdCache [ LCD_CACHE_SIZE ];
+     34          
+     35          /* Log Cache buffer  */
+     36          //static CPU_CHAR  LogCache[69];
+     37          //static CPU_INT16S LogCasheCount= 0;
+     38          
+     39          /* Cache index */
+     40          static CPU_INT32S   LcdCacheIdx;
+     41          
+     42          /* Lower part of water mark */
+     43          static CPU_INT32S   LoWaterMark;
+     44          
+     45          /* Higher part of water mark */
+     46          static CPU_INT32S   HiWaterMark;
+     47          
+     48          //extern CPU_INT08U time_buffer[20];
+     49          //static CPU_CHAR taskMessage[20];
+     50          //static CPU_INT08U msg[20];
+     51          /*
+     52          *********************************************************************************************************
+     53          *                                        LOCAL FUNCTION PROTOTYPES
+     54          *********************************************************************************************************
+     55          */
+     56          //static void strTimecpy(void);
+     57          
+     58          /*
+     59          *********************************************************************************************************
+     60          *  Name         :  LcdInit
+     61          *  Description  :  Performs MCU SPI & LCD controller initialization.
+     62          *  Argument(s)  :  None.
+     63          *  Return value :  None.
+     64          ********************************************************************************************************
+     65          */
+     66          
+     67          void LcdInit ( void )
+     68          {
+     69              LcdSend( 0x21, LCD_CMD ); /* LCD Extended Commands. */
+     70              LcdSend( 0x05, LCD_CMD );
+     71              LcdSend( 0xC8, LCD_CMD ); /* Set LCD Vop (Contrast).*/
+     72              LcdSend( 0x06, LCD_CMD ); /* Set Temp coefficent. */
+     73              LcdSend( 0x14, LCD_CMD ); /* LCD bias mode 1:48. */
+     74          //    LcdSend( 0x12, LCD_CMD ); /* LCD bias mode 1:68. */
+     75              
+     76              
+     77              LcdSend( 0x20, LCD_CMD ); /* LCD Standard Commands,Horizontal addressing mode */
+     78              LcdSend( 0x01, LCD_CMD );
+     79              LcdSend( 0x0C, LCD_CMD ); /* LCD in normal mode. */
+     80              LcdSend( 0x40, LCD_CMD );
+     81              LcdSend( 0x80, LCD_CMD );
+     82              
+     83              LoWaterMark = LCD_CACHE_SIZE; /* Reset watermark pointers to empty */
+     84              HiWaterMark = 0;
+     85              LogActual = 0;
+     86              
+     87              LcdClear(); /* Clear display on first time use */   
+     88              
+     89          }
+     90          
+     91          /*
+     92          *********************************************************************************************************
+     93          * Name         :  LcdContrast
+     94          * Description  :  Set display contrast.
+     95          * Argument(s)  :  contrast -> Contrast value from 0x00 to 0x7F.
+     96          * Return value :  None.
+     97          *********************************************************************************************************
+     98          */
+     99          void LcdContrast ( CPU_INT08U contrast )
+    100          {
+    101              /* LCD Extended Commands. */
+    102              LcdSend( 0x21, LCD_CMD );
+    103          
+    104              /* Set LCD contrast level. */
+    105              LcdSend( 0x80 | contrast, LCD_CMD );
+    106          
+    107              /* LCD Standard Commands, horizontal addressing mode. */
+    108              LcdSend( 0x20, LCD_CMD );
+    109          }
+    110          
+    111          /*
+    112          ********************************************************************************************************
+    113          * Name         :  LcdClear
+    114          * Description  :  Clears the display. LcdUpdate must be called next.
+    115          * Argument(s)  :  None.
+    116          * Return value :  None.
+    117          * Note         :  Based on Sylvain Bissonette's code
+    118          ********************************************************************************************************
+    119          */
+    120          void LcdClear ( void )
+    121          {
+    122              DispLock();
+    123              memset(LcdCache,0x00,LCD_CACHE_SIZE); 
+    124              /* Reset watermark pointers to full */
+    125              LoWaterMark = 0;
+    126              HiWaterMark = LCD_CACHE_SIZE - 1;
+    127          
+    128              /* Set update */
+    129              LcdUpdate();
+    130              DispUnlock();
+    131              LcdGotoXYFont(1,6);
+    132              LcdStr(FONT_1X,"              ");
+    133          }
+    134          
+    135          /*
+    136          ********************************************************************************************************
+    137          * Name         :  LcdNumber
+    138          * Description  :  Decimal numbers convert to Lcd string
+    139          * Argument(s)  :  n  -> str
+    140          * Return value :  none
+    141          ********************************************************************************************************
+    142          */
+    143          void LcdNumber(LcdFontSize size, CPU_INT08U x, CPU_INT08U y, CPU_INT32S n) 
+    144          {
+    145            CPU_CHAR str[80];
+    146            
+    147           
+    148            LcdGotoXYFont(x,y);
+    149            sprintf ((char*)str, "%d", n);
+    150            LcdStr(size, str);
+    151          }
+    152          
+    153          /*
+    154          ********************************************************************************************************
+    155          * Name         :  LcdHex
+    156          * Description  :  HexDecimal number convert to Lcd string
+    157          * Argument(s)  :  HexByte  -> str (0x00)
+    158          * Return value :  none
+    159          ********************************************************************************************************
+    160          */
+    161          void LcdHex( LcdFontSize size, CPU_INT08U x,CPU_INT08U y, CPU_INT08U data_ )
+    162          {
+    163           CPU_INT08U h1,h2;
+    164          
+    165              DispLock();
+    166              h1=data_&0xf0;
+    167              h1=h1>>4;
+    168              h2=data_&0x0f;
+    169              
+    170              if(h1<10)
+    171                h1+=0x30;
+    172              else 
+    173                h1+=0x37;
+    174              
+    175              if(h2<10)
+    176                h2+=0x30;
+    177              else 
+    178                h2+=0x37 ;
+    179              
+    180              LcdGotoXYFont(x++,y);
+    181              LcdChr (size, h1 );
+    182              LcdGotoXYFont(x++,y);
+    183              LcdChr (size, h2 );
+    184                
+    185                /* Set update */
+    186              LcdUpdate();
+    187              DispUnlock();
+    188          }
+    189          
+    190          /*
+    191          ********************************************************************************************************
+    192          * Name         :  LcdWord
+    193          * Description  :  HexDecimal numbers convert to decimal Lcd string
+    194          * Argument(s)  :  HexWord  -> str (0x0000)
+    195          * Return value :  none
+    196          ********************************************************************************************************
+    197          */
+    198          void LcdWord( LcdFontSize size, CPU_INT08U x, CPU_INT08U y, CPU_INT16U data_ )
+    199          {
+    200            CPU_INT16U h;
+    201            CPU_INT08U d1,d2,d3,d4,d5,d6;
+    202            
+    203              DispLock();
+    204              h=data_;
+    205              d1=((h%=1000000)/100000)+48;
+    206              d2=((h%=100000)/10000)+48;
+    207              d3=((h%=10000)/1000)+48;
+    208              d4=((h%=1000)/100)+48;
+    209              d5=((h%=100)/10)+48;
+    210              d6=(h%=10)+48;
+    211            
+    212              LcdGotoXYFont(x++,y);
+    213              LcdChr (size, d1 );
+    214              LcdGotoXYFont(x++,y);
+    215              LcdChr (size, d2 );
+    216              LcdGotoXYFont(x++,y);
+    217              LcdChr (size, d3 );
+    218              LcdGotoXYFont(x++,y);
+    219              LcdChr (size, d4 );
+    220              LcdGotoXYFont(x++,y);
+    221              LcdChr (size, d5 );
+    222              LcdGotoXYFont(x++,y);
+    223              LcdChr (size, d6 );
+    224            
+    225              /* Set update */
+    226              LcdUpdate();
+    227              DispUnlock();
+    228          }
+    229          
+    230          /*
+    231          ********************************************************************************************************
+    232          * Name         :  LcdGotoXYFont
+    233          * Description  :  Sets cursor location to xy location corresponding to basic
+    234          *                 font size.
+    235          * Argument(s)  :  x, y -> Coordinate for new cursor position. Range: 1,1 .. 14,6
+    236          * Return value :  see return value in pcd8544.h
+    237          * Note         :  Based on Sylvain Bissonette's code
+    238          ********************************************************************************************************
+    239          */
+    240          CPU_INT08U LcdGotoXYFont ( CPU_INT08U x, CPU_INT08U y )
+    241          {
+    242              /* Boundary check, slow down the speed but will guarantee this code wont fail */
+    243              /* Version 0.2.5 - Fixed on Dec 25, 2008 (XMAS) */
+    244              if( x > 14)  
+    245                  return OUT_OF_BORDER;
+    246              if( y > 6)
+    247                  return OUT_OF_BORDER;
+    248              /*  Calculate index. It is defined as address within 504 bytes memory */
+    249          
+    250              LcdCacheIdx = ( x - 1 ) * 6 + ( y - 1 ) * 84;
+    251              return OK;
+    252          }
+    253          
+    254          /*
+    255          *******************************************************************************************************
+    256          * Name         :  LcdChr
+    257          * Description  :  Displays a character at current cursor location and
+    258          *                 increment cursor location.
+    259          * Argument(s)  :  size -> Font size. See enum in pcd8544.h.
+    260          *                 ch   -> Character to write.
+    261          * Return value :  see pcd8544.h about return value
+    262          *******************************************************************************************************
+    263          */
+    264          CPU_INT08U LcdChr ( LcdFontSize size, CPU_INT08U ch )
+    265          {
+    266              CPU_INT08U i, c;
+    267              CPU_INT08U b1, b2;
+    268              CPU_INT16S tmpIdx;
+    269          
+    270              if ( LcdCacheIdx < LoWaterMark )
+    271              {
+    272                  /* Update low marker. */
+    273                  LoWaterMark = LcdCacheIdx;
+    274              }
+    275          
+    276              if ( (ch < 0x20) || (ch > 0x7b) )
+    277              {
+    278                  /* Convert to a printable character. */
+    279                  ch = 92;
+    280              }
+    281          
+    282              if ( size == FONT_1X )
+    283              {
+    284                  for ( i = 0; i < 5; i++ )
+    285                  {
+    286                    /* Copy lookup table from Flash ROM to LcdCache */
+    287                    LcdCache[LcdCacheIdx++] = FontLookup[ ch - 32 ][ i ]  << 1;
+    288                  }
+    289              }
+    290              else if ( size == FONT_2X )
+    291              {
+    292                  tmpIdx = LcdCacheIdx - 84;
+    293          
+    294                  if ( tmpIdx < LoWaterMark )
+    295                  {
+    296                      LoWaterMark = tmpIdx;
+    297                  }
+    298          
+    299                  if ( tmpIdx < 0 ) return OUT_OF_BORDER;
+    300          
+    301                  for ( i = 0; i < 5; i++ )
+    302                  {
+    303                      /* Copy lookup table from Flash ROM to temporary c */
+    304                      c = FontLookup[ch - 32][i] << 1;
+    305                      /* Enlarge image */
+    306                      /* First part */
+    307                      b1 =  (c & 0x01) * 3;
+    308                      b1 |= (c & 0x02) * 6;
+    309                      b1 |= (c & 0x04) * 12;
+    310                      b1 |= (c & 0x08) * 24;
+    311          
+    312                      c >>= 4;
+    313                      /* Second part */
+    314                      b2 =  (c & 0x01) * 3;
+    315                      b2 |= (c & 0x02) * 6;
+    316                      b2 |= (c & 0x04) * 12;
+    317                      b2 |= (c & 0x08) * 24;
+    318          
+    319                      /* Copy two parts into LcdCache */
+    320                      LcdCache[tmpIdx++] = b1;
+    321                      LcdCache[tmpIdx++] = b1;
+    322                      //LcdCache[tmpIdx + 82] = b2;
+    323                      //LcdCache[tmpIdx + 83] = b2;
+    324                      LcdCache[tmpIdx + 100] = b2;
+    325                      LcdCache[tmpIdx + 101] = b2;
+    326                  }
+    327                  
+    328                  /* Update x cursor position. */
+    329                  /* Version 0.2.5 - Possible bug fixed on Dec 25,2008 */
+    330                  //LcdCacheIdx = (LcdCacheIdx + 11) % LCD_CACHE_SIZE;
+    331                  LcdCacheIdx = (LcdCacheIdx + 28) % LCD_CACHE_SIZE;
+    332              }
+    333          
+    334              if ( LcdCacheIdx > HiWaterMark )
+    335              {
+    336                  /* Update high marker. */
+    337                  HiWaterMark = LcdCacheIdx;
+    338              }
+    339          
+    340              /* Horizontal gap between characters. */
+    341              /* Version 0.2.5 - Possible bug fixed on Dec 25,2008 */
+    342              LcdCache[LcdCacheIdx] = 0x00;
+    343              /* At index number LCD_CACHE_SIZE - 1, wrap to 0 */
+    344              if(LcdCacheIdx == (LCD_CACHE_SIZE - 1) )
+    345              {
+    346                  LcdCacheIdx = 0;
+    347                  return OK_WITH_WRAP;
+    348              }
+    349              /* Otherwise just increment the index */
+    350              if ( size == FONT_2X )
+    351               LcdCacheIdx-=16;
+    352              else
+    353               LcdCacheIdx++; 
+    354              
+    355              return OK;
+    356          }
+    357          
+    358          /*
+    359          *******************************************************************************************************
+    360          * Name         :  LcdStr
+    361          * Description  :  Displays a character at current cursor location and increment
+    362          *                 cursor location according to font size. This function is
+    363          *                 dedicated to print string laid in SRAM
+    364          * Argument(s)  :  size      -> Font size. See enum.
+    365          *                 dataArray -> Array contained string of char to be written
+    366          *                              into cache.
+    367          * Return value :  see return value on pcd8544.h
+    368          *******************************************************************************************************
+    369          */
+    370          CPU_INT08U LcdStr ( LcdFontSize size, CPU_INT08U dataArray[] )
+    371          {
+    372              CPU_INT08U tmpIdx=0;
+    373              CPU_INT08U response;
+    374              
+    375              DispLock();
+    376              while( dataArray[ tmpIdx ] != '\0' )
+    377          	{
+    378                  /* Send char */
+    379          		response = LcdChr( size, dataArray[ tmpIdx ] );
+    380                  /* Just in case OUT_OF_BORDER occured */
+    381                  /* Dont worry if the signal == OK_WITH_WRAP, the string will
+    382                  be wrapped to starting point */
+    383                  if( response == OUT_OF_BORDER)
+    384                      return OUT_OF_BORDER;
+    385                  /* Increase index */
+    386          	tmpIdx++;
+    387          	}
+    388              /* Set update */
+    389              LcdUpdate();
+    390              DispUnlock();
+    391              return OK;
+    392          }
+    393          
+    394          /*
+    395          *******************************************************************************************************
+    396          * Name         :  LcdNStr
+    397          * Description  :  Displays a character at current cursor location and increment
+    398          *                 cursor location according to font size. This function is
+    399          *                 dedicated to print string laid in SRAM
+    400          * Argument(s)  :  size      -> Font size. See enum.
+    401          *                 dataArray -> Array contained string of char to be written
+    402          *                              into cache.
+    403          * Return value :  see return value on pcd8544.h
+    404          *******************************************************************************************************
+    405          */
+    406          CPU_INT08U LcdNStr ( LcdFontSize size, CPU_INT08U *dataArray, CPU_INT08U from, CPU_INT08U to)
+    407          {
+    408              CPU_INT08U tmpIdx=from;
+    409              CPU_INT08U response;
+    410              
+    411              DispLock();
+    412              while( tmpIdx  != to )
+    413          	{
+    414                  /* Send char */
+    415          		response = LcdChr( size, dataArray[ tmpIdx ] );
+    416                  /* Just in case OUT_OF_BORDER occured */
+    417                  /* Dont worry if the signal == OK_WITH_WRAP, the string will
+    418                  be wrapped to starting point */
+    419                  if( response == OUT_OF_BORDER)
+    420                      return OUT_OF_BORDER;
+    421                  /* Increase index */
+    422          	tmpIdx++;
+    423          	}
+    424              /* Set update */
+    425              LcdUpdate();
+    426              DispUnlock();
+    427              return OK;
+    428          }
+    429          
+    430          /*******************************************************************************
+    431          * Log Time Copy
+    432          *
+    433          ********************************************************************************
+    434          */
+    435          /*
+    436          static void strTimecpy(void)
+    437          {
+    438            CPU_INT16S i= 1;
+    439            
+    440            
+    441            Get_Time_Now();
+    442            strcpy((char *)taskMessage,"[");
+    443            strncat((char *)taskMessage,(char const *)time_buffer, strlen((char const *)time_buffer));
+    444            
+    445            while ((i + 11) != 17)
+    446            {
+    447              taskMessage[ i ] = taskMessage[ i + 11];
+    448              i++;
+    449            }       
+    450            taskMessage[6]= '\0';
+    451          }
+    452          */
+    453          /*
+    454          *******************************************************************************************************
+    455          * Name         :  LcdLogStr
+    456          * Description  :  Displays a character at current cursor location and increment
+    457          *                 cursor location according to font size. This function is
+    458          *                 dedicated to print string laid in SRAM
+    459          * Argument(s)  :  size      -> Font size. See enum.
+    460          *                 dataArray -> Array contained string of char to be written
+    461          *                              into cache.
+    462          * Return value :  see return value on pcd8544.h
+    463          *******************************************************************************************************
+    464          */
+    465          /*
+    466          CPU_INT08U LcdLogStr ( LcdFontSize size, CPU_INT08U message[], CPU_INT08U task[])
+    467          {
+    468              CPU_INT08U tmpIdx= 0;
+    469              CPU_INT08U response;
+    470              CPU_INT16S i,j;
+    471              
+    472              DispLock();
+    473              if (LogCasheCount > 1)
+    474              {
+    475                LogCasheCount= 1;
+    476                i= 0;
+    477                j= 34;                              //from three Line to one line
+    478                while( LogCache[ j ] != '\0' )
+    479                {
+    480                  LogCache[ i ] = LogCache[ j ];
+    481                  i++;
+    482                  j++;
+    483                }
+    484                LogCache[ 34 ] = '\0';
+    485              }
+    486              
+    487              strTimecpy();
+    488              strncat((char *)taskMessage,"] ", 2);
+    489              strncat((char *)taskMessage,(char *)task, 9);
+    490              
+    491              if (LogCasheCount != 0)
+    492                strncat((char *)LogCache,(char *)taskMessage,strlen((char const *)taskMessage));
+    493              else
+    494                 strcpy((char *)LogCache,(char const *)taskMessage);
+    495              strncat((char *)LogCache,(char *)message,strlen((char const *)message));
+    496              LogCache[ 68 ] = '\0';
+    497              
+    498              LcdCacheIdx= 1;
+    499              LogCasheCount++;
+    500              
+    501              while( LogCache[ tmpIdx ] != '\0' )
+    502          	{
+    503                  // Send char 
+    504          	response = LcdChr( size, LogCache[ tmpIdx ] );
+    505                  if( response == OUT_OF_BORDER)
+    506                      return OUT_OF_BORDER;
+    507                  // Increase index 
+    508          	tmpIdx++;
+    509          	}
+    510              // Set update 
+    511              LcdUpdate();
+    512              DispUnlock();
+    513              return OK;
+    514          }
+    515          
+    516          */
+    517          /*
+    518          *********************************************************************************************************
+    519          */
+    520          void LcdListLog( CPU_INT08U index, CPU_INT08U *message)
+    521          {
+    522            LcdGotoXYFont(1 ,1 + index);
+    523            LcdStr ( FONT_1X, (unsigned char*)message );
+    524          }
+    525          
+    526          /*
+    527          *********************************************************************************************************
+    528          */
+    529          void LcdLog( CPU_INT08U *message)
+    530          {
+    531            CPU_INT08U i;
+    532            
+    533          
+    534            if (LogActual == 6){
+    535              for (i = 0; i < 6; i++){
+    536                strcpy((char*)LogMessage[i], (char const*)LogMessage[i+1]);
+    537              }
+    538            }
+    539            
+    540            strcpy((char*)LogMessage[LogActual], (char const*)message);
+    541            
+    542            if(LogActual != 6)
+    543              LogActual++;
+    544            
+    545            for (i= 0; i < LogActual; i++){
+    546              LcdGotoXYFont(1 ,1 + i);
+    547              LcdStr ( FONT_1X, (unsigned char*)LogMessage[i] );
+    548            }
+    549            
+    550          }
+    551          
+    552          /*
+    553          *******************************************************************************************************
+    554          * Name         :  LcdFStr
+    555          * Description  :  Displays a characters at current cursor location and increment
+    556          *                 cursor location according to font size. This function is
+    557          *                 dedicated to print string laid in Flash ROM
+    558          * Argument(s)  :  size    -> Font size. See enum.
+    559          *                 dataPtr -> Pointer contained string of char to be written
+    560          *                            into cache.
+    561          * Return value :  see return value on pcd8544.h
+    562          * Example      :  LcdFStr(FONT_1X, "Hello World");
+    563          *                 LcdFStr(FONT_1X, &name_of_string_as_array);
+    564          *******************************************************************************************************
+    565          */
+    566          CPU_INT08U LcdFStr ( LcdFontSize size, const CPU_INT08U *dataPtr )
+    567          {
+    568              CPU_INT08U c;
+    569              CPU_INT08U response;
+    570              
+    571              DispLock();
+    572              for ( c = (*(const CPU_INT08U *)(dataPtr)); c; ++dataPtr, c = (*(const CPU_INT08U *)(dataPtr)))
+    573              {
+    574                  /* Put char */
+    575                  response = LcdChr( size, c );
+    576                  if(response == OUT_OF_BORDER)
+    577                      return OUT_OF_BORDER;
+    578              }
+    579              /* Set update */
+    580              LcdUpdate();
+    581              DispUnlock();
+    582              return OK;
+    583          }
+    584          
+    585          /*
+    586          *******************************************************************************************************
+    587          * Name         :  LcdPixel
+    588          * Description  :  Displays a pixel at given absolute (x, y) location.
+    589          * Argument(s)  :  x, y -> Absolute pixel coordinates
+    590          *                 mode -> Off, On or Xor. See enum in pcd8544.h.
+    591          * Return value :  see return value on pcd8544.h
+    592          * Note         :  Based on Sylvain Bissonette's code
+    593          *******************************************************************************************************
+    594          */
+    595          CPU_INT08U LcdPixel ( CPU_INT08U x, CPU_INT08U y, LcdPixelMode mode )
+    596          {
+    597              CPU_INT16U  index;
+    598              CPU_INT08U  offset;
+    599              CPU_INT08U  data;
+    600          
+    601              DispLock();
+    602              /* Prevent from getting out of border */
+    603              if ( x > LCD_X_RES ) {DispUnlock(); return OUT_OF_BORDER;}
+    604              if ( y > LCD_Y_RES ) { DispUnlock(); return OUT_OF_BORDER;}
+    605          
+    606              /* Recalculating index and offset */
+    607              index = ( ( y / 8 ) * 84 ) + x;
+    608              offset  = y - ( ( y / 8 ) * 8 );
+    609          
+    610              data = LcdCache[ index ];
+    611          
+    612              /* Bit processing */
+    613          
+    614          	/* Clear mode */
+    615              if ( mode == PIXEL_OFF )
+    616              {
+    617                  data &= ( ~( 0x01 << offset ) );
+    618              }
+    619          
+    620              /* On mode */
+    621              else if ( mode == PIXEL_ON )
+    622              {
+    623                  data |= ( 0x01 << offset );
+    624              }
+    625          
+    626              /* Xor mode */
+    627              else if ( mode  == PIXEL_XOR )
+    628              {
+    629                  data ^= ( 0x01 << offset );
+    630              }
+    631          
+    632              /* Final result copied to cache */
+    633              LcdCache[ index ] = data;
+    634          
+    635              if ( index < LoWaterMark )
+    636              {
+    637                  /*  Update low marker. */
+    638                  LoWaterMark = index;
+    639              }
+    640          
+    641              if ( index > HiWaterMark )
+    642              {
+    643                  /*  Update high marker. */
+    644                  HiWaterMark = index;
+    645              }
+    646              /* Set update */
+    647              LcdUpdate();
+    648              DispUnlock();
+    649              return OK;
+    650          }
+    651          
+    652          /*
+    653          *******************************************************************************************************
+    654          * Name         :  LcdLine
+    655          * Description  :  Draws a line between two points on the display.
+    656          * Argument(s)  :  x1, y1 -> Absolute pixel coordinates for line origin.
+    657          *                 x2, y2 -> Absolute pixel coordinates for line end.
+    658          *                 mode   -> Off, On or Xor. See enum in pcd8544.h.
+    659          * Return value :  see return value on pcd8544.h
+    660          *******************************************************************************************************
+    661          */
+    662          CPU_INT08U LcdLine ( CPU_INT08U x1, CPU_INT08U x2, CPU_INT08U y1, CPU_INT08U y2, LcdPixelMode mode )
+    663          {
+    664              CPU_INT32S dx, dy, stepx, stepy, fraction;
+    665              CPU_INT08U response;
+    666          
+    667              /* Calculate differential form */
+    668              /* dy   y2 - y1 */
+    669              /* -- = ------- */
+    670              /* dx   x2 - x1 */
+    671          
+    672              /* Take differences */
+    673              dy = y2 - y1;
+    674              dx = x2 - x1;
+    675          
+    676              /* dy is negative */
+    677              if ( dy < 0 )
+    678              {
+    679                  dy    = -dy;
+    680                  stepy = -1;
+    681              }
+    682              else
+    683              {
+    684                  stepy = 1;
+    685              }
+    686          
+    687              /* dx is negative */
+    688              if ( dx < 0 )
+    689              {
+    690                  dx    = -dx;
+    691                  stepx = -1;
+    692              }
+    693              else
+    694              {
+    695                  stepx = 1;
+    696              }
+    697          
+    698              dx <<= 1;
+    699              dy <<= 1;
+    700          
+    701              /* Draw initial position */
+    702              response = LcdPixel( x1, y1, mode );
+    703              if(response)
+    704                  return response;
+    705          
+    706              /* Draw next positions until end */
+    707              if ( dx > dy )
+    708              {
+    709                  /* Take fraction */
+    710                  fraction = dy - ( dx >> 1);
+    711                  while ( x1 != x2 )
+    712                  {
+    713                      if ( fraction >= 0 )
+    714                      {
+    715                          y1 += stepy;
+    716                          fraction -= dx;
+    717                      }
+    718                      x1 += stepx;
+    719                      fraction += dy;
+    720          
+    721                      /* Draw calculated point */
+    722                      response = LcdPixel( x1, y1, mode );
+    723                      if(response)
+    724                          return response;
+    725          
+    726                  }
+    727              }
+    728              else
+    729              {
+    730                  /* Take fraction */
+    731                  fraction = dx - ( dy >> 1);
+    732                  while ( y1 != y2 )
+    733                  {
+    734                      if ( fraction >= 0 )
+    735                      {
+    736                          x1 += stepx;
+    737                          fraction -= dy;
+    738                      }
+    739                      y1 += stepy;
+    740                      fraction += dx;
+    741          
+    742                      /* Draw calculated point */
+    743                      response = LcdPixel( x1, y1, mode );
+    744                      if(response)
+    745                          return response;
+    746                  }
+    747              }
+    748          
+    749              return OK;
+    750          }
+    751          
+    752          /*
+    753          *********************************************************************************************************
+    754          */
+    755          CPU_INT08U LcdCircle(CPU_INT08U x, CPU_INT08U y, CPU_INT08U radius, LcdPixelMode mode)
+    756          {
+    757              CPU_INT08S xc = 0;
+    758              CPU_INT08S yc = 0;
+    759              CPU_INT08S p = 0;
+    760          
+    761              if ( x >= LCD_X_RES || y >= LCD_Y_RES) return OUT_OF_BORDER;
+    762          
+    763              yc = radius;
+    764              p = 3 - (radius<<1);
+    765              while (xc <= yc)
+    766              {
+    767                  LcdPixel(x + xc, y + yc, mode);
+    768                  LcdPixel(x + xc, y - yc, mode);
+    769                  LcdPixel(x - xc, y + yc, mode);
+    770                  LcdPixel(x - xc, y - yc, mode);
+    771                  LcdPixel(x + yc, y + xc, mode);
+    772                  LcdPixel(x + yc, y - xc, mode);
+    773                  LcdPixel(x - yc, y + xc, mode);
+    774                  LcdPixel(x - yc, y - xc, mode);
+    775                  if (p < 0) p += (xc++ << 2) + 6;
+    776                      else p += ((xc++ - yc--)<<2) + 10;
+    777              }
+    778          
+    779              return OK;
+    780          }
+    781          
+    782          /*******************************************************************************
+    783          *
+    784          * Widgets!!!!
+    785          *
+    786          ********************************************************************************
+    787          */
+    788          
+    789          void LcdBatt(int x1, int y1, int x2, int y2, CPU_INT08U persent)
+    790          {
+    791              CPU_INT08U horizon_line,horizon_line2,i;
+    792                  
+    793              if(persent>100)
+    794                return;
+    795                  
+    796              LcdLine(x1,x2,y2,y2,PIXEL_ON);  //down
+    797              LcdLine(x2,x2,y1,y2,PIXEL_ON);  //right
+    798              LcdLine(x1,x1,y1,y2,PIXEL_ON);  //left
+    799              LcdLine(x1,x2,y1,y1,PIXEL_ON);  //up
+    800              LcdLine(x1+7,x2-7,y1-1,y1-1,PIXEL_ON);
+    801              LcdLine(x1+7,x2-7,y1-2,y1-2,PIXEL_ON);
+    802          	
+    803              horizon_line=persent*(y2-y1-3)/100;
+    804              for(i=0;i<horizon_line;i++)
+    805                LcdLine(x1+2,x2-2,y2-2-i,y2-2-i,PIXEL_ON);
+    806          
+    807              horizon_line2=(y2-y1-3);
+    808              for(i=horizon_line2;i>horizon_line;i--) 
+    809                LcdLine(x1+2,x2-2,y2-2-i,y2-2-i,PIXEL_OFF);
+    810          }
+    811          
+    812          /*
+    813          *********************************************************************************************************
+    814          */
+    815          void LcdHBar(int x1, int x2, int y1, int y2, CPU_INT08U persent)	
+    816          {
+    817             CPU_INT08U line;
+    818                  
+    819             if(persent>100)return;
+    820                  
+    821             LcdLine(x1+2,x2-2,y2,y2,PIXEL_ON);  //down
+    822             LcdLine(x2-2,x2-2,y1,y2,PIXEL_ON);  //right
+    823             LcdLine(x1+2,x1+2,y1,y2,PIXEL_ON);  //left
+    824             LcdLine(x1+2,x2-2,y1,y1,PIXEL_ON);  //up
+    825          	
+    826             LcdLine(x2-1,x2-1,y1+1,y2-1,PIXEL_ON);  //right
+    827             LcdLine(x1+1,x1+1,y1+1,y2-1,PIXEL_ON);  //left
+    828                  
+    829             LcdLine(x2,x2,y1+2,y2-2,PIXEL_ON);  //right
+    830             LcdLine(x1,x1,y1+2,y2-2,PIXEL_ON);  //left
+    831                  
+    832             line=persent*(x2-x1-7)/100-1;
+    833             LcdLine(x1+4,x2-4,y1+2,y2-2,PIXEL_OFF);
+    834             LcdLine(x1+4,x1+4+line,y1+2,y2-2,PIXEL_ON);
+    835          }
+    836          
+    837          /*
+    838          *********************************************************************************************************
+    839          */
+    840          void LcdHBarLine(CPU_INT08U line, CPU_INT08U persent)
+    841          {
+    842            LcdHBar(0,  83, (line-1)*7+1, (line-1)*7+5, persent);
+    843          }
+    844          
+    845          /*
+    846          *******************************************************************************************************
+    847          * Name         :  LcdSingleBar
+    848          * Description  :  Display single bar.
+    849          * Argument(s)  :  baseX  -> absolute x axis coordinate
+    850          *                 baseY  -> absolute y axis coordinate
+    851          *				   height -> height of bar (in pixel)
+    852          *				   width  -> width of bar (in pixel)
+    853          *				   mode   -> Off, On or Xor. See enum in pcd8544.h.
+    854          * Return value :  see return value on pcd8544.h
+    855          *******************************************************************************************************
+    856          */
+    857          CPU_INT08U LcdSingleBar ( CPU_INT08U baseX, CPU_INT08U baseY, CPU_INT08U height, CPU_INT08U width, LcdPixelMode mode )
+    858          {
+    859              CPU_INT08U tmpIdxX,tmpIdxY,tmp;
+    860              CPU_INT08U response;
+    861          
+    862              /* Checking border */
+    863          	if ( ( baseX > LCD_X_RES ) || ( baseY > LCD_Y_RES ) ) return OUT_OF_BORDER;
+    864          
+    865          	if ( height > baseY )
+    866          		tmp = 0;
+    867          	else
+    868          		tmp = baseY - height;
+    869          
+    870              /* Draw lines */
+    871          	for ( tmpIdxY = tmp; tmpIdxY < baseY; tmpIdxY++ )
+    872          	{
+    873          	  for ( tmpIdxX = baseX; tmpIdxX < (baseX + width); tmpIdxX++ )
+    874                    {
+    875          		response = LcdPixel( tmpIdxX, tmpIdxY, mode );
+    876                          if(response)
+    877                           return response;
+    878                    }
+    879          	}
+    880                  return OK;
+    881          }
+    882          
+    883          /*
+    884          *******************************************************************************************************
+    885          * Name         :  LcdBars
+    886          * Description  :  Display multiple bars.
+    887          * Argument(s)  :  data[] -> data which want to be plotted
+    888          *                 numbBars  -> number of bars want to be plotted
+    889          *				   width  -> width of bar (in pixel)
+    890          * Return value :  see return value on pcd8544.h
+    891          * Note         :  Please check EMPTY_SPACE_BARS, BAR_X, BAR_Y in pcd8544.h
+    892          *******************************************************************************************************
+    893          */
+    894          CPU_INT08U LcdBars ( CPU_INT08U data[], CPU_INT08U numbBars, CPU_INT08U width, CPU_INT08U multiplier )
+    895          {
+    896          	CPU_INT08U b;
+    897          	CPU_INT08U tmpIdx = 0;
+    898                  CPU_INT08U response;
+    899          
+    900          	for ( b = 0;  b < numbBars ; b++ )
+    901          	{
+    902                  /* Preventing from out of border (LCD_X_RES) */
+    903          		if ( tmpIdx > LCD_X_RES ) return OUT_OF_BORDER;
+    904          
+    905          		/* Calculate x axis */
+    906          		tmpIdx = ((width + EMPTY_SPACE_BARS) * b) + BAR_X;
+    907          
+    908          		/* Draw single bar */
+    909          		response = LcdSingleBar( tmpIdx, BAR_Y, data[ b ] * multiplier, width, PIXEL_ON);
+    910                  if(response == OUT_OF_BORDER)
+    911                      return response;
+    912          	}
+    913                  return OK;
+    914          }
+    915          /*
+    916          *******************************************************************************************************
+    917          * Name         :  LcdRect
+    918          * Description  :  Display a rectangle.
+    919          * Argument(s)  :  x1   -> absolute first x axis coordinate
+    920          *                 y1   -> absolute first y axis coordinate
+    921          *				   x2   -> absolute second x axis coordinate
+    922          *				   y2   -> absolute second y axis coordinate
+    923          *				   mode -> Off, On or Xor. See enum in pcd8544.h.
+    924          * Return value :  see return value on pcd8544.h.
+    925          *******************************************************************************************************
+    926          */
+    927          CPU_INT08U LcdRect ( CPU_INT08U x1, CPU_INT08U x2,CPU_INT08U y1, CPU_INT08U y2, LcdPixelMode mode )
+    928          {
+    929          	CPU_INT08U tmpIdxX,tmpIdxY;
+    930          
+    931          	/* Checking border */
+    932          	if ( ( x1 > LCD_X_RES ) ||  ( x2 > LCD_X_RES ) || ( y1 > LCD_Y_RES ) || ( y2 > LCD_Y_RES ) )
+    933          		/* If out of border then return */
+    934          		return OUT_OF_BORDER;
+    935          
+    936          	if ( ( x2 > x1 ) && ( y2 > y1 ) )
+    937          	{
+    938          		for ( tmpIdxY = y1; tmpIdxY < y2; tmpIdxY++ )
+    939          		{
+    940          		       /* Draw line horizontally */
+    941          		      for ( tmpIdxX = x1; tmpIdxX < x2; tmpIdxX++ )
+    942                                {        
+    943                                   /* Draw a pixel */
+    944          			 LcdPixel( tmpIdxX, tmpIdxY, mode );
+    945                                }
+    946          		}
+    947          	}
+    948                  return OK;
+    949          }
+    950          /*
+    951          *******************************************************************************************************
+    952          * Name         :  LcdImage
+    953          * Description  :  Image mode display routine.
+    954          * Argument(s)  :  Address of image in hexes
+    955          * Return value :  None.
+    956          * Example      :  LcdImage(&sample_image_declared_as_array);
+    957          *******************************************************************************************************
+    958          */
+    959          void LcdImage ( const CPU_INT08U *imageData )
+    960          {
+    961              DispLock();
+    962              /* Initialize cache index to 0 */   
+    963              memcpy(LcdCache,imageData,LCD_CACHE_SIZE);
+    964          
+    965              /* Reset watermark pointers to be full */
+    966              LoWaterMark = 0;
+    967              HiWaterMark = LCD_CACHE_SIZE - 1;
+    968          
+    969              /* Set update */
+    970              LcdUpdate();
+    971              DispUnlock();
+    972          }
+    973          
+    974          /*
+    975          *******************************************************************************************************
+    976          * Name         :  LcdUpdate
+    977          * Description  :  Copies the LCD cache into the device RAM.
+    978          * Argument(s)  :  None.
+    979          * Return value :  None.
+    980          *******************************************************************************************************
+    981          */
+    982          void LcdUpdate ( void )
+    983          {
+    984              CPU_INT32S i;
+    985          
+    986              if ( LoWaterMark < 0 )
+    987                  LoWaterMark = 0;
+    988              else if ( LoWaterMark >= LCD_CACHE_SIZE )
+    989                  LoWaterMark = LCD_CACHE_SIZE - 1;
+    990          
+    991              if ( HiWaterMark < 0 )
+    992                  HiWaterMark = 0;
+    993              else if ( HiWaterMark >= LCD_CACHE_SIZE )
+    994                  HiWaterMark = LCD_CACHE_SIZE - 1;
+    995          
+    996              /*  Set base address according to LoWaterMark. */
+    997              LcdSend( 0x80 | ( LoWaterMark % LCD_X_RES ), LCD_CMD );
+    998              LcdSend( 0x40 | ( LoWaterMark / LCD_X_RES ), LCD_CMD );
+    999          
+   1000              /*  Serialize the display buffer. */
+   1001              for ( i = LoWaterMark; i <= HiWaterMark; i++ )
+   1002              {
+   1003                  LcdSend( LcdCache[ i ], LCD_DATA );
+   1004              }
+   1005          
+   1006              /*  Reset watermark pointers. */
+   1007              LoWaterMark = LCD_CACHE_SIZE - 1;
+   1008              HiWaterMark = 0;
+   1009          }
+   1010          #endif
+
+
+ 
+
+ 
+
+
+Errors: none
+Warnings: none

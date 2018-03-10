@@ -1,0 +1,204 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:14:47
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp_reset_rfm69cw.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp_reset_rfm69cw.c"
+#        -lCN "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List" -o
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome -
+#        RF69w\Debug\List\bsp_reset_rfm69cw.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome -
+#        RF69w\Debug\Obj\bsp_reset_rfm69cw.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp_reset_rfm69cw.c
+      1          /*
+      2          *********************************************************************************************************
+      3          *
+      4          *                                        Reset Pin of RFM69CW Modul
+      5          *                                                                         
+      6          *
+      7          * Filename      : bsp_reset_rfm69cw.c
+      8          * Version       : V1.00
+      9          * Programmer(s) : Puleo
+     10          *********************************************************************************************************
+     11          * Note(s)       :
+     12          *********************************************************************************************************
+     13          */
+     14          
+     15          /*
+     16          *********************************************************************************************************
+     17          *                                             INCLUDE FILES
+     18          *********************************************************************************************************
+     19          */
+     20          
+     21          #define  BSP_RESET_RFM69CW_MODULE
+     22          #include <bsp.h>
+     23          
+     24          
+     25          /*
+     26          *********************************************************************************************************
+     27          *                                              LOCAL DEFINES
+     28          *********************************************************************************************************
+     29          */
+     30          
+     31             
+     32          
+     33          /*
+     34          *********************************************************************************************************
+     35          *                                           LOCAL CONSTANTS
+     36          *********************************************************************************************************
+     37          */
+     38          
+     39          
+     40          
+     41          /*
+     42          *********************************************************************************************************
+     43          *                                          LOCAL DATA TYPES
+     44          *********************************************************************************************************
+     45          */
+     46          
+     47          
+     48          /*
+     49          *********************************************************************************************************
+     50          *                                            LOCAL TABLES
+     51          *********************************************************************************************************
+     52          */
+     53          
+     54          
+     55          /*
+     56          *********************************************************************************************************
+     57          *                                       LOCAL GLOBAL VARIABLES
+     58          *********************************************************************************************************
+     59          */
+     60          
+     61          /*
+     62          *********************************************************************************************************
+     63          *                                      LOCAL FUNCTION PROTOTYPES
+     64          *********************************************************************************************************
+     65          */
+     66          
+     67          /*
+     68          *********************************************************************************************************
+     69          *                                     LOCAL CONFIGURATION ERRORS
+     70          *********************************************************************************************************
+     71          */
+     72          
+     73          
+     74          /*
+     75          *********************************************************************************************************
+     76          *********************************************************************************************************
+     77          **                                         GLOBAL FUNCTIONS
+     78          *********************************************************************************************************
+     79          *********************************************************************************************************
+     80          */
+
+   \                                 In section .text, align 4, keep-with-next
+     81          void Reset_RFM69CW_Init(void) 
+     82          {
+   \                     Reset_RFM69CW_Init: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0xB082             SUB      SP,SP,#+8
+     83            GPIO_InitTypeDef GPIO_InitStructure;
+     84            
+     85            RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC | RCC_APB2Periph_AFIO, ENABLE);
+   \   00000004   0x2101             MOVS     R1,#+1
+   \   00000006   0x2011             MOVS     R0,#+17
+   \   00000008   0x.... 0x....      BL       RCC_APB2PeriphClockCmd
+     86          
+     87            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
+   \   0000000C   0x2080             MOVS     R0,#+128
+   \   0000000E   0xF8AD 0x0000      STRH     R0,[SP, #+0]
+     88            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+   \   00000012   0x2010             MOVS     R0,#+16
+   \   00000014   0xF88D 0x0003      STRB     R0,[SP, #+3]
+     89            //GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+     90            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+   \   00000018   0x2003             MOVS     R0,#+3
+   \   0000001A   0xF88D 0x0002      STRB     R0,[SP, #+2]
+     91            GPIO_Init(GPIOC, &GPIO_InitStructure);
+   \   0000001E   0x4669             MOV      R1,SP
+   \   00000020   0x4C08             LDR.N    R4,??Reset_RFM69CW_Init_0  ;; 0x40011000
+   \   00000022   0x4620             MOV      R0,R4
+   \   00000024   0x.... 0x....      BL       GPIO_Init
+     92            
+     93            GPIO_SetBits(GPIOC, GPIO_Pin_7);
+   \   00000028   0x2180             MOVS     R1,#+128
+   \   0000002A   0x4620             MOV      R0,R4
+   \   0000002C   0x.... 0x....      BL       GPIO_SetBits
+     94            //OSTimeDlyHMSM(0, 0, 0, 100);
+     95            OSTimeDly(1000);
+   \   00000030   0xF44F 0x707A      MOV      R0,#+1000
+   \   00000034   0x.... 0x....      BL       OSTimeDly
+     96            GPIO_ResetBits(GPIOC, GPIO_Pin_7);
+   \   00000038   0x2180             MOVS     R1,#+128
+   \   0000003A   0x4620             MOV      R0,R4
+   \   0000003C   0x.... 0x....      BL       GPIO_ResetBits
+     97          }
+   \   00000040   0xBD13             POP      {R0,R1,R4,PC}    ;; return
+   \   00000042   0xBF00             Nop      
+   \                     ??Reset_RFM69CW_Init_0:
+   \   00000044   0x40011000         DC32     0x40011000
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      16   Reset_RFM69CW_Init
+        16   -> GPIO_Init
+        16   -> GPIO_ResetBits
+        16   -> GPIO_SetBits
+        16   -> OSTimeDly
+        16   -> RCC_APB2PeriphClockCmd
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      72  Reset_RFM69CW_Init
+
+ 
+ 72 bytes in section .text
+ 
+ 72 bytes of CODE memory
+
+Errors: none
+Warnings: none

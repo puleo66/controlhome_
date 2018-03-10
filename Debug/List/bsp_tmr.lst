@@ -1,0 +1,377 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:14:48
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp_tmr.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp_tmr.c" -lCN
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\bsp_tmr.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\bsp_tmr.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp_tmr.c
+      1          /*
+      2          *********************************************************************************************************
+      3          *
+      4          *                                        BOARD SUPPORT PACKAGE
+      5          *
+      6          *
+      7          * Filename      : bsp_tmr.c
+      8          * Version       : V0.1
+      9          * Programmer(s) : Puleo
+     10          *********************************************************************************************************
+     11          */
+     12          
+     13          /*
+     14          *********************************************************************************************************
+     15          *                                             INCLUDE FILES
+     16          *********************************************************************************************************
+     17          */
+     18          
+     19          #define  BSP_MODULE
+     20          #include <bsp.h>
+     21          
+     22          /*
+     23          *********************************************************************************************************
+     24          *                                            LOCAL DEFINES
+     25          *********************************************************************************************************
+     26          */
+     27          #define SYS_CLK10           72000000    /* 72 MHz */
+     28          #define SYS_CLK             50000000    /* 50 MHz */
+     29          #define DELAY_TIM_FREQUENCY 1000000     /* = 1MHZ -> timer runs in microseconds */
+     30          
+     31          /*
+     32          *********************************************************************************************************
+     33          *                                      LOCAL FUNCTION PROTOTYPES
+     34          *********************************************************************************************************
+     35          */
+     36          extern void  FS20_TimeISRHandler (void);
+     37          
+     38          /*
+     39          *********************************************************************************************************
+     40          *                                              Us_TmrInit10()
+     41          *
+     42          * Description : Select & initialize a timer for use with uC/OS.
+     43          *
+     44          * Argument(s) : none.
+     45          *
+     46          * Return(s)   : none.
+     47          *********************************************************************************************************
+     48          */
+
+   \                                 In section .text, align 2, keep-with-next
+     49          void  Us_TmrInit10 (void)
+     50          {
+   \                     Us_TmrInit10: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0xB084             SUB      SP,SP,#+16
+     51              RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+   \   00000004   0x2101             MOVS     R1,#+1
+   \   00000006   0x2002             MOVS     R0,#+2
+   \   00000008   0x.... 0x....      BL       RCC_APB1PeriphClockCmd
+     52              
+     53              TIM_TimeBaseInitTypeDef  tim_init;
+     54              TIM_TimeBaseStructInit(&tim_init);
+   \   0000000C   0x4668             MOV      R0,SP
+   \   0000000E   0x.... 0x....      BL       TIM_TimeBaseStructInit
+     55          
+     56          
+     57              tim_init.TIM_Period        = 0xFFFF;
+   \   00000012   0xF64F 0x70FF      MOVW     R0,#+65535
+   \   00000016   0xF8AD 0x0004      STRH     R0,[SP, #+4]
+     58              tim_init.TIM_Prescaler     = (SYS_CLK10 / DELAY_TIM_FREQUENCY) - 1;
+   \   0000001A   0x2047             MOVS     R0,#+71
+   \   0000001C   0xF8AD 0x0000      STRH     R0,[SP, #+0]
+     59              tim_init.TIM_ClockDivision = 0;
+   \   00000020   0x2000             MOVS     R0,#+0
+   \   00000022   0xF8AD 0x0006      STRH     R0,[SP, #+6]
+     60              tim_init.TIM_CounterMode   = TIM_CounterMode_Up;
+   \   00000026   0xF8AD 0x0002      STRH     R0,[SP, #+2]
+     61          
+     62              TIM_TimeBaseInit(TIM3, &tim_init);
+   \   0000002A   0x4669             MOV      R1,SP
+   \   0000002C   0x....             LDR.N    R4,??DataTable4  ;; 0x40000400
+   \   0000002E   0x4620             MOV      R0,R4
+   \   00000030   0x.... 0x....      BL       TIM_TimeBaseInit
+     63              TIM_Cmd(TIM3, DISABLE);
+   \   00000034   0x2100             MOVS     R1,#+0
+   \   00000036   0x4620             MOV      R0,R4
+   \   00000038   0x.... 0x....      BL       TIM_Cmd
+     64             
+     65          }
+   \   0000003C   0xB004             ADD      SP,SP,#+16
+   \   0000003E   0xBD10             POP      {R4,PC}          ;; return
+     66          
+     67          /******************************************************************************
+     68          *                       Free_TmrISRHandler
+     69          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+     70          static void Free_TmrISRHandler (void)
+     71          {
+   \                     Free_TmrISRHandler: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+     72            CPU_SR          cpu_sr;
+     73          
+     74            CPU_CRITICAL_ENTER();                                       /* Tell uC/OS-II that we are starting an ISR            */
+   \   00000002   0x.... 0x....      BL       CPU_SR_Save
+     75            OSIntNesting++;
+   \   00000006   0x....             LDR.N    R1,??DataTable4_1
+   \   00000008   0x....             LDR.N    R4,??DataTable4_2  ;; 0x40012c00
+   \   0000000A   0x780A             LDRB     R2,[R1, #+0]
+   \   0000000C   0x1C52             ADDS     R2,R2,#+1
+   \   0000000E   0x700A             STRB     R2,[R1, #+0]
+     76            CPU_CRITICAL_EXIT();
+   \   00000010   0x.... 0x....      BL       CPU_SR_Restore
+     77            if(TIM_GetITStatus(TIM1,TIM_FLAG_Update) != RESET)
+   \   00000014   0x2101             MOVS     R1,#+1
+   \   00000016   0x4620             MOV      R0,R4
+   \   00000018   0x.... 0x....      BL       TIM_GetITStatus
+   \   0000001C   0xB128             CBZ.N    R0,??Free_TmrISRHandler_0
+     78            {
+     79              FS20_TimeISRHandler();
+   \   0000001E   0x.... 0x....      BL       FS20_TimeISRHandler
+     80              TIM_ClearITPendingBit(TIM1, TIM_FLAG_Update);
+   \   00000022   0x2101             MOVS     R1,#+1
+   \   00000024   0x4620             MOV      R0,R4
+   \   00000026   0x.... 0x....      BL       TIM_ClearITPendingBit
+     81                 
+     82            }
+     83            else{}
+     84             
+     85            OSIntExit();                                                /* Tell uC/OS-II that we are leaving the ISR            */
+   \                     ??Free_TmrISRHandler_0: (+1)
+   \   0000002A   0xE8BD 0x4010      POP      {R4,LR}
+   \   0000002E   0x.... 0x....      B.W      OSIntExit
+     86          }
+     87          
+     88          /*
+     89          *********************************************************************************************************
+     90          *                                              Free_TmrInit()
+     91          *
+     92          * Description : Select & initialize a timer for use with RF.
+     93          *
+     94          * Argument(s) : none.
+     95          *
+     96          * Return(s)   : none.
+     97          *********************************************************************************************************
+     98          */
+
+   \                                 In section .text, align 2, keep-with-next
+     99          void  Free_TmrInit (void)
+    100          {
+   \                     Free_TmrInit: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0xB084             SUB      SP,SP,#+16
+    101              TIM_TimeBaseInitTypeDef  tim_init;
+    102          
+    103              RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE );
+   \   00000004   0x2101             MOVS     R1,#+1
+   \   00000006   0xF44F 0x6000      MOV      R0,#+2048
+   \   0000000A   0x.... 0x....      BL       RCC_APB2PeriphClockCmd
+    104          
+    105          
+    106              tim_init.TIM_Period        = 5000;  
+   \   0000000E   0xF241 0x3088      MOVW     R0,#+5000
+   \   00000012   0xF8AD 0x0004      STRH     R0,[SP, #+4]
+    107              tim_init.TIM_Prescaler     = 72;
+   \   00000016   0x2048             MOVS     R0,#+72
+   \   00000018   0xF8AD 0x0000      STRH     R0,[SP, #+0]
+    108              tim_init.TIM_ClockDivision = TIM_CKD_DIV1;
+   \   0000001C   0x2000             MOVS     R0,#+0
+   \   0000001E   0xF8AD 0x0006      STRH     R0,[SP, #+6]
+    109              tim_init.TIM_CounterMode   = TIM_CounterMode_Up;
+   \   00000022   0xF8AD 0x0002      STRH     R0,[SP, #+2]
+    110          
+    111              TIM_TimeBaseInit(TIM1, &tim_init);
+   \   00000026   0x4669             MOV      R1,SP
+   \   00000028   0x....             LDR.N    R4,??DataTable4_2  ;; 0x40012c00
+   \   0000002A   0x4620             MOV      R0,R4
+   \   0000002C   0x.... 0x....      BL       TIM_TimeBaseInit
+    112              
+    113              TIM_ClearFlag(TIM1, TIM_FLAG_Update);        
+   \   00000030   0x2101             MOVS     R1,#+1
+   \   00000032   0x4620             MOV      R0,R4
+   \   00000034   0x.... 0x....      BL       TIM_ClearFlag
+    114              TIM_ClearITPendingBit(TIM1, TIM_FLAG_Update); 
+   \   00000038   0x2101             MOVS     R1,#+1
+   \   0000003A   0x4620             MOV      R0,R4
+   \   0000003C   0x.... 0x....      BL       TIM_ClearITPendingBit
+    115              TIM_ARRPreloadConfig(TIM1, ENABLE);        
+   \   00000040   0x2101             MOVS     R1,#+1
+   \   00000042   0x4620             MOV      R0,R4
+   \   00000044   0x.... 0x....      BL       TIM_ARRPreloadConfig
+    116              TIM_ITConfig(TIM1, TIM_IT_Update, ENABLE);    
+   \   00000048   0x2201             MOVS     R2,#+1
+   \   0000004A   0x2101             MOVS     R1,#+1
+   \   0000004C   0x4620             MOV      R0,R4
+   \   0000004E   0x.... 0x....      BL       TIM_ITConfig
+    117              TIM_Cmd(TIM1, ENABLE);
+   \   00000052   0x2101             MOVS     R1,#+1
+   \   00000054   0x4620             MOV      R0,R4
+   \   00000056   0x.... 0x....      BL       TIM_Cmd
+    118          
+    119              BSP_IntVectSet(BSP_INT_ID_TIM1_UP, Free_TmrISRHandler);
+   \   0000005A   0x....             LDR.N    R1,??DataTable4_3
+   \   0000005C   0x2019             MOVS     R0,#+25
+   \   0000005E   0x.... 0x....      BL       BSP_IntVectSet
+    120              BSP_IntPrioSet(BSP_INT_ID_TIM1_UP,3);  
+   \   00000062   0x2103             MOVS     R1,#+3
+   \   00000064   0x2019             MOVS     R0,#+25
+   \   00000066   0x.... 0x....      BL       BSP_IntPrioSet
+    121              BSP_IntEn(BSP_INT_ID_TIM1_UP);
+   \   0000006A   0x2019             MOVS     R0,#+25
+   \   0000006C   0x.... 0x....      BL       BSP_IntEn
+    122          }
+   \   00000070   0xB004             ADD      SP,SP,#+16
+   \   00000072   0xBD10             POP      {R4,PC}          ;; return
+    123          
+    124          /*
+    125          *********************************************************************************************************
+    126          *                                         Free_TmrRd()
+    127          *
+    128          * Description : Read the current counts of a 32-bit free running timer.
+    129          *
+    130          * Argument(s) : none.
+    131          *
+    132          * Return(s)   : The 32 bit counts of the timer.
+    133          *********************************************************************************************************
+    134          */
+
+   \                                 In section .text, align 2, keep-with-next
+    135          CPU_INT32U  Free_TmrRd (void)
+    136          {
+    137              return ((CPU_INT32U)TIM_GetCounter(TIM1));
+   \                     Free_TmrRd: (+1)
+   \   00000000   0x....             LDR.N    R0,??DataTable4_2  ;; 0x40012c00
+   \   00000002   0x.... 0x....      B.W      TIM_GetCounter
+    138          }
+    139          
+    140          /*
+    141          *********************************************************************************************************
+    142          *                                         Free_TmrClr()
+    143          *
+    144          * Description : Clear the current counts of a 32-bit free running timer.
+    145          *
+    146          * Argument(s) : none.
+    147          *
+    148          * Return(s)   : none.
+    149          *********************************************************************************************************
+    150          */
+
+   \                                 In section .text, align 2, keep-with-next
+    151          void Free_TmrClr (void)
+    152          {
+    153            TIM_SetCounter(TIM1, 0);
+   \                     Free_TmrClr: (+1)
+   \   00000000   0x2100             MOVS     R1,#+0
+   \   00000002   0x....             LDR.N    R0,??DataTable4_2  ;; 0x40012c00
+   \   00000004   0x.... 0x....      B.W      TIM_SetCounter
+    154          }
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4:
+   \   00000000   0x40000400         DC32     0x40000400
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_1:
+   \   00000000   0x........         DC32     OSIntNesting
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_2:
+   \   00000000   0x40012C00         DC32     0x40012c00
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_3:
+   \   00000000   0x........         DC32     Free_TmrISRHandler
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   Free_TmrClr
+         0   -> TIM_SetCounter
+       8   Free_TmrISRHandler
+         8   -> CPU_SR_Restore
+         8   -> CPU_SR_Save
+         8   -> FS20_TimeISRHandler
+         0   -> OSIntExit
+         8   -> TIM_ClearITPendingBit
+         8   -> TIM_GetITStatus
+      24   Free_TmrInit
+        24   -> BSP_IntEn
+        24   -> BSP_IntPrioSet
+        24   -> BSP_IntVectSet
+        24   -> RCC_APB2PeriphClockCmd
+        24   -> TIM_ARRPreloadConfig
+        24   -> TIM_ClearFlag
+        24   -> TIM_ClearITPendingBit
+        24   -> TIM_Cmd
+        24   -> TIM_ITConfig
+        24   -> TIM_TimeBaseInit
+       0   Free_TmrRd
+         0   -> TIM_GetCounter
+      24   Us_TmrInit10
+        24   -> RCC_APB1PeriphClockCmd
+        24   -> TIM_Cmd
+        24   -> TIM_TimeBaseInit
+        24   -> TIM_TimeBaseStructInit
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable4
+       4  ??DataTable4_1
+       4  ??DataTable4_2
+       4  ??DataTable4_3
+       8  Free_TmrClr
+      50  Free_TmrISRHandler
+     116  Free_TmrInit
+       6  Free_TmrRd
+      64  Us_TmrInit10
+
+ 
+ 260 bytes in section .text
+ 
+ 260 bytes of CODE memory
+
+Errors: none
+Warnings: none

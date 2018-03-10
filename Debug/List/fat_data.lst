@@ -1,0 +1,116 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:14:49
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome -
+#        RF69w\uC-FatFS\fsl\fat\fat_data.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome -
+#        RF69w\uC-FatFS\fsl\fat\fat_data.c" -lCN "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\fat_data.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\fat_data.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\fat_data.c
+      1          /*
+      2          **********************************************************************
+      3          *                          Micrium, Inc.
+      4          *                      949 Crestview Circle
+      5          *                     Weston,  FL 33327-1848
+      6          *
+      7          *                            uC/FS
+      8          *
+      9          *             (c) Copyright 2001 - 2003, Micrium, Inc.
+     10          *                      All rights reserved.
+     11          *
+     12          ***********************************************************************
+     13          
+     14          ----------------------------------------------------------------------
+     15          File        : fat_data.c
+     16          Purpose     : File system's FAT File System Layer data buffers
+     17          ----------------------------------------------------------------------
+     18          Known problems or limitations with current version
+     19          ----------------------------------------------------------------------
+     20          None.
+     21          ---------------------------END-OF-HEADER------------------------------
+     22          */
+     23          
+     24          /*********************************************************************
+     25          *
+     26          *             #include Section
+     27          *
+     28          **********************************************************************
+     29          */
+     30          
+     31          #include "fs_conf.h"
+     32          #include "fs_port.h"
+     33          #include "fs_dev.h"
+     34          #include "fs_api.h"
+     35          #include "fs_fat.h"
+     36          
+     37          /*********************************************************************
+     38          *
+     39          *             Global Variables
+     40          *
+     41          **********************************************************************
+     42          */
+     43          
+
+   \                                 In section .bss, align 4
+     44          FS__FAT_BPB FS__FAT_aBPBUnit[FS_MAXDEV][FS_FAT_MAXUNIT];	//fs_maxdevΪ1 maxunitΪ2
+   \                     FS__FAT_aBPBUnit:
+   \   00000000                      DS8 32
+     45          
+     46          
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      32  FS__FAT_aBPBUnit
+
+ 
+ 32 bytes in section .bss
+ 
+ 32 bytes of DATA memory
+
+Errors: none
+Warnings: none

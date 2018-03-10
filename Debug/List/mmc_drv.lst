@@ -1,0 +1,855 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:14:59
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome -
+#        RF69w\uC-FatFS\device\Mmc\mmc_drv.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome -
+#        RF69w\uC-FatFS\device\Mmc\mmc_drv.c" -lCN "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\mmc_drv.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\mmc_drv.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\Mmc\mmc_drv.c
+      1          /*
+      2          **********************************************************************
+      3          *                          Micrium, Inc.
+      4          *                      949 Crestview Circle
+      5          *                     Weston,  FL 33327-1848
+      6          *
+      7          *                            uC/FS
+      8          *
+      9          *             (c) Copyright 2001 - 2003, Micrium, Inc.
+     10          *                      All rights reserved.
+     11          *
+     12          ***********************************************************************
+     13          
+     14          ----------------------------------------------------------------------
+     15          File        : mmc_drv.c
+     16          Purpose     : File system generic MMC/SD driver
+     17          ---------------------------END-OF-HEADER------------------------------
+     18          */
+     19          
+     20          /*********************************************************************
+     21          *
+     22          *             #include Section
+     23          *
+     24          **********************************************************************
+     25          */
+     26          #include <stdio.h>
+     27          #include "fs_api.h"
+     28          #include "fs_clib.h"
+     29          #include "fs_dev.h"
+     30          
+     31          #if FS_USE_MMC_DRIVER
+     32          
+     33          #include "bsp.h"
+     34          
+     35          #include "sddriver.h"
+     36          #include "fs_lbl.h"
+     37          
+     38          
+     39          #define FS__DEV_MBRFLAG_CLI     0xFA
+     40          #define FS__DEV_MBRFLAG_JUMP1   0xEB
+     41          #define FS__DEV_MBRFLAG_JUMP2   0xE9
+     42          #define FS__DEV_MBRSECTORFLAG_L 0x55
+     43          #define FS__DEV_MBRSECTORFLAG_H 0xAA
+     44          
+     45          #define FS__DEV_PART_0_TABLE    0x01BE
+     46          
+     47          /*********************************************************************
+     48          *
+     49          *             Local Variables        
+     50          *
+     51          **********************************************************************
+     52          */
+     53          
+     54          static FS_u32   _FS_mmc_logicalstart[FS_MMC_MAXUNIT]; /* start of partition */
+     55          static char     _FS_mmc_mbrbuffer[0x200];             /* buffer for reading MBR */   
+     56          static char     _FS_mmc_diskchange[FS_MMC_MAXUNIT];   /* signal flag for driver */
+     57          static char     _FS_mmc_busycnt[FS_MMC_MAXUNIT];      /* counter for BSY LED on/off */
+     58          /*********************************************************************
+     59          *
+     60          *             Local functions
+     61          *
+     62          **********************************************************************
+     63          */
+     64          
+     65          
+     66          /*********************************************************************
+     67          *
+     68          *             FS_MMC_HW_X_BusyLedOff
+     69          *
+     70          *  Description:
+     71          *    FS low level function. Switches the busy LED off.
+     72          *
+     73          *  Parameters:
+     74          *    Unit      - Device Index
+     75          *
+     76          *  Return value:
+     77          *    void
+     78          */
+     79          static void FS_MMC_HW_X_BusyLedOff (FS_u8 Unit) {
+     80          	//GPIO_ResetBits(GPIOC, DEF_BIT_07);
+     81          }
+     82          
+     83          /*********************************************************************
+     84          *
+     85          *             FS_MMC_HW_X_BusyLedOn
+     86          *
+     87          *  Description:
+     88          *    FS low level function. Switches the busy LED off.
+     89          *
+     90          *  Parameters:
+     91          *    Unit      - Device Index
+     92          *
+     93          *  Return value:
+     94          *    void
+     95          */
+     96          
+     97          static void FS_MMC_HW_X_BusyLedOn(FS_u8 Unit) {
+     98          	//GPIO_SetBits(GPIOC, DEF_BIT_07);
+     99          }
+    100          
+    101          
+    102          /*********************************************************************
+    103          *
+    104          *             FS_MMC_HW_X_IsPresent
+    105          *
+    106          *  Description:
+    107          *    Returns the state of the media. If you do not know the state, return
+    108          *    FS_MEDIA_STATEUNKNOWN and the higher layer will try to figure out if
+    109          *    a media is present.
+    110          *
+    111          *  Parameters:
+    112          *    Unit                 - Device Index
+    113          *
+    114          *  Return value:
+    115          *    FS_MEDIA_STATEUNKNOWN       - the state of the media is unkown
+    116          *    FS_MEDIA_ISNOTPRESENT       - no card is present
+    117          *    FS_MEDIA_ISPRESENT          - a card is present
+    118          */
+    119          
+    120          static char FS_MMC_HW_X_IsPresent(FS_u8 Unit) {
+    121            //return FS_MEDIA_STATEUNKNOWN;
+    122            return FS_MEDIA_ISPRESENT;
+    123          }
+    124          
+    125          /*********************************************************************
+    126          *
+    127          *             FS_GetMediaStartSec
+    128          *
+    129          *  Description:
+    130          *    FS api function. Get logical start sector from master boot record
+    131          *    or partition table.
+    132          *
+    133          *  Parameters:
+    134          *    DevIndex        - DevIndex number.
+    135          *    pBuffer         - A pointer to a buffer containing the first
+    136          *                      sector of the media. This should contain the
+    137          *                      master boot record (MBR) or Bios Parameter Block
+    138          *                      (BPB) if the device has no partition table.
+    139          * 
+    140          *  Return value:
+    141          *    < 0xFFFF        - Number of the first sector of the medium.
+    142          *    ==0xFFFF        - No valid MBR/BPB found.
+    143          */
+    144          
+
+   \                                 In section .text, align 2, keep-with-next
+    145          static FS_u32 FS_GetMediaStartSec(const FS_u8 *pBuffer) {
+    146            FS_u8  c;
+    147            FS_u32 StartSec;
+    148           
+    149            c = pBuffer[0x1FE]; /* check first part of the signature */
+    150            if (c != FS__DEV_MBRSECTORFLAG_L) {
+   \                     FS_GetMediaStartSec: (+1)
+   \   00000000   0xF500 0x71FF      ADD      R1,R0,#+510
+   \   00000004   0x780A             LDRB     R2,[R1, #+0]
+   \   00000006   0x2A55             CMP      R2,#+85
+   \   00000008   0xBF04             ITT      EQ 
+   \   0000000A   0x7849             LDRBEQ   R1,[R1, #+1]
+   \   0000000C   0x29AA             CMPEQ    R1,#+170
+    151               return 0xFFFFFFFF;
+    152            }
+    153          
+    154            c = pBuffer[0x1FF]; /* check second part of the signature */
+    155            if (c != FS__DEV_MBRSECTORFLAG_H) {
+   \   0000000E   0xD002             BEQ.N    ??FS_GetMediaStartSec_0
+    156              return 0xFFFFFFFF;
+   \   00000010   0xF04F 0x30FF      MOV      R0,#-1
+   \   00000014   0x4770             BX       LR
+    157            }
+    158          
+    159            c = pBuffer[0x000]; /* check if boot or partition record */
+   \                     ??FS_GetMediaStartSec_0: (+1)
+   \   00000016   0x7801             LDRB     R1,[R0, #+0]
+    160            if (c == FS__DEV_MBRFLAG_JUMP1) {
+   \   00000018   0x29EB             CMP      R1,#+235
+   \   0000001A   0xBF18             IT       NE 
+   \   0000001C   0x29E9             CMPNE    R1,#+233
+    161              return 0; /* if first byte is a jump command, there is no partition table */
+    162            } 
+    163          
+    164            if (c == FS__DEV_MBRFLAG_JUMP2) {
+   \   0000001E   0xD101             BNE.N    ??FS_GetMediaStartSec_1
+    165              return 0; /* if first byte is a jump command, there is no partition table */
+   \   00000020   0x2000             MOVS     R0,#+0
+   \   00000022   0x4770             BX       LR
+    166            } /* this calculation makes sure big/little endian system get the right value from the table */
+    167            /* read first entry of the partition table */
+    168            StartSec  = (FS_u32)pBuffer[FS__DEV_PART_0_TABLE + 11] & 0xFFUL;
+    169            StartSec <<= 8;
+    170            StartSec += (FS_u32)pBuffer[FS__DEV_PART_0_TABLE + 10] & 0xFFUL;
+    171            StartSec <<= 8;
+    172            StartSec += (FS_u32)pBuffer[FS__DEV_PART_0_TABLE + 9] & 0xFFUL;
+    173            StartSec <<= 8;
+    174            StartSec += (FS_u32)pBuffer[FS__DEV_PART_0_TABLE + 8] & 0xFFUL; 
+    175          
+    176           return StartSec;
+   \                     ??FS_GetMediaStartSec_1: (+1)
+   \   00000024   0xF500 0x70E3      ADD      R0,R0,#+454
+   \   00000028   0x78C1             LDRB     R1,[R0, #+3]
+   \   0000002A   0x7882             LDRB     R2,[R0, #+2]
+   \   0000002C   0xEB02 0x2101      ADD      R1,R2,R1, LSL #+8
+   \   00000030   0x7842             LDRB     R2,[R0, #+1]
+   \   00000032   0x7800             LDRB     R0,[R0, #+0]
+   \   00000034   0xEB02 0x2101      ADD      R1,R2,R1, LSL #+8
+   \   00000038   0xEB00 0x2001      ADD      R0,R0,R1, LSL #+8
+   \   0000003C   0x4770             BX       LR               ;; return
+    177          }
+    178          
+    179          /*********************************************************************
+    180          *
+    181          *             _FS_MMC_DevStatus
+    182          *
+    183            Description:
+    184            FS driver function. Get status of the media.
+    185          
+    186            Parameters:
+    187            Unit        - Unit number.
+    188           
+    189            Return value:
+    190            ==1 (FS_LBL_MEDIACHANGED) - The media of the device has changed.
+    191            ==0                       - Device okay and ready for operation.
+    192            <0                        - An error has occured.
+    193          */
+    194          
+
+   \                                 In section .text, align 2, keep-with-next
+    195          static int _FS_MMC_DevStatus(FS_u32 Unit) {
+   \                     _FS_MMC_DevStatus: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+    196          	static int init = 0;
+    197          	int x;
+    198          	char a;
+    199          	FS_u32 ul;
+    200          	FS_MMC_HW_X_BusyLedOn(1);
+    201          	if (!init) {
+   \   00000002   0x....             LDR.N    R4,??DataTable8
+   \   00000004   0x68A1             LDR      R1,[R4, #+8]
+   \   00000006   0xB911             CBNZ.N   R1,??_FS_MMC_DevStatus_0
+    202          		/* 
+    203          		The function is called the first time. For each unit,
+    204          		the flag for 'diskchange' is set. That makes sure, that
+    205          		FS_LBL_MEDIACHANGED is returned, if there is already a
+    206          		media in the reader.
+    207          		*/
+    208          		for (init = 0; init < FS_MMC_MAXUNIT; init++) {
+    209          			_FS_mmc_diskchange[init] = 1;
+   \   00000008   0x2101             MOVS     R1,#+1
+   \   0000000A   0x7021             STRB     R1,[R4, #+0]
+    210          		}
+    211          		init = 1;
+   \   0000000C   0x60A1             STR      R1,[R4, #+8]
+    212          	}
+    213          	if (Unit >= FS_MMC_MAXUNIT) {
+   \                     ??_FS_MMC_DevStatus_0: (+1)
+   \   0000000E   0xBB10             CBNZ.N   R0,??_FS_MMC_DevStatus_1
+    214          		return -1;  /* No valid unit number */
+    215          	}
+    216          	a = FS_MMC_HW_X_IsPresent(Unit);/* Check if a card is present */
+    217          	if (!a) {
+    218          	  return -1;  /* No card in reader */
+    219          	}
+    220          	/* When you get here, then there is a card in the reader */
+    221          	a = _FS_mmc_diskchange[Unit];  /* Check if the media has changed */
+    222          	if (a) {
+   \   00000010   0x7820             LDRB     R0,[R4, #+0]
+   \   00000012   0xB318             CBZ.N    R0,??_FS_MMC_DevStatus_2
+    223          		/* 
+    224          		A diskchange took place. The following code reads the MBR of the
+    225          		card to get its partition information.
+    226          		*/
+    227          		_FS_mmc_diskchange[Unit] = 0;  /* Reset 'diskchange' flag */
+   \   00000014   0x2000             MOVS     R0,#+0
+   \   00000016   0x7020             STRB     R0,[R4, #+0]
+    228          		x = SD_Initialize();
+   \   00000018   0x.... 0x....      BL       SD_Initialize
+   \   0000001C   0x4601             MOV      R1,R0
+    229          		if (x > 0) {
+   \   0000001E   0x2901             CMP      R1,#+1
+   \   00000020   0xDB04             BLT.N    ??_FS_MMC_DevStatus_3
+    230          			printf("SD_Initialize error! CODE: 0x%02X\r\n", x);
+   \   00000022   0x.... 0x....      ADR.W    R0,?_1
+   \   00000026   0x.... 0x....      BL       printf
+    231          			return -1;
+   \   0000002A   0xE014             B.N      ??_FS_MMC_DevStatus_1
+    232          		}
+    233          		x = SD_ReadBlock(0, 512, (FS_u8*)&_FS_mmc_mbrbuffer[0]);
+   \                     ??_FS_MMC_DevStatus_3: (+1)
+   \   0000002C   0x....             LDR.N    R5,??DataTable8_1
+   \   0000002E   0x462A             MOV      R2,R5
+   \   00000030   0xF44F 0x7100      MOV      R1,#+512
+   \   00000034   0x2000             MOVS     R0,#+0
+   \   00000036   0x.... 0x....      BL       SD_ReadBlock
+   \   0000003A   0x4601             MOV      R1,R0
+    234          		if (x > 0) {
+   \   0000003C   0x2901             CMP      R1,#+1
+   \   0000003E   0xDB04             BLT.N    ??_FS_MMC_DevStatus_4
+    235          			printf("SD_ReadBlock error! CODE: 0x%02X\r\n", x);
+   \   00000040   0x.... 0x....      ADR.W    R0,?_2
+   \   00000044   0x.... 0x....      BL       printf
+    236          			return -1;
+   \   00000048   0xE005             B.N      ??_FS_MMC_DevStatus_1
+    237          		}
+    238          		/* Calculate start sector of the first partition */
+    239          	    ul = FS_GetMediaStartSec((FS_u8*)&_FS_mmc_mbrbuffer[0]);
+   \                     ??_FS_MMC_DevStatus_4: (+1)
+   \   0000004A   0x4628             MOV      R0,R5
+   \   0000004C   0x.... 0x....      BL       FS_GetMediaStartSec
+    240          	    if (ul == 0xFFFFFFFF) { /* check if MBR was invalid */
+   \   00000050   0xF110 0x0F01      CMN      R0,#+1
+   \   00000054   0xD100             BNE.N    ??_FS_MMC_DevStatus_5
+    241          	      return -1;
+   \                     ??_FS_MMC_DevStatus_1: (+1)
+   \   00000056   0x....             B.N      ?Subroutine0
+    242          	    }
+    243          		_FS_mmc_logicalstart[Unit] = ul;
+   \                     ??_FS_MMC_DevStatus_5: (+1)
+   \   00000058   0x6060             STR      R0,[R4, #+4]
+    244          		return FS_LBL_MEDIACHANGED;
+   \   0000005A   0x2001             MOVS     R0,#+1
+    245          	}
+    246          	FS_MMC_HW_X_BusyLedOff(1);
+    247          	return 0;
+   \                     ??_FS_MMC_DevStatus_2: (+1)
+   \   0000005C   0xBD32             POP      {R1,R4,R5,PC}    ;; return
+    248          }
+
+   \                                 In section .text, align 2, keep-with-next
+   \                     ?Subroutine0: (+1)
+   \   00000000   0xF04F 0x30FF      MOV      R0,#-1
+   \   00000004   0xBD32             POP      {R1,R4,R5,PC}
+
+   \                                 In section .bss, align 4
+   \                     _FS_mmc_diskchange:
+   \   00000000                      DS8 1
+   \   00000001                      DS8 3
+   \   00000004                      DS8 4
+   \   00000008                      DS8 4
+
+   \                                 In section .bss, align 4
+   \                     _FS_mmc_mbrbuffer:
+   \   00000000                      DS8 512
+
+   \                                 In section .bss, align 1
+   \                     _FS_mmc_busycnt:
+   \   00000000                      DS8 1
+    249          /*********************************************************************
+    250          *
+    251          *             _FS_MMC_DevRead
+    252          *
+    253            Description:
+    254            FS driver function. Read a sector from the media.
+    255          
+    256            Parameters:
+    257            Unit        - Unit number.
+    258            Sector      - Sector to be read from the device.
+    259            pBuffer     - Pointer to buffer for storing the data.
+    260           
+    261            Return value:
+    262            ==0         - Sector has been read and copied to pBuffer.
+    263            <0          - An error has occured.
+    264          */
+    265          
+
+   \                                 In section .text, align 2, keep-with-next
+    266          static int _FS_MMC_DevRead(FS_u32 Unit, FS_u32 Sector, void *pBuffer){
+   \                     _FS_MMC_DevRead: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+   \   00000002   0x460B             MOV      R3,R1
+    267          	int x;
+    268          	if (Unit >= FS_MMC_MAXUNIT) {
+   \   00000004   0xB968             CBNZ.N   R0,??_FS_MMC_DevRead_0
+    269          		return -1;  /* No valid unit number */
+    270          	}
+    271          	FS_MMC_HW_X_BusyLedOn(1);
+    272          	x = SD_ReadBlock(Sector+_FS_mmc_logicalstart[Unit], 512, (FS_u8*)pBuffer);
+   \   00000006   0x....             LDR.N    R0,??DataTable8
+   \   00000008   0x6840             LDR      R0,[R0, #+4]
+   \   0000000A   0xF44F 0x7100      MOV      R1,#+512
+   \   0000000E   0x18C0             ADDS     R0,R0,R3
+   \   00000010   0x.... 0x....      BL       SD_ReadBlock
+    273          	if(x > 0) {
+   \   00000014   0x2801             CMP      R0,#+1
+   \   00000016   0xDB05             BLT.N    ??_FS_MMC_DevRead_1
+    274          		printf("SD_ReadBlock error! CODE: 0x%02X\r\n", x);
+   \   00000018   0x4601             MOV      R1,R0
+   \   0000001A   0x.... 0x....      ADR.W    R0,?_2
+   \   0000001E   0x.... 0x....      BL       printf
+    275          		x = -1;
+    276          	}    
+   \                     ??_FS_MMC_DevRead_0: (+1)
+   \   00000022   0x....             B.N      ?Subroutine1
+    277          	else {
+    278          		x = 0;
+   \                     ??_FS_MMC_DevRead_1: (+1)
+   \   00000024   0x2000             MOVS     R0,#+0
+    279          	}
+    280          	FS_MMC_HW_X_BusyLedOff(1);
+    281          	return x;
+   \   00000026   0xBD02             POP      {R1,PC}          ;; return
+    282          }
+
+   \                                 In section .text, align 2, keep-with-next
+   \                     ?Subroutine1: (+1)
+   \   00000000   0xF04F 0x30FF      MOV      R0,#-1
+   \   00000004   0xBD02             POP      {R1,PC}
+    283          /*********************************************************************
+    284          *
+    285          *             _FS_MMC_DevWrite
+    286          *
+    287            Description:
+    288            FS driver function. Write sector to the media.
+    289          
+    290            Parameters:
+    291            Unit        - Unit number.
+    292            Sector      - Sector to be written to the device.
+    293            pBuffer     - Pointer to data to be stored.
+    294           
+    295            Return value:
+    296            ==0         - Sector has been written to the device.
+    297            <0          - An error has occured.
+    298          */
+    299          
+
+   \                                 In section .text, align 2, keep-with-next
+    300          static int _FS_MMC_DevWrite(FS_u32 Unit, FS_u32 Sector, void *pBuffer){
+   \                     _FS_MMC_DevWrite: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+   \   00000002   0x460B             MOV      R3,R1
+    301          	
+    302          	int x;
+    303          	
+    304          	if (Unit >= FS_MMC_MAXUNIT) {
+   \   00000004   0xB968             CBNZ.N   R0,??_FS_MMC_DevWrite_0
+    305          		return -1;  /* No valid unit number */
+    306          	}
+    307          	FS_MMC_HW_X_BusyLedOn(1);
+    308          	x = SD_WriteBlock(Sector+_FS_mmc_logicalstart[Unit], 512, (FS_u8*)pBuffer); 
+   \   00000006   0x....             LDR.N    R0,??DataTable8
+   \   00000008   0x6840             LDR      R0,[R0, #+4]
+   \   0000000A   0xF44F 0x7100      MOV      R1,#+512
+   \   0000000E   0x18C0             ADDS     R0,R0,R3
+   \   00000010   0x.... 0x....      BL       SD_WriteBlock
+    309          	if (x > 0) {
+   \   00000014   0x2801             CMP      R0,#+1
+   \   00000016   0xDB05             BLT.N    ??_FS_MMC_DevWrite_1
+    310          		printf("SD_WriteBlock error! CODE: 0x%02X\r\n", x);
+   \   00000018   0x4601             MOV      R1,R0
+   \   0000001A   0x.... 0x....      ADR.W    R0,?_3
+   \   0000001E   0x.... 0x....      BL       printf
+    311          		x = -1;
+    312          	}
+   \                     ??_FS_MMC_DevWrite_0: (+1)
+   \   00000022   0x....             B.N      ?Subroutine1
+    313          	else {
+    314          		x = 0;
+   \                     ??_FS_MMC_DevWrite_1: (+1)
+   \   00000024   0x2000             MOVS     R0,#+0
+    315          	}
+    316          	FS_MMC_HW_X_BusyLedOff(1);
+    317          	return x;
+   \   00000026   0xBD02             POP      {R1,PC}          ;; return
+    318          }
+    319          /*********************************************************************
+    320          *
+    321          *             _FS_MMC_DevIoCtl
+    322          *
+    323            Description:
+    324            FS driver function. Execute device command.
+    325          
+    326            Parameters:
+    327            Unit        - Unit number.
+    328            Cmd         - Command to be executed.
+    329            Aux         - Parameter depending on command.
+    330            pBuffer     - Pointer to a buffer used for the command.
+    331           
+    332            Return value:
+    333            Command specific. In general a negative value means an error.
+    334          */
+    335          
+
+   \                                 In section .text, align 2, keep-with-next
+    336          static int _FS_MMC_DevIoCtl(FS_u32 Unit, FS_i32 Cmd, FS_i32 Aux, void *pBuffer){
+   \                     _FS_MMC_DevIoCtl: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+   \   00000002   0x461C             MOV      R4,R3
+    337             FS_u32 *info, ul;
+    338             int x;
+    339          
+    340             FS_MMC_HW_X_BusyLedOn(1);
+    341             Aux = Aux;  /* Get rid of compiler warning */
+    342             if (Unit >= FS_MMC_MAXUNIT) {
+   \   00000004   0xBB58             CBNZ.N   R0,??_FS_MMC_DevIoCtl_0
+    343                return -1;  /* No valid unit number */
+    344             }
+    345             switch(Cmd){
+   \   00000006   0xF640 0x30B9      MOVW     R0,#+3001
+   \   0000000A   0x1A09             SUBS     R1,R1,R0
+   \   0000000C   0xD006             BEQ.N    ??_FS_MMC_DevIoCtl_1
+   \   0000000E   0x1E49             SUBS     R1,R1,#+1
+   \   00000010   0xD008             BEQ.N    ??_FS_MMC_DevIoCtl_2
+   \   00000012   0xF240 0x30F1      MOVW     R0,#+1009
+   \   00000016   0x1A09             SUBS     R1,R1,R0
+   \   00000018   0xD009             BEQ.N    ??_FS_MMC_DevIoCtl_3
+   \   0000001A   0xE044             B.N      ??_FS_MMC_DevIoCtl_4
+    346               case FS_CMD_INC_BUSYCNT:
+    347                 _FS_mmc_busycnt[Unit]++;
+   \                     ??_FS_MMC_DevIoCtl_1: (+1)
+   \   0000001C   0x....             LDR.N    R0,??DataTable8_2
+   \   0000001E   0x7801             LDRB     R1,[R0, #+0]
+   \   00000020   0x1C49             ADDS     R1,R1,#+1
+   \   00000022   0xE002             B.N      ??_FS_MMC_DevIoCtl_5
+    348                 if(_FS_mmc_busycnt[Unit] > 0){
+    349                    FS_MMC_HW_X_BusyLedOn(Unit);
+    350                 }
+    351                 break;
+    352               case FS_CMD_DEC_BUSYCNT:
+    353                 _FS_mmc_busycnt[Unit]--;
+   \                     ??_FS_MMC_DevIoCtl_2: (+1)
+   \   00000024   0x....             LDR.N    R0,??DataTable8_2
+   \   00000026   0x7801             LDRB     R1,[R0, #+0]
+   \   00000028   0x1E49             SUBS     R1,R1,#+1
+   \                     ??_FS_MMC_DevIoCtl_5: (+1)
+   \   0000002A   0x7001             STRB     R1,[R0, #+0]
+    354                 if(_FS_mmc_busycnt[Unit] <= 0){
+   \   0000002C   0xE03B             B.N      ??_FS_MMC_DevIoCtl_4
+    355                    _FS_mmc_busycnt[Unit] = 0;
+    356                    FS_MMC_HW_X_BusyLedOff(Unit);
+    357                 }
+    358                 break;
+    359               case FS_CMD_CHK_DSKCHANGE:
+    360                 //a = FS_MMC_HW_X_DetectStatus(Unit);
+    361                 //if(a){
+    362                 //   _FS_mmc_diskchange[Unit] = 1;
+    363                 //}    
+    364                 break;
+    365               case FS_CMD_GET_DEVINFO:
+    366                 if (!pBuffer) {
+   \                     ??_FS_MMC_DevIoCtl_3: (+1)
+   \   0000002E   0xB1B4             CBZ.N    R4,??_FS_MMC_DevIoCtl_0
+    367                   return -1;
+    368                 }
+    369                 info = pBuffer;
+    370          	   x = SD_Initialize();
+    371                 if (x > 0) {
+   \   00000030   0x.... 0x....      BL       SD_Initialize
+   \   00000034   0xB998             CBNZ.N   R0,??_FS_MMC_DevIoCtl_0
+    372                    return -1;
+    373                 }
+    374          	   x = SD_ReadBlock(0, 512, (FS_u8*)&_FS_mmc_mbrbuffer[0]);
+    375                 if (x > 0) {
+   \   00000036   0x....             LDR.N    R5,??DataTable8_1
+   \   00000038   0x462A             MOV      R2,R5
+   \   0000003A   0xF44F 0x7100      MOV      R1,#+512
+   \   0000003E   0x.... 0x....      BL       SD_ReadBlock
+   \   00000042   0xB960             CBNZ.N   R0,??_FS_MMC_DevIoCtl_0
+    376                    return -1;
+    377                 }
+    378                ul = FS_GetMediaStartSec((FS_u8*)&_FS_mmc_mbrbuffer[0]);
+   \   00000044   0x4628             MOV      R0,R5
+   \   00000046   0x.... 0x....      BL       FS_GetMediaStartSec
+    379                if (ul == 0xFFFFFFFF) { /* check if MBR was invalid */
+   \   0000004A   0xF110 0x0F01      CMN      R0,#+1
+   \   0000004E   0xD006             BEQ.N    ??_FS_MMC_DevIoCtl_0
+    380                  return -1;
+    381                }
+    382                if (ul != 0) {
+   \   00000050   0xB130             CBZ.N    R0,??_FS_MMC_DevIoCtl_6
+    383                  /* READ (1) 512 BYTE SECTOR */
+    384          		x = SD_ReadBlock(ul, 512, (FS_u8*)&_FS_mmc_mbrbuffer[0]);
+    385          		if (x > 0) {
+   \   00000052   0x462A             MOV      R2,R5
+   \   00000054   0xF44F 0x7100      MOV      R1,#+512
+   \   00000058   0x.... 0x....      BL       SD_ReadBlock
+   \   0000005C   0xB100             CBZ.N    R0,??_FS_MMC_DevIoCtl_6
+    386          		  return -1;
+   \                     ??_FS_MMC_DevIoCtl_0: (+1)
+   \   0000005E   0x....             B.N      ?Subroutine0
+    387          		}
+    388                }
+    389                 /* hidden */
+    390                 *info = _FS_mmc_mbrbuffer[0x1c6];
+   \                     ??_FS_MMC_DevIoCtl_6: (+1)
+   \   00000060   0xF205 0x10C3      ADDW     R0,R5,#+451
+   \   00000064   0x78C1             LDRB     R1,[R0, #+3]
+   \   00000066   0x6021             STR      R1,[R4, #+0]
+    391                 *info += (0x100UL * _FS_mmc_mbrbuffer[0x1c7]);
+   \   00000068   0x7902             LDRB     R2,[R0, #+4]
+   \   0000006A   0xEB01 0x2102      ADD      R1,R1,R2, LSL #+8
+   \   0000006E   0x6021             STR      R1,[R4, #+0]
+    392                 *info += (0x10000UL * _FS_mmc_mbrbuffer[0x1c8]);
+   \   00000070   0x7942             LDRB     R2,[R0, #+5]
+   \   00000072   0xEB01 0x4102      ADD      R1,R1,R2, LSL #+16
+   \   00000076   0x6021             STR      R1,[R4, #+0]
+    393                 *info += (0x1000000UL * _FS_mmc_mbrbuffer[0x1c9]);
+   \   00000078   0x7982             LDRB     R2,[R0, #+6]
+   \   0000007A   0xEB01 0x6102      ADD      R1,R1,R2, LSL #+24
+   \   0000007E   0xF844 0x1B04      STR      R1,[R4], #+4
+    394                 info++;
+    395                 /* head */
+    396                 *info = _FS_mmc_mbrbuffer[0x1c3]; 
+   \   00000082   0x7801             LDRB     R1,[R0, #+0]
+   \   00000084   0x6021             STR      R1,[R4, #+0]
+    397                 info++;
+    398                 /* sec per track */
+    399                 *info = _FS_mmc_mbrbuffer[0x1c4]; 
+   \   00000086   0x7841             LDRB     R1,[R0, #+1]
+   \   00000088   0x6061             STR      R1,[R4, #+4]
+    400                 info++;
+    401                 /* size */
+    402                 *info = _FS_mmc_mbrbuffer[0x1ca];
+   \   0000008A   0x79C1             LDRB     R1,[R0, #+7]
+   \   0000008C   0x60A1             STR      R1,[R4, #+8]
+    403                 *info += (0x100UL * _FS_mmc_mbrbuffer[0x1cb]);
+   \   0000008E   0x7A02             LDRB     R2,[R0, #+8]
+   \   00000090   0xEB01 0x2102      ADD      R1,R1,R2, LSL #+8
+   \   00000094   0x60A1             STR      R1,[R4, #+8]
+    404                 *info += (0x10000UL * _FS_mmc_mbrbuffer[0x1cc]);
+   \   00000096   0x7A42             LDRB     R2,[R0, #+9]
+   \   00000098   0xEB01 0x4102      ADD      R1,R1,R2, LSL #+16
+   \   0000009C   0x60A1             STR      R1,[R4, #+8]
+    405                 *info += (0x1000000UL * _FS_mmc_mbrbuffer[0x1cd]);
+   \   0000009E   0x7A80             LDRB     R0,[R0, #+10]
+   \   000000A0   0xEB01 0x6000      ADD      R0,R1,R0, LSL #+24
+   \   000000A4   0x60A0             STR      R0,[R4, #+8]
+    406                 break;
+    407               default:
+    408                 break;
+    409             }
+    410             FS_MMC_HW_X_BusyLedOff(1);
+    411             return 0; 
+   \                     ??_FS_MMC_DevIoCtl_4: (+1)
+   \   000000A6   0x2000             MOVS     R0,#+0
+   \   000000A8   0xBD32             POP      {R1,R4,R5,PC}    ;; return
+    412          }
+    413          /*********************************************************************
+    414          *
+    415          *             Global variables
+    416          *
+    417          **********************************************************************
+    418          */
+
+   \                                 In section .rodata, align 4, keep-with-next
+    419          const FS__device_type FS__mmcdevice_driver = {
+   \                     FS__mmcdevice_driver:
+   \   00000000   0x........         DC32 ?_0, _FS_MMC_DevStatus, _FS_MMC_DevRead, _FS_MMC_DevWrite
+   \              0x........   
+   \              0x........   
+   \              0x........   
+   \   00000010   0x........         DC32 _FS_MMC_DevIoCtl
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable8:
+   \   00000000   0x........         DC32     _FS_mmc_diskchange
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable8_1:
+   \   00000000   0x........         DC32     _FS_mmc_mbrbuffer
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable8_2:
+   \   00000000   0x........         DC32     _FS_mmc_busycnt
+
+   \                                 In section .rodata, align 4, keep-with-next
+   \                     ?_0:
+   \   00000000   0x4D 0x4D          DC8 "MMC device"
+   \              0x43 0x20    
+   \              0x64 0x65    
+   \              0x76 0x69    
+   \              0x63 0x65    
+   \              0x00         
+   \   0000000B   0x00               DC8 0
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ?_1:
+   \   00000000   0x53 0x44          DC8 "SD_Initialize error! CODE: 0x%02X\015\012"
+   \              0x5F 0x49    
+   \              0x6E 0x69    
+   \              0x74 0x69    
+   \              0x61 0x6C    
+   \              0x69 0x7A    
+   \              0x65 0x20    
+   \              0x65 0x72    
+   \              0x72 0x6F    
+   \              0x72 0x21    
+   \              0x20 0x43    
+   \              0x4F 0x44    
+   \              0x45 0x3A    
+   \              0x20 0x30    
+   \              0x78 0x25    
+   \              0x30 0x32    
+   \              0x58 0x0D    
+   \              0x0A 0x00    
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ?_2:
+   \   00000000   0x53 0x44          DC8 "SD_ReadBlock error! CODE: 0x%02X\015\012"
+   \              0x5F 0x52    
+   \              0x65 0x61    
+   \              0x64 0x42    
+   \              0x6C 0x6F    
+   \              0x63 0x6B    
+   \              0x20 0x65    
+   \              0x72 0x72    
+   \              0x6F 0x72    
+   \              0x21 0x20    
+   \              0x43 0x4F    
+   \              0x44 0x45    
+   \              0x3A 0x20    
+   \              0x30 0x78    
+   \              0x25 0x30    
+   \              0x32 0x58    
+   \              0x0D 0x0A    
+   \              0x00         
+   \   00000023   0x00               DC8 0
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ?_3:
+   \   00000000   0x53 0x44          DC8 "SD_WriteBlock error! CODE: 0x%02X\015\012"
+   \              0x5F 0x57    
+   \              0x72 0x69    
+   \              0x74 0x65    
+   \              0x42 0x6C    
+   \              0x6F 0x63    
+   \              0x6B 0x20    
+   \              0x65 0x72    
+   \              0x72 0x6F    
+   \              0x72 0x21    
+   \              0x20 0x43    
+   \              0x4F 0x44    
+   \              0x45 0x3A    
+   \              0x20 0x30    
+   \              0x78 0x25    
+   \              0x30 0x32    
+   \              0x58 0x0D    
+   \              0x0A 0x00    
+    420            "MMC device",
+    421            _FS_MMC_DevStatus,
+    422            _FS_MMC_DevRead,
+    423            _FS_MMC_DevWrite,
+    424            _FS_MMC_DevIoCtl
+    425          };
+    426          
+    427          #endif /* FS_USE_MMC_DRIVER */
+    428          
+    429          /*************************** End of file ****************************/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   FS_GetMediaStartSec
+      16   _FS_MMC_DevIoCtl
+        16   -> FS_GetMediaStartSec
+        16   -> SD_Initialize
+        16   -> SD_ReadBlock
+       8   _FS_MMC_DevRead
+         8   -> SD_ReadBlock
+         8   -> printf
+      16   _FS_MMC_DevStatus
+        16   -> FS_GetMediaStartSec
+        16   -> SD_Initialize
+        16   -> SD_ReadBlock
+        16   -> printf
+       8   _FS_MMC_DevWrite
+         8   -> SD_WriteBlock
+         8   -> printf
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable8
+       4  ??DataTable8_1
+       4  ??DataTable8_2
+       6  ?Subroutine0
+       6  ?Subroutine1
+      12  ?_0
+      36  ?_1
+      36  ?_2
+      36  ?_3
+      62  FS_GetMediaStartSec
+      20  FS__mmcdevice_driver
+     170  _FS_MMC_DevIoCtl
+      40  _FS_MMC_DevRead
+      94  _FS_MMC_DevStatus
+      40  _FS_MMC_DevWrite
+       1  _FS_mmc_busycnt
+      12  _FS_mmc_diskchange
+          _FS_mmc_logicalstart
+          init
+     512  _FS_mmc_mbrbuffer
+
+ 
+ 525 bytes in section .bss
+  32 bytes in section .rodata
+ 538 bytes in section .text
+ 
+ 538 bytes of CODE  memory
+  32 bytes of CONST memory
+ 525 bytes of DATA  memory
+
+Errors: none
+Warnings: none

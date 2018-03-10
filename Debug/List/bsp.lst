@@ -1,0 +1,530 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:14:44
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp.c" -lCN "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\bsp.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\bsp.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp.c
+      1          /*
+      2          *********************************************************************************************************
+      3          *
+      4          *                                        BOARD SUPPORT PACKAGE
+      5          *
+      6          *
+      7          * Filename      : bsp.c
+      8          * Version       : V0.1
+      9          * Programmer(s) : Puleo
+     10          *********************************************************************************************************
+     11          */
+     12          
+     13          /*
+     14          *********************************************************************************************************
+     15          *                                             INCLUDE FILES
+     16          *********************************************************************************************************
+     17          */
+     18          
+     19          #define  BSP_MODULE
+     20          #include <bsp.h>
+     21          #include <rtc.h>
+     22          
+     23          /*
+     24          *********************************************************************************************************
+     25          *                                            LOCAL DEFINES
+     26          *********************************************************************************************************
+     27          */
+     28          #define SYS_CLK10           72000000    /* 72 MHz */
+     29          #define SYS_CLK             50000000    /* 50 MHz */
+     30          //#define SYS_CLK10           10000000    /* 10 MHz */
+     31          #define DELAY_TIM_FREQUENCY 1000000     /* = 1MHZ -> timer runs in microseconds */
+     32          
+     33          /*
+     34          *********************************************************************************************************
+     35          *                                      LOCAL FUNCTION PROTOTYPES
+     36          *********************************************************************************************************
+     37          */
+     38          
+     39          /*
+     40          *********************************************************************************************************
+     41          *                                               BSP_Init()
+     42          *
+     43          * Description : Initialize the Board Support Package (BSP).
+     44          *
+     45          * Argument(s) : none.
+     46          *
+     47          * Return(s)   : none.
+     48          *
+     49          * Caller(s)   : Application.
+     50          *
+     51          * Note(s)     : (1) This function SHOULD be called before any other BSP function is called.
+     52          *********************************************************************************************************
+     53          */
+     54          
+
+   \                                 In section .text, align 2, keep-with-next
+     55          void  BSP_Init (void)
+     56          {
+   \                     BSP_Init: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+     57              
+     58              RCC_DeInit();
+   \   00000002   0x.... 0x....      BL       RCC_DeInit
+     59              RCC_HSEConfig(RCC_HSE_ON);
+   \   00000006   0xF44F 0x3080      MOV      R0,#+65536
+   \   0000000A   0x.... 0x....      BL       RCC_HSEConfig
+     60              RCC_WaitForHSEStartUp();
+   \   0000000E   0x.... 0x....      BL       RCC_WaitForHSEStartUp
+     61          
+     62          
+     63              RCC_HCLKConfig(RCC_SYSCLK_Div1);
+   \   00000012   0x2000             MOVS     R0,#+0
+   \   00000014   0x.... 0x....      BL       RCC_HCLKConfig
+     64              RCC_PCLK2Config(RCC_HCLK_Div1);
+   \   00000018   0x2000             MOVS     R0,#+0
+   \   0000001A   0x.... 0x....      BL       RCC_PCLK2Config
+     65              RCC_PCLK1Config(RCC_HCLK_Div2);
+   \   0000001E   0xF44F 0x6080      MOV      R0,#+1024
+   \   00000022   0x.... 0x....      BL       RCC_PCLK1Config
+     66              RCC_ADCCLKConfig(RCC_PCLK2_Div6);
+   \   00000026   0xF44F 0x4000      MOV      R0,#+32768
+   \   0000002A   0x.... 0x....      BL       RCC_ADCCLKConfig
+     67              FLASH_SetLatency(FLASH_Latency_2);
+   \   0000002E   0x2002             MOVS     R0,#+2
+   \   00000030   0x.... 0x....      BL       FLASH_SetLatency
+     68              FLASH_PrefetchBufferCmd(FLASH_PrefetchBuffer_Enable);
+   \   00000034   0x2010             MOVS     R0,#+16
+   \   00000036   0x.... 0x....      BL       FLASH_PrefetchBufferCmd
+     69              RCC_PLLConfig(RCC_PLLSource_HSE_Div1, RCC_PLLMul_9);
+   \   0000003A   0xF44F 0x11E0      MOV      R1,#+1835008
+   \   0000003E   0xF44F 0x3080      MOV      R0,#+65536
+   \   00000042   0x.... 0x....      BL       RCC_PLLConfig
+     70              RCC_PLLCmd(ENABLE);
+   \   00000046   0x2001             MOVS     R0,#+1
+   \   00000048   0x.... 0x....      BL       RCC_PLLCmd
+     71          
+     72              while (RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET) {
+   \                     ??BSP_Init_0: (+1)
+   \   0000004C   0x2039             MOVS     R0,#+57
+   \   0000004E   0x.... 0x....      BL       RCC_GetFlagStatus
+   \   00000052   0x2800             CMP      R0,#+0
+   \   00000054   0xD0FA             BEQ.N    ??BSP_Init_0
+     73                  ;
+     74              }
+     75          
+     76              RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
+   \   00000056   0x2002             MOVS     R0,#+2
+   \   00000058   0x.... 0x....      BL       RCC_SYSCLKConfig
+     77          
+     78              while (RCC_GetSYSCLKSource() != 0x08) {
+   \                     ??BSP_Init_1: (+1)
+   \   0000005C   0x.... 0x....      BL       RCC_GetSYSCLKSource
+   \   00000060   0x2808             CMP      R0,#+8
+   \   00000062   0xD1FB             BNE.N    ??BSP_Init_1
+     79                  ;
+     80              }
+     81                 
+     82              #if (RTC_MODULE == DEF_ENABLED)
+     83                RTC_Config();
+   \   00000064   0x.... 0x....      BL       RTC_Config
+     84                RTC_IntEn();
+   \   00000068   0x.... 0x....      BL       RTC_IntEn
+     85              #endif
+     86              
+     87              #if (LCD_MODULE == DEF_ENABLED)
+     88                BSP_LCD_Init();
+     89              #endif
+     90                 
+     91              #if (I2COUT_MODULE == DEF_ENABLED)
+     92                i2c_init();
+   \   0000006C   0x.... 0x....      BL       i2c_init
+     93              #endif
+     94                
+     95              #if (RFM69CW_MODULE == DEF_ENABLED)
+     96                SPI2_HardWareInit();
+   \   00000070   0x.... 0x....      BL       SPI2_HardWareInit
+     97                Reset_RFM69CW_Init();
+   \   00000074   0x.... 0x....      BL       Reset_RFM69CW_Init
+     98              #endif
+     99              
+    100              #if (WDTLED_MODULE == DEF_ENABLED)
+    101                green_led_init();
+   \   00000078   0x.... 0x....      BL       green_led_init
+    102                direct_btn_init();
+   \   0000007C   0xE8BD 0x4001      POP      {R0,LR}
+   \   00000080   0x.... 0x....      B.W      direct_btn_init
+    103              #endif
+    104          }
+    105          
+    106          /*
+    107          *********************************************************************************************************
+    108          *                                            BSP_CPU_ClkFreq()
+    109          *
+    110          * Description : Read CPU registers to determine the CPU clock frequency of the chip.
+    111          *
+    112          * Argument(s) : none.
+    113          *
+    114          * Return(s)   : The CPU clock frequency, in Hz.
+    115          *
+    116          * Caller(s)   : Application.
+    117          *
+    118          * Note(s)     : none.
+    119          *********************************************************************************************************
+    120          */
+    121          
+
+   \                                 In section .text, align 2, keep-with-next
+    122          CPU_INT32U  BSP_CPU_ClkFreq (void)
+   \                     BSP_CPU_ClkFreq: (+1)
+   \   00000000   0xB500             PUSH     {LR}
+   \   00000002   0x....             B.N      ?Subroutine0
+
+   \                                 In section .text, align 2, keep-with-next
+    123          {
+   \                     ?Subroutine0: (+1)
+   \   00000000   0xB085             SUB      SP,SP,#+20
+    124              RCC_ClocksTypeDef  rcc_clocks;
+    125          
+    126          
+    127              RCC_GetClocksFreq(&rcc_clocks);
+   \   00000002   0x4668             MOV      R0,SP
+   \   00000004   0x.... 0x....      BL       RCC_GetClocksFreq
+    128          
+    129              return ((CPU_INT32U)rcc_clocks.HCLK_Frequency);
+   \   00000008   0x9801             LDR      R0,[SP, #+4]
+   \   0000000A   0xB005             ADD      SP,SP,#+20
+   \   0000000C   0xBD00             POP      {PC}             ;; return
+    130          }
+    131          
+    132          /*
+    133          *********************************************************************************************************
+    134          *********************************************************************************************************
+    135          *                                         OS CORTEX-M3 FUNCTIONS
+    136          *********************************************************************************************************
+    137          *********************************************************************************************************
+    138          */
+    139          
+    140          /*
+    141          *********************************************************************************************************
+    142          *                                         OS_CPU_SysTickClkFreq()
+    143          *
+    144          * Description : Get system tick clock frequency.
+    145          *
+    146          * Argument(s) : none.
+    147          *
+    148          * Return(s)   : Clock frequency (of system tick).
+    149          *
+    150          * Caller(s)   : BSP_Init().
+    151          *
+    152          * Note(s)     : none.
+    153          *********************************************************************************************************
+    154          */
+    155          
+
+   \                                 In section .text, align 2, keep-with-next
+    156          INT32U  OS_CPU_SysTickClkFreq (void)
+   \                     OS_CPU_SysTickClkFreq: (+1)
+   \   00000000   0xB500             PUSH     {LR}
+   \   00000002                      REQUIRE ?Subroutine0
+   \   00000002                      ;; // Fall through to label ?Subroutine0
+    157          {
+    158              INT32U  freq;
+    159          
+    160          
+    161              freq = BSP_CPU_ClkFreq();
+    162              return (freq);
+    163          }
+    164          
+    165          /*
+    166          *********************************************************************************************************
+    167          *                                              Us_TmrInit()
+    168          *
+    169          * Description : Select & initialize a timer for use with uC/OS.
+    170          *
+    171          * Argument(s) : none.
+    172          *
+    173          * Return(s)   : none.
+    174          *********************************************************************************************************
+    175          */
+
+   \                                 In section .text, align 2, keep-with-next
+    176          void  Us_TmrInitIO (void)
+    177          {
+   \                     Us_TmrInitIO: (+1)
+   \   00000000   0xB500             PUSH     {LR}
+   \   00000002   0xB083             SUB      SP,SP,#+12
+    178              RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+   \   00000004   0x2101             MOVS     R1,#+1
+   \   00000006   0x2001             MOVS     R0,#+1
+   \   00000008   0x.... 0x....      BL       RCC_APB1PeriphClockCmd
+    179              
+    180              TIM_TimeBaseInitTypeDef  tim_init;
+    181              TIM_TimeBaseStructInit(&tim_init);
+   \   0000000C   0x4668             MOV      R0,SP
+   \   0000000E   0x.... 0x....      BL       TIM_TimeBaseStructInit
+    182          
+    183          
+    184              tim_init.TIM_Period        = 0xFFFF;
+   \   00000012   0xF64F 0x70FF      MOVW     R0,#+65535
+   \   00000016   0xF8AD 0x0004      STRH     R0,[SP, #+4]
+    185              tim_init.TIM_Prescaler     = (SYS_CLK / DELAY_TIM_FREQUENCY) - 1;
+    186              tim_init.TIM_ClockDivision = 0;
+    187              tim_init.TIM_CounterMode   = TIM_CounterMode_Up;
+    188          
+    189              TIM_TimeBaseInit(TIM2, &tim_init);
+   \   0000001A   0x4669             MOV      R1,SP
+   \   0000001C   0x2031             MOVS     R0,#+49
+   \   0000001E   0xF8AD 0x0000      STRH     R0,[SP, #+0]
+   \   00000022   0x2000             MOVS     R0,#+0
+   \   00000024   0xF8AD 0x0006      STRH     R0,[SP, #+6]
+   \   00000028   0xF8AD 0x0002      STRH     R0,[SP, #+2]
+   \   0000002C   0xF04F 0x4080      MOV      R0,#+1073741824
+   \   00000030   0x.... 0x....      BL       TIM_TimeBaseInit
+    190              TIM_Cmd(TIM2, DISABLE);
+   \   00000034   0x2100             MOVS     R1,#+0
+   \   00000036   0xF04F 0x4080      MOV      R0,#+1073741824
+   \   0000003A   0x.... 0x....      BL       TIM_Cmd
+    191             
+    192          }
+   \   0000003E   0xB003             ADD      SP,SP,#+12
+   \   00000040   0xBD00             POP      {PC}             ;; return
+    193          
+    194          /*
+    195          *********************************************************************************************************
+    196          *                                              Us_Delay(INT32U nCount)
+    197          *
+    198          * Description : Select & initialize a timer for use with uC/OS.
+    199          *
+    200          * Argument(s) : INT32U nCount
+    201          *
+    202          * Return(s)   : none.
+    203          *********************************************************************************************************
+    204          */
+
+   \                                 In section .text, align 2, keep-with-next
+    205          void Us_DelayIO(INT16U nCount)
+    206          {
+   \                     Us_DelayIO: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0x4604             MOV      R4,R0
+    207            TIM_SetCounter(TIM2, 0);
+   \   00000004   0x2100             MOVS     R1,#+0
+   \   00000006   0xF04F 0x4080      MOV      R0,#+1073741824
+   \   0000000A   0x.... 0x....      BL       TIM_SetCounter
+    208            TIM_Cmd(TIM2, ENABLE);
+   \   0000000E   0x2101             MOVS     R1,#+1
+   \   00000010   0xF04F 0x4080      MOV      R0,#+1073741824
+   \   00000014   0x.... 0x....      BL       TIM_Cmd
+    209            while (TIM_GetCounter(TIM2) <= nCount);
+   \                     ??Us_DelayIO_0: (+1)
+   \   00000018   0xF04F 0x4080      MOV      R0,#+1073741824
+   \   0000001C   0x.... 0x....      BL       TIM_GetCounter
+   \   00000020   0x4284             CMP      R4,R0
+   \   00000022   0xD2F9             BCS.N    ??Us_DelayIO_0
+    210            TIM_Cmd(TIM2, DISABLE);
+   \   00000024   0xE8BD 0x4010      POP      {R4,LR}
+   \   00000028   0x2100             MOVS     R1,#+0
+   \   0000002A   0xF04F 0x4080      MOV      R0,#+1073741824
+   \   0000002E   0x.... 0x....      B.W      TIM_Cmd
+    211          }
+    212          
+    213          /*
+    214          *********************************************************************************************************
+    215          *                                              Ms_Delay(INT32U nCount)
+    216          *
+    217          * Description : Select & initialize a timer for use with uC/OS.
+    218          *
+    219          * Argument(s) : INT32U nCount
+    220          *
+    221          * Return(s)   : none.
+    222          *********************************************************************************************************
+    223          */
+
+   \                                 In section .text, align 2, keep-with-next
+    224          void Ms_DelayIO( INT16U ms )
+    225          {
+   \                     Ms_DelayIO: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+   \   00000002   0x0004             MOVS     R4,R0
+    226            int i;
+    227            for (i=0; i < ms; i++){
+   \   00000004   0xD018             BEQ.N    ??Ms_DelayIO_0
+   \   00000006   0xF240 0x35E9      MOVW     R5,#+1001
+    228              Us_DelayIO(1000);
+   \                     ??Ms_DelayIO_1: (+1)
+   \   0000000A   0x2100             MOVS     R1,#+0
+   \   0000000C   0xF04F 0x4080      MOV      R0,#+1073741824
+   \   00000010   0x.... 0x....      BL       TIM_SetCounter
+   \   00000014   0x2101             MOVS     R1,#+1
+   \   00000016   0xF04F 0x4080      MOV      R0,#+1073741824
+   \   0000001A   0x.... 0x....      BL       TIM_Cmd
+   \                     ??Ms_DelayIO_2: (+1)
+   \   0000001E   0xF04F 0x4080      MOV      R0,#+1073741824
+   \   00000022   0x.... 0x....      BL       TIM_GetCounter
+   \   00000026   0x42A8             CMP      R0,R5
+   \   00000028   0xD3F9             BCC.N    ??Ms_DelayIO_2
+   \   0000002A   0x2100             MOVS     R1,#+0
+   \   0000002C   0xF04F 0x4080      MOV      R0,#+1073741824
+   \   00000030   0x.... 0x....      BL       TIM_Cmd
+    229            }
+   \   00000034   0x1E64             SUBS     R4,R4,#+1
+   \   00000036   0xD1E8             BNE.N    ??Ms_DelayIO_1
+    230          }
+   \                     ??Ms_DelayIO_0: (+1)
+   \   00000038   0xBD31             POP      {R0,R4,R5,PC}    ;; return
+    231          
+    232          /*
+    233          *********************************************************************************************************
+    234          *                                              Us_Delay10(INT32U nCount)
+    235          *
+    236          * Description : Select & initialize a timer for use with uC/OS.
+    237          *
+    238          * Argument(s) : INT32U nCount
+    239          *
+    240          * Return(s)   : none.
+    241          *********************************************************************************************************
+    242          */
+
+   \                                 In section .text, align 2, keep-with-next
+    243          void Us_Delay10(INT16U nCount)
+    244          {
+   \                     Us_Delay10: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+   \   00000002   0x4604             MOV      R4,R0
+    245            TIM_SetCounter(TIM3, 0);
+   \   00000004   0x....             LDR.N    R5,??DataTable0  ;; 0x40000400
+   \   00000006   0x2100             MOVS     R1,#+0
+   \   00000008   0x4628             MOV      R0,R5
+   \   0000000A   0x.... 0x....      BL       TIM_SetCounter
+    246            TIM_Cmd(TIM3, ENABLE);
+   \   0000000E   0x2101             MOVS     R1,#+1
+   \   00000010   0x4628             MOV      R0,R5
+   \   00000012   0x.... 0x....      BL       TIM_Cmd
+    247            while (TIM_GetCounter(TIM3) <= nCount);
+   \                     ??Us_Delay10_0: (+1)
+   \   00000016   0x4628             MOV      R0,R5
+   \   00000018   0x.... 0x....      BL       TIM_GetCounter
+   \   0000001C   0x4284             CMP      R4,R0
+   \   0000001E   0xD2FA             BCS.N    ??Us_Delay10_0
+    248            TIM_Cmd(TIM3, DISABLE);
+   \   00000020   0x4628             MOV      R0,R5
+   \   00000022   0xE8BD 0x4034      POP      {R2,R4,R5,LR}
+   \   00000026   0x2100             MOVS     R1,#+0
+   \   00000028   0x.... 0x....      B.W      TIM_Cmd
+    249          }
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable0:
+   \   00000000   0x40000400         DC32     0x40000400
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       4   BSP_CPU_ClkFreq
+        24   -> RCC_GetClocksFreq
+       8   BSP_Init
+         8   -> FLASH_PrefetchBufferCmd
+         8   -> FLASH_SetLatency
+         8   -> RCC_ADCCLKConfig
+         8   -> RCC_DeInit
+         8   -> RCC_GetFlagStatus
+         8   -> RCC_GetSYSCLKSource
+         8   -> RCC_HCLKConfig
+         8   -> RCC_HSEConfig
+         8   -> RCC_PCLK1Config
+         8   -> RCC_PCLK2Config
+         8   -> RCC_PLLCmd
+         8   -> RCC_PLLConfig
+         8   -> RCC_SYSCLKConfig
+         8   -> RCC_WaitForHSEStartUp
+         8   -> RTC_Config
+         8   -> RTC_IntEn
+         8   -> Reset_RFM69CW_Init
+         8   -> SPI2_HardWareInit
+         0   -> direct_btn_init
+         8   -> green_led_init
+         8   -> i2c_init
+      16   Ms_DelayIO
+        16   -> TIM_Cmd
+        16   -> TIM_GetCounter
+        16   -> TIM_SetCounter
+       0   OS_CPU_SysTickClkFreq
+        24   -> RCC_GetClocksFreq
+      16   Us_Delay10
+         0   -> TIM_Cmd
+        16   -> TIM_Cmd
+        16   -> TIM_GetCounter
+        16   -> TIM_SetCounter
+       8   Us_DelayIO
+         0   -> TIM_Cmd
+         8   -> TIM_Cmd
+         8   -> TIM_GetCounter
+         8   -> TIM_SetCounter
+      16   Us_TmrInitIO
+        16   -> RCC_APB1PeriphClockCmd
+        16   -> TIM_Cmd
+        16   -> TIM_TimeBaseInit
+        16   -> TIM_TimeBaseStructInit
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable0
+      14  ?Subroutine0
+       4  BSP_CPU_ClkFreq
+     132  BSP_Init
+      58  Ms_DelayIO
+       2  OS_CPU_SysTickClkFreq
+      44  Us_Delay10
+      50  Us_DelayIO
+      66  Us_TmrInitIO
+
+ 
+ 374 bytes in section .text
+ 
+ 374 bytes of CODE memory
+
+Errors: none
+Warnings: none

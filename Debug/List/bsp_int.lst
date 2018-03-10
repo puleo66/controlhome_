@@ -1,0 +1,992 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:14:46
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp_int.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp_int.c" -lCN
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\bsp_int.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\bsp_int.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp_int.c
+      1          /*
+      2          *********************************************************************************************************
+      3          *
+      4          *                                        BOARD SUPPORT PACKAGE
+      5          *
+      6          *                                     
+      7          *
+      8          * Filename      : bsp_int.c
+      9          * Version       : V0.1
+     10          * Programmer(s) : Puleo
+     11          *********************************************************************************************************
+     12          */
+     13          
+     14          /*
+     15          *********************************************************************************************************
+     16          *                                             INCLUDE FILES
+     17          *********************************************************************************************************
+     18          */
+     19          
+     20          #define  BSP_INT_MODULE
+     21          #include <bsp.h>
+     22          
+     23          
+     24          /*
+     25          *********************************************************************************************************
+     26          *                                            LOCAL DEFINES
+     27          *********************************************************************************************************
+     28          */
+     29          
+     30          #define  BSP_INT_SRC_NBR                                 42
+     31          
+     32          
+     33          /*
+     34          *********************************************************************************************************
+     35          *                                           LOCAL CONSTANTS
+     36          *********************************************************************************************************
+     37          */
+     38          
+     39          
+     40          /*
+     41          *********************************************************************************************************
+     42          *                                          LOCAL DATA TYPES
+     43          *********************************************************************************************************
+     44          */
+     45          
+     46          
+     47          /*
+     48          *********************************************************************************************************
+     49          *                                            LOCAL TABLES
+     50          *********************************************************************************************************
+     51          */
+     52          
+
+   \                                 In section .bss, align 4
+     53          static  CPU_FNCT_VOID  BSP_IntVectTbl[BSP_INT_SRC_NBR];
+   \                     BSP_IntVectTbl:
+   \   00000000                      DS8 168
+     54          
+     55          
+     56          /*
+     57          *********************************************************************************************************
+     58          *                                       LOCAL GLOBAL VARIABLES
+     59          *********************************************************************************************************
+     60          */
+     61          
+     62          
+     63          /*
+     64          *********************************************************************************************************
+     65          *                                      LOCAL FUNCTION PROTOTYPES
+     66          *********************************************************************************************************
+     67          */
+     68          
+     69          static  void  BSP_IntHandler     (CPU_DATA  int_id);
+     70          static  void  BSP_IntHandlerDummy(void);
+     71          
+     72          
+     73          /*
+     74          *********************************************************************************************************
+     75          *                                     LOCAL CONFIGURATION ERRORS
+     76          *********************************************************************************************************
+     77          */
+     78          
+     79          
+     80          /*
+     81          *********************************************************************************************************
+     82          *                                              BSP_IntClr()
+     83          *
+     84          * Description : Clear interrupt.
+     85          *
+     86          * Argument(s) : int_id      Interrupt to clear.
+     87          *
+     88          * Return(s)   : none.
+     89          *
+     90          * Caller(s)   : Application.
+     91          *
+     92          * Note(s)     : (1) An interrupt does not need to be cleared within the interrupt controller.
+     93          *********************************************************************************************************
+     94          */
+     95          
+
+   \                                 In section .text, align 2, keep-with-next
+     96          void  BSP_IntClr (CPU_DATA  int_id)
+     97          {
+     98          
+     99          }
+   \                     BSP_IntClr: (+1)
+   \   00000000   0x4770             BX       LR               ;; return
+    100          
+    101          
+    102          /*
+    103          *********************************************************************************************************
+    104          *                                              BSP_IntDis()
+    105          *
+    106          * Description : Disable interrupt.
+    107          *
+    108          * Argument(s) : int_id      Interrupt to disable.
+    109          *
+    110          * Return(s)   : none.
+    111          *
+    112          * Caller(s)   : Application.
+    113          *
+    114          * Note(s)     : none.
+    115          *********************************************************************************************************
+    116          */
+    117          
+
+   \                                 In section .text, align 2, keep-with-next
+    118          void  BSP_IntDis (CPU_DATA  int_id)
+    119          {
+    120              if (int_id < BSP_INT_SRC_NBR) {
+   \                     BSP_IntDis: (+1)
+   \   00000000   0x282A             CMP      R0,#+42
+   \   00000002   0xD203             BCS.N    ??BSP_IntDis_0
+    121                  CPU_IntSrcDis(int_id + 16);
+   \   00000004   0x3010             ADDS     R0,R0,#+16
+   \   00000006   0xB2C0             UXTB     R0,R0
+   \   00000008   0x.... 0x....      B.W      CPU_IntSrcDis
+    122              }
+    123          }
+   \                     ??BSP_IntDis_0: (+1)
+   \   0000000C   0x4770             BX       LR               ;; return
+    124          
+    125          
+    126          /*
+    127          *********************************************************************************************************
+    128          *                                           BSP_IntDisAll()
+    129          *
+    130          * Description : Disable ALL interrupts.
+    131          *
+    132          * Argument(s) : none.
+    133          *
+    134          * Return(s)   : none.
+    135          *
+    136          * Caller(s)   : Application.
+    137          *
+    138          * Note(s)     : none.
+    139          *********************************************************************************************************
+    140          */
+    141          
+
+   \                                 In section .text, align 2, keep-with-next
+    142          void  BSP_IntDisAll (void)
+    143          {
+    144              CPU_IntDis();
+   \                     BSP_IntDisAll: (+1)
+   \   00000000   0x.... 0x....      B.W      CPU_IntDis
+    145          }
+    146          
+    147          
+    148          /*
+    149          *********************************************************************************************************
+    150          *                                               BSP_IntEn()
+    151          *
+    152          * Description : Enable interrupt.
+    153          *
+    154          * Argument(s) : int_id      Interrupt to enable.
+    155          *
+    156          * Return(s)   : none.
+    157          *
+    158          * Caller(s)   : Application.
+    159          *
+    160          * Note(s)     : none.
+    161          *********************************************************************************************************
+    162          */
+    163          
+
+   \                                 In section .text, align 2, keep-with-next
+    164          void  BSP_IntEn (CPU_DATA  int_id)
+    165          {
+    166              if (int_id < BSP_INT_SRC_NBR) {
+   \                     BSP_IntEn: (+1)
+   \   00000000   0x282A             CMP      R0,#+42
+   \   00000002   0xD203             BCS.N    ??BSP_IntEn_0
+    167                  CPU_IntSrcEn(int_id + 16);
+   \   00000004   0x3010             ADDS     R0,R0,#+16
+   \   00000006   0xB2C0             UXTB     R0,R0
+   \   00000008   0x.... 0x....      B.W      CPU_IntSrcEn
+    168              }
+    169          }
+   \                     ??BSP_IntEn_0: (+1)
+   \   0000000C   0x4770             BX       LR               ;; return
+    170          
+    171          
+    172          /*
+    173          *********************************************************************************************************
+    174          *                                            BSP_IntVectSet()
+    175          *
+    176          * Description : Assign ISR handler.
+    177          *
+    178          * Argument(s) : int_id      Interrupt for which vector will be set.
+    179          *
+    180          *               isr         Handler to assign
+    181          *
+    182          * Return(s)   : none.
+    183          *
+    184          * Caller(s)   : Application.
+    185          *
+    186          * Note(s)     : none.
+    187          *********************************************************************************************************
+    188          */
+    189          
+
+   \                                 In section .text, align 2, keep-with-next
+    190          void  BSP_IntVectSet (CPU_DATA       int_id,
+    191                                CPU_FNCT_VOID  isr)
+    192          {
+   \                     BSP_IntVectSet: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+   \   00000002   0x4604             MOV      R4,R0
+    193          #if (CPU_CFG_CRITICAL_METHOD == CPU_CRITICAL_METHOD_STATUS_LOCAL)
+    194              CPU_SR   cpu_sr;
+    195          #endif
+    196          
+    197          
+    198              if (int_id < BSP_INT_SRC_NBR) {
+   \   00000004   0x2C2A             CMP      R4,#+42
+   \   00000006   0x460D             MOV      R5,R1
+   \   00000008   0xD208             BCS.N    ??BSP_IntVectSet_0
+    199                  CPU_CRITICAL_ENTER();
+   \   0000000A   0x.... 0x....      BL       CPU_SR_Save
+    200                  BSP_IntVectTbl[int_id] = isr;
+   \   0000000E   0x....             LDR.N    R1,??DataTable3
+   \   00000010   0xF841 0x5024      STR      R5,[R1, R4, LSL #+2]
+    201                  CPU_CRITICAL_EXIT();
+   \   00000014   0xE8BD 0x4032      POP      {R1,R4,R5,LR}
+   \   00000018   0x.... 0x....      B.W      CPU_SR_Restore
+    202              }
+    203          }
+   \                     ??BSP_IntVectSet_0: (+1)
+   \   0000001C   0xBD31             POP      {R0,R4,R5,PC}    ;; return
+    204          
+    205          
+    206          /*
+    207          *********************************************************************************************************
+    208          *                                            BSP_IntPrioSet()
+    209          *
+    210          * Description : Assign ISR priority.
+    211          *
+    212          * Argument(s) : int_id      Interrupt for which vector will be set.
+    213          *
+    214          *               prio        Priority to assign
+    215          *
+    216          * Return(s)   : none.
+    217          *
+    218          * Caller(s)   : Application.
+    219          *
+    220          * Note(s)     : none.
+    221          *********************************************************************************************************
+    222          */
+    223          
+
+   \                                 In section .text, align 2, keep-with-next
+    224          void  BSP_IntPrioSet (CPU_DATA    int_id,
+    225                                CPU_INT08U  prio)
+    226          {
+   \                     BSP_IntPrioSet: (+1)
+   \   00000000   0xB570             PUSH     {R4-R6,LR}
+   \   00000002   0x4604             MOV      R4,R0
+    227          #if (CPU_CFG_CRITICAL_METHOD == CPU_CRITICAL_METHOD_STATUS_LOCAL)
+    228              CPU_SR    cpu_sr;
+    229          #endif
+    230          
+    231          
+    232              if (int_id < BSP_INT_SRC_NBR) {
+   \   00000004   0x2C2A             CMP      R4,#+42
+   \   00000006   0x460D             MOV      R5,R1
+   \   00000008   0xD20D             BCS.N    ??BSP_IntPrioSet_0
+    233                  CPU_CRITICAL_ENTER();
+   \   0000000A   0x.... 0x....      BL       CPU_SR_Save
+   \   0000000E   0x4606             MOV      R6,R0
+    234                  CPU_IntSrcPrioSet(int_id + 16, prio);
+   \   00000010   0xF104 0x0010      ADD      R0,R4,#+16
+   \   00000014   0x4629             MOV      R1,R5
+   \   00000016   0xB2C0             UXTB     R0,R0
+   \   00000018   0x.... 0x....      BL       CPU_IntSrcPrioSet
+    235                  CPU_CRITICAL_EXIT();
+   \   0000001C   0x4630             MOV      R0,R6
+   \   0000001E   0xE8BD 0x4070      POP      {R4-R6,LR}
+   \   00000022   0x.... 0x....      B.W      CPU_SR_Restore
+    236              }
+    237          }
+   \                     ??BSP_IntPrioSet_0: (+1)
+   \   00000026   0xBD70             POP      {R4-R6,PC}       ;; return
+    238          
+    239          
+    240          /*
+    241          *********************************************************************************************************
+    242          *********************************************************************************************************
+    243          *                                           INTERNAL FUNCTIONS
+    244          *********************************************************************************************************
+    245          *********************************************************************************************************
+    246          */
+    247          
+    248          /*
+    249          *********************************************************************************************************
+    250          *                                              BSP_IntInit()
+    251          *
+    252          * Description : Initialize interrupts:
+    253          *
+    254          * Argument(s) : none.
+    255          *
+    256          * Return(s)   : none.
+    257          *
+    258          * Caller(s)   : BSP_Init().
+    259          *
+    260          * Note(s)     : none.
+    261          *********************************************************************************************************
+    262          */
+    263          
+
+   \                                 In section .text, align 2, keep-with-next
+    264          void  BSP_IntInit (void)
+    265          {
+   \                     BSP_IntInit: (+1)
+   \   00000000   0xB570             PUSH     {R4-R6,LR}
+    266              CPU_DATA  int_id;
+    267          
+    268          
+    269              for (int_id = 0; int_id < BSP_INT_SRC_NBR; int_id++) {
+   \   00000002   0x....             LDR.N    R4,??DataTable3
+   \   00000004   0x.... 0x....      ADR.W    R6,BSP_IntHandlerDummy
+   \   00000008   0x252A             MOVS     R5,#+42
+    270                  BSP_IntVectSet(int_id, BSP_IntHandlerDummy);
+   \                     ??BSP_IntInit_0: (+1)
+   \   0000000A   0x.... 0x....      BL       CPU_SR_Save
+   \   0000000E   0xF844 0x6B04      STR      R6,[R4], #+4
+   \   00000012   0x.... 0x....      BL       CPU_SR_Restore
+    271              }
+   \   00000016   0x1E6D             SUBS     R5,R5,#+1
+   \   00000018   0xD1F7             BNE.N    ??BSP_IntInit_0
+    272          }
+   \   0000001A   0xBD70             POP      {R4-R6,PC}       ;; return
+    273          
+    274          
+    275          /*
+    276          *********************************************************************************************************
+    277          *                                        BSP_IntHandler####()
+    278          *
+    279          * Description : Handle an interrupt.
+    280          *
+    281          * Argument(s) : none.
+    282          *
+    283          * Return(s)   : none.
+    284          *
+    285          * Caller(s)   : This is an ISR.
+    286          *
+    287          * Note(s)     : none.
+    288          *********************************************************************************************************
+    289          */
+    290          
+
+   \                                 In section .text, align 2, keep-with-next
+    291          void  BSP_IntHandlerWWDG          (void)  { BSP_IntHandler(BSP_INT_ID_WWDG);            }
+   \                     BSP_IntHandlerWWDG: (+1)
+   \   00000000   0x2000             MOVS     R0,#+0
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    292          void  BSP_IntHandlerPVD           (void)  { BSP_IntHandler(BSP_INT_ID_PVD);             }
+   \                     BSP_IntHandlerPVD: (+1)
+   \   00000000   0x2001             MOVS     R0,#+1
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    293          void  BSP_IntHandlerTAMPER        (void)  { BSP_IntHandler(BSP_INT_ID_TAMPER);          }
+   \                     BSP_IntHandlerTAMPER: (+1)
+   \   00000000   0x2002             MOVS     R0,#+2
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    294          void  BSP_IntHandlerRTC           (void)  { BSP_IntHandler(BSP_INT_ID_RTC);             }
+   \                     BSP_IntHandlerRTC: (+1)
+   \   00000000   0x2003             MOVS     R0,#+3
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    295          void  BSP_IntHandlerFLASH         (void)  { BSP_IntHandler(BSP_INT_ID_FLASH);           }
+   \                     BSP_IntHandlerFLASH: (+1)
+   \   00000000   0x2004             MOVS     R0,#+4
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    296          void  BSP_IntHandlerRCC           (void)  { BSP_IntHandler(BSP_INT_ID_RCC);             }
+   \                     BSP_IntHandlerRCC: (+1)
+   \   00000000   0x2005             MOVS     R0,#+5
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    297          void  BSP_IntHandlerEXTI0         (void)  { BSP_IntHandler(BSP_INT_ID_EXTI0);           }
+   \                     BSP_IntHandlerEXTI0: (+1)
+   \   00000000   0x2006             MOVS     R0,#+6
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    298          void  BSP_IntHandlerEXTI1         (void)  { BSP_IntHandler(BSP_INT_ID_EXTI1);           }
+   \                     BSP_IntHandlerEXTI1: (+1)
+   \   00000000   0x2007             MOVS     R0,#+7
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    299          void  BSP_IntHandlerEXTI2         (void)  { BSP_IntHandler(BSP_INT_ID_EXTI2);           }
+   \                     BSP_IntHandlerEXTI2: (+1)
+   \   00000000   0x2008             MOVS     R0,#+8
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    300          void  BSP_IntHandlerEXTI3         (void)  { BSP_IntHandler(BSP_INT_ID_EXTI3);           }
+   \                     BSP_IntHandlerEXTI3: (+1)
+   \   00000000   0x2009             MOVS     R0,#+9
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    301          void  BSP_IntHandlerEXTI4         (void)  { BSP_IntHandler(BSP_INT_ID_EXTI4);           }
+   \                     BSP_IntHandlerEXTI4: (+1)
+   \   00000000   0x200A             MOVS     R0,#+10
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    302          void  BSP_IntHandlerDMA1_CH1      (void)  { BSP_IntHandler(BSP_INT_ID_DMA1_CH1);        }
+   \                     BSP_IntHandlerDMA1_CH1: (+1)
+   \   00000000   0x200B             MOVS     R0,#+11
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    303          void  BSP_IntHandlerDMA1_CH2      (void)  { BSP_IntHandler(BSP_INT_ID_DMA1_CH2);        }
+   \                     BSP_IntHandlerDMA1_CH2: (+1)
+   \   00000000   0x200C             MOVS     R0,#+12
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    304          void  BSP_IntHandlerDMA1_CH3      (void)  { BSP_IntHandler(BSP_INT_ID_DMA1_CH3);        }
+   \                     BSP_IntHandlerDMA1_CH3: (+1)
+   \   00000000   0x200D             MOVS     R0,#+13
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    305          void  BSP_IntHandlerDMA1_CH4      (void)  { BSP_IntHandler(BSP_INT_ID_DMA1_CH4);        }
+   \                     BSP_IntHandlerDMA1_CH4: (+1)
+   \   00000000   0x200E             MOVS     R0,#+14
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    306          void  BSP_IntHandlerDMA1_CH5      (void)  { BSP_IntHandler(BSP_INT_ID_DMA1_CH5);        }
+   \                     BSP_IntHandlerDMA1_CH5: (+1)
+   \   00000000   0x200F             MOVS     R0,#+15
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    307          void  BSP_IntHandlerDMA1_CH6      (void)  { BSP_IntHandler(BSP_INT_ID_DMA1_CH6);        }
+   \                     BSP_IntHandlerDMA1_CH6: (+1)
+   \   00000000   0x2010             MOVS     R0,#+16
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    308          void  BSP_IntHandlerDMA1_CH7      (void)  { BSP_IntHandler(BSP_INT_ID_DMA1_CH7);        }
+   \                     BSP_IntHandlerDMA1_CH7: (+1)
+   \   00000000   0x2011             MOVS     R0,#+17
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    309          void  BSP_IntHandlerADC1_2        (void)  { BSP_IntHandler(BSP_INT_ID_ADC1_2);          }
+   \                     BSP_IntHandlerADC1_2: (+1)
+   \   00000000   0x2012             MOVS     R0,#+18
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    310          void  BSP_IntHandlerUSB_HP_CAN_TX (void)  { BSP_IntHandler(BSP_INT_ID_USB_HP_CAN_TX);   }
+   \                     BSP_IntHandlerUSB_HP_CAN_TX: (+1)
+   \   00000000   0x2013             MOVS     R0,#+19
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    311          void  BSP_IntHandlerUSB_LP_CAN_RX0(void)  { BSP_IntHandler(BSP_INT_ID_USB_LP_CAN_RX0);  }
+   \                     BSP_IntHandlerUSB_LP_CAN_RX0: (+1)
+   \   00000000   0x2014             MOVS     R0,#+20
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    312          void  BSP_IntHandlerCAN_RX1       (void)  { BSP_IntHandler(BSP_INT_ID_CAN_RX1);         }
+   \                     BSP_IntHandlerCAN_RX1: (+1)
+   \   00000000   0x2015             MOVS     R0,#+21
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    313          void  BSP_IntHandlerCAN_SCE       (void)  { BSP_IntHandler(BSP_INT_ID_CAN_SCE);         }
+   \                     BSP_IntHandlerCAN_SCE: (+1)
+   \   00000000   0x2016             MOVS     R0,#+22
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    314          void  BSP_IntHandlerEXTI9_5       (void)  { BSP_IntHandler(BSP_INT_ID_EXTI9_5);         }
+   \                     BSP_IntHandlerEXTI9_5: (+1)
+   \   00000000   0x2017             MOVS     R0,#+23
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    315          void  BSP_IntHandlerTIM1_BRK      (void)  { BSP_IntHandler(BSP_INT_ID_TIM1_BRK);        }
+   \                     BSP_IntHandlerTIM1_BRK: (+1)
+   \   00000000   0x2018             MOVS     R0,#+24
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    316          void  BSP_IntHandlerTIM1_UP       (void)  { BSP_IntHandler(BSP_INT_ID_TIM1_UP);         }
+   \                     BSP_IntHandlerTIM1_UP: (+1)
+   \   00000000   0x2019             MOVS     R0,#+25
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    317          void  BSP_IntHandlerTIM1_TRG_COM  (void)  { BSP_IntHandler(BSP_INT_ID_TIM1_TRG_COM);    }
+   \                     BSP_IntHandlerTIM1_TRG_COM: (+1)
+   \   00000000   0x201A             MOVS     R0,#+26
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    318          void  BSP_IntHandlerTIM1_CC       (void)  { BSP_IntHandler(BSP_INT_ID_TIM1_CC);         }
+   \                     BSP_IntHandlerTIM1_CC: (+1)
+   \   00000000   0x201B             MOVS     R0,#+27
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    319          void  BSP_IntHandlerTIM2          (void)  { BSP_IntHandler(BSP_INT_ID_TIM2);            }
+   \                     BSP_IntHandlerTIM2: (+1)
+   \   00000000   0x201C             MOVS     R0,#+28
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    320          void  BSP_IntHandlerTIM3          (void)  { BSP_IntHandler(BSP_INT_ID_TIM3);            }
+   \                     BSP_IntHandlerTIM3: (+1)
+   \   00000000   0x201D             MOVS     R0,#+29
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    321          void  BSP_IntHandlerTIM4          (void)  { BSP_IntHandler(BSP_INT_ID_TIM4);            }
+   \                     BSP_IntHandlerTIM4: (+1)
+   \   00000000   0x201E             MOVS     R0,#+30
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    322          void  BSP_IntHandlerI2C1_EV       (void)  { BSP_IntHandler(BSP_INT_ID_I2C1_EV);         }
+   \                     BSP_IntHandlerI2C1_EV: (+1)
+   \   00000000   0x201F             MOVS     R0,#+31
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    323          void  BSP_IntHandlerI2C1_ER       (void)  { BSP_IntHandler(BSP_INT_ID_I2C1_ER);         }
+   \                     BSP_IntHandlerI2C1_ER: (+1)
+   \   00000000   0x2020             MOVS     R0,#+32
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    324          void  BSP_IntHandlerI2C2_EV       (void)  { BSP_IntHandler(BSP_INT_ID_I2C2_EV);         }
+   \                     BSP_IntHandlerI2C2_EV: (+1)
+   \   00000000   0x2021             MOVS     R0,#+33
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    325          void  BSP_IntHandlerI2C2_ER       (void)  { BSP_IntHandler(BSP_INT_ID_I2C2_ER);         }
+   \                     BSP_IntHandlerI2C2_ER: (+1)
+   \   00000000   0x2022             MOVS     R0,#+34
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    326          void  BSP_IntHandlerSPI1          (void)  { BSP_IntHandler(BSP_INT_ID_SPI1);            }
+   \                     BSP_IntHandlerSPI1: (+1)
+   \   00000000   0x2023             MOVS     R0,#+35
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    327          void  BSP_IntHandlerSPI2          (void)  { BSP_IntHandler(BSP_INT_ID_SPI2);            }
+   \                     BSP_IntHandlerSPI2: (+1)
+   \   00000000   0x2024             MOVS     R0,#+36
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    328          void  BSP_IntHandlerUSART1        (void)  { BSP_IntHandler(BSP_INT_ID_USART1);          }
+   \                     BSP_IntHandlerUSART1: (+1)
+   \   00000000   0x2025             MOVS     R0,#+37
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    329          void  BSP_IntHandlerUSART2        (void)  { BSP_IntHandler(BSP_INT_ID_USART2);          }
+   \                     BSP_IntHandlerUSART2: (+1)
+   \   00000000   0x2026             MOVS     R0,#+38
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    330          void  BSP_IntHandlerUSART3        (void)  { BSP_IntHandler(BSP_INT_ID_USART3);          }
+   \                     BSP_IntHandlerUSART3: (+1)
+   \   00000000   0x2027             MOVS     R0,#+39
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    331          void  BSP_IntHandlerEXTI15_10     (void)  { BSP_IntHandler(BSP_INT_ID_EXTI15_10);       }
+   \                     BSP_IntHandlerEXTI15_10: (+1)
+   \   00000000   0x2028             MOVS     R0,#+40
+   \   00000002   0x....             B.N      BSP_IntHandler
+
+   \                                 In section .text, align 2, keep-with-next
+    332          void  BSP_IntHandlerRTCAlarm      (void)  { BSP_IntHandler(BSP_INT_ID_RTCAlarm);        }
+   \                     BSP_IntHandlerRTCAlarm: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+   \   00000002   0x.... 0x....      BL       CPU_SR_Save
+   \   00000006   0x....             LDR.N    R1,??DataTable3_1
+   \   00000008   0x780A             LDRB     R2,[R1, #+0]
+   \   0000000A   0x1C52             ADDS     R2,R2,#+1
+   \   0000000C   0x700A             STRB     R2,[R1, #+0]
+   \   0000000E   0x.... 0x....      BL       CPU_SR_Restore
+   \   00000012   0x....             LDR.N    R0,??DataTable3
+   \   00000014   0xF8D0 0x00A4      LDR      R0,[R0, #+164]
+   \   00000018   0x0001             MOVS     R1,R0
+   \   0000001A   0xBF18             IT       NE 
+   \   0000001C   0x4780             BLXNE    R0
+   \   0000001E   0x....             B.N      ?Subroutine0
+
+   \                                 In section .text, align 2, keep-with-next
+    333          void  BSP_IntHandlerUSBWakeUp     (void)  { BSP_IntHandler(BSP_INT_ID_USBWakeUp);       }
+   \                     BSP_IntHandlerUSBWakeUp: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+   \   00000002   0x.... 0x....      BL       CPU_SR_Save
+   \   00000006   0x....             LDR.N    R1,??DataTable3_1
+   \   00000008   0x780A             LDRB     R2,[R1, #+0]
+   \   0000000A   0x1C52             ADDS     R2,R2,#+1
+   \   0000000C   0x700A             STRB     R2,[R1, #+0]
+   \   0000000E   0x.... 0x....      BL       CPU_SR_Restore
+   \   00000012                      REQUIRE ?Subroutine0
+   \   00000012                      ;; // Fall through to label ?Subroutine0
+    334          
+    335          
+    336          /*
+    337          *********************************************************************************************************
+    338          *********************************************************************************************************
+    339          *                                           LOCAL FUNCTIONS
+    340          *********************************************************************************************************
+    341          *********************************************************************************************************
+    342          */
+    343          
+    344          /*
+    345          *********************************************************************************************************
+    346          *                                          BSP_IntHandler()
+    347          *
+    348          * Description : Central interrupt handler.
+    349          *
+    350          * Argument(s) : int_id          Interrupt that will be handled.
+    351          *
+    352          * Return(s)   : none.
+    353          *
+    354          * Caller(s)   : ISR handlers.
+    355          *
+    356          * Note(s)     : none.
+    357          *********************************************************************************************************
+    358          */
+    359          
+
+   \                                 In section .text, align 2, keep-with-next
+    360          static  void  BSP_IntHandler (CPU_DATA  int_id)
+    361          {
+   \                     BSP_IntHandler: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0x4604             MOV      R4,R0
+    362          #if (CPU_CFG_CRITICAL_METHOD == CPU_CRITICAL_METHOD_STATUS_LOCAL)
+    363              CPU_SR         cpu_sr;
+    364          #endif
+    365              CPU_FNCT_VOID  isr;
+    366          
+    367          
+    368              CPU_CRITICAL_ENTER();                                       /* Tell uC/OS-II that we are starting an ISR            */
+   \   00000004   0x.... 0x....      BL       CPU_SR_Save
+    369              OSIntNesting++;
+   \   00000008   0x....             LDR.N    R1,??DataTable3_1
+   \   0000000A   0x780A             LDRB     R2,[R1, #+0]
+   \   0000000C   0x1C52             ADDS     R2,R2,#+1
+   \   0000000E   0x700A             STRB     R2,[R1, #+0]
+    370              CPU_CRITICAL_EXIT();
+   \   00000010   0x.... 0x....      BL       CPU_SR_Restore
+    371          
+    372              if (int_id < BSP_INT_SRC_NBR) {
+   \   00000014   0x2C2A             CMP      R4,#+42
+   \   00000016   0xD205             BCS.N    ??BSP_IntHandler_0
+    373                  isr = BSP_IntVectTbl[int_id];
+   \   00000018   0x....             LDR.N    R0,??DataTable3
+   \   0000001A   0xF850 0x0024      LDR      R0,[R0, R4, LSL #+2]
+    374                  if (isr != (CPU_FNCT_VOID)0) {
+   \   0000001E   0x0001             MOVS     R1,R0
+   \   00000020   0xBF18             IT       NE 
+    375                      isr();
+   \   00000022   0x4780             BLXNE    R0
+    376                  }
+    377              }
+    378          
+    379              OSIntExit();                                                /* Tell uC/OS-II that we are leaving the ISR            */
+   \                     ??BSP_IntHandler_0: (+1)
+   \   00000024   0xE8BD 0x4010      POP      {R4,LR}
+   \   00000028   0x.... 0x....      B.W      OSIntExit
+    380          }
+    381          
+    382          
+    383          /*
+    384          *********************************************************************************************************
+    385          *                                        BSP_IntHandlerDummy()
+    386          *
+    387          * Description : Dummy interrupt handler.
+    388          *
+    389          * Argument(s) : none.
+    390          *
+    391          * Return(s)   : none.
+    392          *
+    393          * Caller(s)   : BSP_IntHandler().
+    394          *
+    395          * Note(s)     : none.
+    396          *********************************************************************************************************
+    397          */
+    398          
+
+   \                                 In section .text, align 4, keep-with-next
+    399          static  void  BSP_IntHandlerDummy (void)
+    400          {
+    401          
+    402          }
+   \                     BSP_IntHandlerDummy: (+1)
+   \   00000000   0x4770             BX       LR               ;; return
+
+   \                                 In section .text, align 2, keep-with-next
+   \                     ?Subroutine0: (+1)
+   \   00000000   0xE8BD 0x4001      POP      {R0,LR}
+   \   00000004   0x.... 0x....      B.W      OSIntExit
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3:
+   \   00000000   0x........         DC32     BSP_IntVectTbl
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3_1:
+   \   00000000   0x........         DC32     OSIntNesting
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   BSP_IntClr
+       0   BSP_IntDis
+         0   -> CPU_IntSrcDis
+       0   BSP_IntDisAll
+         0   -> CPU_IntDis
+       0   BSP_IntEn
+         0   -> CPU_IntSrcEn
+       8   BSP_IntHandler
+         8   -- Indirect call
+         8   -> CPU_SR_Restore
+         8   -> CPU_SR_Save
+         0   -> OSIntExit
+       0   BSP_IntHandlerADC1_2
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerCAN_RX1
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerCAN_SCE
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerDMA1_CH1
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerDMA1_CH2
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerDMA1_CH3
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerDMA1_CH4
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerDMA1_CH5
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerDMA1_CH6
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerDMA1_CH7
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerDummy
+       0   BSP_IntHandlerEXTI0
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerEXTI1
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerEXTI15_10
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerEXTI2
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerEXTI3
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerEXTI4
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerEXTI9_5
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerFLASH
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerI2C1_ER
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerI2C1_EV
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerI2C2_ER
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerI2C2_EV
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerPVD
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerRCC
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerRTC
+         0   -> BSP_IntHandler
+       8   BSP_IntHandlerRTCAlarm
+         8   -- Indirect call
+         8   -> CPU_SR_Restore
+         8   -> CPU_SR_Save
+         0   -> OSIntExit
+       0   BSP_IntHandlerSPI1
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerSPI2
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerTAMPER
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerTIM1_BRK
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerTIM1_CC
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerTIM1_TRG_COM
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerTIM1_UP
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerTIM2
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerTIM3
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerTIM4
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerUSART1
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerUSART2
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerUSART3
+         0   -> BSP_IntHandler
+       8   BSP_IntHandlerUSBWakeUp
+         8   -> CPU_SR_Restore
+         8   -> CPU_SR_Save
+         0   -> OSIntExit
+       0   BSP_IntHandlerUSB_HP_CAN_TX
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerUSB_LP_CAN_RX0
+         0   -> BSP_IntHandler
+       0   BSP_IntHandlerWWDG
+         0   -> BSP_IntHandler
+      16   BSP_IntInit
+        16   -> CPU_SR_Restore
+        16   -> CPU_SR_Save
+      16   BSP_IntPrioSet
+        16   -> CPU_IntSrcPrioSet
+         0   -> CPU_SR_Restore
+        16   -> CPU_SR_Save
+      16   BSP_IntVectSet
+         0   -> CPU_SR_Restore
+        16   -> CPU_SR_Save
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable3
+       4  ??DataTable3_1
+       8  ?Subroutine0
+       2  BSP_IntClr
+      14  BSP_IntDis
+       4  BSP_IntDisAll
+      14  BSP_IntEn
+      44  BSP_IntHandler
+       4  BSP_IntHandlerADC1_2
+       4  BSP_IntHandlerCAN_RX1
+       4  BSP_IntHandlerCAN_SCE
+       4  BSP_IntHandlerDMA1_CH1
+       4  BSP_IntHandlerDMA1_CH2
+       4  BSP_IntHandlerDMA1_CH3
+       4  BSP_IntHandlerDMA1_CH4
+       4  BSP_IntHandlerDMA1_CH5
+       4  BSP_IntHandlerDMA1_CH6
+       4  BSP_IntHandlerDMA1_CH7
+       2  BSP_IntHandlerDummy
+       4  BSP_IntHandlerEXTI0
+       4  BSP_IntHandlerEXTI1
+       4  BSP_IntHandlerEXTI15_10
+       4  BSP_IntHandlerEXTI2
+       4  BSP_IntHandlerEXTI3
+       4  BSP_IntHandlerEXTI4
+       4  BSP_IntHandlerEXTI9_5
+       4  BSP_IntHandlerFLASH
+       4  BSP_IntHandlerI2C1_ER
+       4  BSP_IntHandlerI2C1_EV
+       4  BSP_IntHandlerI2C2_ER
+       4  BSP_IntHandlerI2C2_EV
+       4  BSP_IntHandlerPVD
+       4  BSP_IntHandlerRCC
+       4  BSP_IntHandlerRTC
+      32  BSP_IntHandlerRTCAlarm
+       4  BSP_IntHandlerSPI1
+       4  BSP_IntHandlerSPI2
+       4  BSP_IntHandlerTAMPER
+       4  BSP_IntHandlerTIM1_BRK
+       4  BSP_IntHandlerTIM1_CC
+       4  BSP_IntHandlerTIM1_TRG_COM
+       4  BSP_IntHandlerTIM1_UP
+       4  BSP_IntHandlerTIM2
+       4  BSP_IntHandlerTIM3
+       4  BSP_IntHandlerTIM4
+       4  BSP_IntHandlerUSART1
+       4  BSP_IntHandlerUSART2
+       4  BSP_IntHandlerUSART3
+      18  BSP_IntHandlerUSBWakeUp
+       4  BSP_IntHandlerUSB_HP_CAN_TX
+       4  BSP_IntHandlerUSB_LP_CAN_RX0
+       4  BSP_IntHandlerWWDG
+      28  BSP_IntInit
+      40  BSP_IntPrioSet
+      30  BSP_IntVectSet
+     168  BSP_IntVectTbl
+
+ 
+ 168 bytes in section .bss
+ 408 bytes in section .text
+ 
+ 408 bytes of CODE memory
+ 168 bytes of DATA memory
+
+Errors: none
+Warnings: none

@@ -1,0 +1,612 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:14:48
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp_spi2.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp_spi2.c" -lCN
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\bsp_spi2.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\bsp_spi2.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp_spi2.c
+      1          /*
+      2          *********************************************************************************************************
+      3          *
+      4          *                                        SD/MMC (SPI2) INTERFACE
+      5          *
+      6          *
+      7          * Filename      : bsp_spi2.c
+      8          * Version       : V0.1
+      9          * Programmer(s) : Puleo
+     10          *********************************************************************************************************
+     11          */
+     12          
+     13          /*
+     14          *********************************************************************************************************
+     15          *                                             INCLUDE FILES
+     16          *********************************************************************************************************
+     17          */
+     18          
+     19          #define  BSP_MODULE
+     20          #include <bsp.h>
+     21          
+     22          /*
+     23          *********************************************************************************************************
+     24          *                                            LOCAL DEFINES
+     25          *********************************************************************************************************
+     26          */
+     27          /* Select MSD Card: ChipSelect pin low  */
+     28          #define MSD_CS_LOW()     GPIO_ResetBits(GPIOD, GPIO_Pin_2)
+     29          /* Deselect MSD Card: ChipSelect pin high */
+     30          #define MSD_CS_HIGH()    GPIO_SetBits(GPIOD, GPIO_Pin_2)
+     31          
+     32          /* Select RF modul: ChipSelect pin low  */
+     33          #define RF_CS_LOW()     GPIO_ResetBits(GPIOB, GPIO_Pin_12)
+     34          /* Deselect RF modul: ChipSelect pin high */
+     35          #define RF_CS_HIGH()    GPIO_SetBits(GPIOB, GPIO_Pin_12)
+     36          
+     37          /*
+     38          *********************************************************************************************************
+     39          *                                           LOCAL VARIABLES
+     40          *********************************************************************************************************
+     41          */
+
+   \                                 In section .bss, align 1
+     42          BOOLEAN SPI2_ASSERT_FLAGH;
+   \                     SPI2_ASSERT_FLAGH:
+   \   00000000                      DS8 1
+     43          /*
+     44          *********************************************************************************************************
+     45          *                                      LOCAL FUNCTION PROTOTYPES
+     46          *********************************************************************************************************
+     47          */
+     48          static void SPI2_Config(void);
+     49          
+     50          /*
+     51          *********************************************************************************************************
+     52          *********************************************************************************************************
+     53          **                                         GLOBAL FUNCTIONS
+     54          *********************************************************************************************************
+     55          *********************************************************************************************************
+     56          */
+     57          
+     58          /*******************************************************************************************************************
+     59          ** Name:	  void SPI2_Clk400k()
+     60          ** Function: set the clock of SPI less than 400kHZ
+     61          ** Input:	  NULL
+     62          ** Output:	  NULL
+     63          ********************************************************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+     64          void SPI2_Clk400k(void)
+     65          {
+   \                     SPI2_Clk400k: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0xB086             SUB      SP,SP,#+24
+     66          	SPI_InitTypeDef   SPI_InitStructure;
+     67          
+     68            	/* SPI2 Config */
+     69            	SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+   \   00000004   0x2000             MOVS     R0,#+0
+   \   00000006   0xF8AD 0x0000      STRH     R0,[SP, #+0]
+     70            	SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
+   \   0000000A   0xF44F 0x7082      MOV      R0,#+260
+   \   0000000E   0xF8AD 0x0002      STRH     R0,[SP, #+2]
+     71            	SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;
+   \   00000012   0x2000             MOVS     R0,#+0
+   \   00000014   0x9001             STR      R0,[SP, #+4]
+     72                  SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
+     73                  SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
+   \   00000016   0xF8AD 0x0008      STRH     R0,[SP, #+8]
+     74            	SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
+   \   0000001A   0xF44F 0x7000      MOV      R0,#+512
+   \   0000001E   0xF8AD 0x000A      STRH     R0,[SP, #+10]
+     75            	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_128;
+   \   00000022   0x2030             MOVS     R0,#+48
+   \   00000024   0x....             B.N      ?Subroutine0
+     76                  //SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_256;
+     77            	SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
+     78            	SPI_InitStructure.SPI_CRCPolynomial = 7;
+     79            	SPI_Init(SPI2, &SPI_InitStructure);
+     80          
+     81          	SPI_I2S_ITConfig(SPI2, SPI_I2S_IT_TXE | SPI_I2S_IT_RXNE | SPI_I2S_IT_ERR, DISABLE);
+     82            	
+     83                  /* SPI2 enable */
+     84            	SPI_Cmd(SPI2, ENABLE);
+     85          }
+
+   \                                 In section .text, align 2, keep-with-next
+   \                     ?Subroutine0: (+1)
+   \   00000000   0xF8AD 0x000C      STRH     R0,[SP, #+12]
+   \   00000004   0x2000             MOVS     R0,#+0
+   \   00000006   0xF8AD 0x000E      STRH     R0,[SP, #+14]
+   \   0000000A   0x2007             MOVS     R0,#+7
+   \   0000000C   0xF8AD 0x0010      STRH     R0,[SP, #+16]
+   \   00000010   0x4669             MOV      R1,SP
+   \   00000012   0x....             LDR.N    R4,??DataTable6  ;; 0x40003800
+   \   00000014   0x4620             MOV      R0,R4
+   \   00000016   0x.... 0x....      BL       SPI_Init
+   \   0000001A   0x2200             MOVS     R2,#+0
+   \   0000001C   0x2171             MOVS     R1,#+113
+   \   0000001E   0x4620             MOV      R0,R4
+   \   00000020   0x.... 0x....      BL       SPI_I2S_ITConfig
+   \   00000024   0x2101             MOVS     R1,#+1
+   \   00000026   0x4620             MOV      R0,R4
+   \   00000028   0x.... 0x....      BL       SPI_Cmd
+   \   0000002C   0xB006             ADD      SP,SP,#+24
+   \   0000002E   0xBD10             POP      {R4,PC}          ;; return
+     86          
+     87          /*******************************************************************************************************************
+     88          ** Name:	  void SPI2_ClkToMax()
+     89          ** Function: set the clock of SPI to maximum
+     90          ** Input:	  NULL
+     91          ** Output:	  NULL
+     92          ********************************************************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+     93          void SPI2_ClkToMax(void)
+     94          {
+   \                     SPI2_ClkToMax: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0xB086             SUB      SP,SP,#+24
+     95          	SPI_InitTypeDef   SPI_InitStructure;
+     96          
+     97            	/* SPI2 Config */
+     98            	SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+   \   00000004   0x2000             MOVS     R0,#+0
+   \   00000006   0xF8AD 0x0000      STRH     R0,[SP, #+0]
+     99            	SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
+   \   0000000A   0xF44F 0x7082      MOV      R0,#+260
+   \   0000000E   0xF8AD 0x0002      STRH     R0,[SP, #+2]
+    100            	SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;
+   \   00000012   0x2000             MOVS     R0,#+0
+   \   00000014   0xF8AD 0x0004      STRH     R0,[SP, #+4]
+    101            	SPI_InitStructure.SPI_CPOL = SPI_CPOL_High;
+   \   00000018   0x2002             MOVS     R0,#+2
+   \   0000001A   0xF8AD 0x0006      STRH     R0,[SP, #+6]
+    102            	SPI_InitStructure.SPI_CPHA = SPI_CPHA_2Edge;
+   \   0000001E   0x2001             MOVS     R0,#+1
+   \   00000020   0xF8AD 0x0008      STRH     R0,[SP, #+8]
+    103            	SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
+   \   00000024   0xF44F 0x7000      MOV      R0,#+512
+   \   00000028   0xF8AD 0x000A      STRH     R0,[SP, #+10]
+    104            	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4;  //9MHz = 72M / 2 / 4
+   \   0000002C   0x2008             MOVS     R0,#+8
+   \   0000002E                      REQUIRE ?Subroutine0
+   \   0000002E                      ;; // Fall through to label ?Subroutine0
+    105            	SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
+    106            	SPI_InitStructure.SPI_CRCPolynomial = 7;
+    107            	SPI_Init(SPI2, &SPI_InitStructure);
+    108          
+    109          	SPI_I2S_ITConfig(SPI2, SPI_I2S_IT_TXE | SPI_I2S_IT_RXNE | SPI_I2S_IT_ERR, DISABLE);
+    110            	/* SPI2 enable */
+    111            	SPI_Cmd(SPI2, ENABLE);
+    112          }
+    113          
+    114          
+    115          /*******************************************************************************************************************
+    116          ** Name:	  void SPI2_SendByte()
+    117          ** Function: send a byte by SPI interface
+    118          ** Input:	  INT8U byte: the byte that will be send
+    119          ** Output:	  NULL
+    120          ********************************************************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+    121          INT8U SPI2_SendByte(INT8U byte)
+    122          {
+   \                     SPI2_SendByte: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+   \   00000002   0x4604             MOV      R4,R0
+   \   00000004   0x....             LDR.N    R5,??DataTable6  ;; 0x40003800
+    123            
+    124          	/* Wait until the transmit buffer is empty */
+    125          	while (SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE) == RESET);
+   \                     ??SPI2_SendByte_0: (+1)
+   \   00000006   0x2102             MOVS     R1,#+2
+   \   00000008   0x4628             MOV      R0,R5
+   \   0000000A   0x.... 0x....      BL       SPI_I2S_GetFlagStatus
+   \   0000000E   0x2800             CMP      R0,#+0
+   \   00000010   0xD0F9             BEQ.N    ??SPI2_SendByte_0
+    126          	/* Send the byte */
+    127          	SPI_I2S_SendData(SPI2, byte);
+   \   00000012   0x4621             MOV      R1,R4
+   \   00000014   0x4628             MOV      R0,R5
+   \   00000016   0x.... 0x....      BL       SPI_I2S_SendData
+    128                   /* Wait to receive a byte */
+    129                  while ( SPI_I2S_GetFlagStatus( SPI2, SPI_I2S_FLAG_RXNE ) == RESET );
+   \                     ??SPI2_SendByte_1: (+1)
+   \   0000001A   0x2101             MOVS     R1,#+1
+   \   0000001C   0x4628             MOV      R0,R5
+   \   0000001E   0x.... 0x....      BL       SPI_I2S_GetFlagStatus
+   \   00000022   0x2800             CMP      R0,#+0
+   \   00000024   0xD0F9             BEQ.N    ??SPI2_SendByte_1
+    130                  /* Return the byte read from the SPI bus */
+    131                  return SPI_I2S_ReceiveData( SPI2 );
+   \   00000026   0x4628             MOV      R0,R5
+   \   00000028   0x.... 0x....      BL       SPI_I2S_ReceiveData
+   \   0000002C   0xB2C0             UXTB     R0,R0
+   \   0000002E   0xBD32             POP      {R1,R4,R5,PC}    ;; return
+    132          }
+    133          
+    134          
+    135          /*******************************************************************************************************************
+    136          ** Name:	  INT8U SPI2_RecByte()
+    137          ** Function: receive a byte from SPI interface
+    138          ** Input:	  NULL
+    139          ** Output:	  the byte that be received
+    140          ********************************************************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+    141          INT8U SPI2_RecByte(void)
+    142          {
+   \                     SPI2_RecByte: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    143          	INT8U Data = 0;
+   \   00000002   0x....             LDR.N    R4,??DataTable6  ;; 0x40003800
+    144          	
+    145          	/* Wait until the transmit buffer is empty */
+    146          	while (SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE) == RESET);
+   \                     ??SPI2_RecByte_0: (+1)
+   \   00000004   0x2102             MOVS     R1,#+2
+   \   00000006   0x4620             MOV      R0,R4
+   \   00000008   0x.... 0x....      BL       SPI_I2S_GetFlagStatus
+   \   0000000C   0x2800             CMP      R0,#+0
+   \   0000000E   0xD0F9             BEQ.N    ??SPI2_RecByte_0
+    147          	/* Send the byte */
+    148          	SPI_I2S_SendData(SPI2, 0xFF);
+   \   00000010   0x21FF             MOVS     R1,#+255
+   \   00000012   0x4620             MOV      R0,R4
+   \   00000014   0x.... 0x....      BL       SPI_I2S_SendData
+    149          
+    150          	/* Wait until a data is received */
+    151          	while (SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_RXNE) == RESET);
+   \                     ??SPI2_RecByte_1: (+1)
+   \   00000018   0x2101             MOVS     R1,#+1
+   \   0000001A   0x4620             MOV      R0,R4
+   \   0000001C   0x.... 0x....      BL       SPI_I2S_GetFlagStatus
+   \   00000020   0x2800             CMP      R0,#+0
+   \   00000022   0xD0F9             BEQ.N    ??SPI2_RecByte_1
+    152          	/* Get the received data */
+    153          	Data = SPI_I2S_ReceiveData(SPI2);
+    154          	
+    155          	/* Return the shifted data */
+    156          	return Data;
+   \   00000024   0x4620             MOV      R0,R4
+   \   00000026   0x.... 0x....      BL       SPI_I2S_ReceiveData
+   \   0000002A   0xB2C0             UXTB     R0,R0
+   \   0000002C   0xBD10             POP      {R4,PC}          ;; return
+    157          }
+    158          
+    159          
+    160          /*******************************************************************************************************************
+    161          ** Name:	  void MSD_CS_Assert()
+    162          ** Function: select the SPI MMC slave 
+    163          ** Input:	  NULL
+    164          ** Output:	  NULL
+    165          ********************************************************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+    166          void MSD_CS_Assert(void)
+    167          {
+   \                     MSD_CS_Assert: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0x....             LDR.N    R4,??DataTable6_1
+   \   00000004   0x7820             LDRB     R0,[R4, #+0]
+    168                  while (SPI2_ASSERT_FLAGH);
+   \                     ??MSD_CS_Assert_0: (+1)
+   \   00000006   0x2800             CMP      R0,#+0
+   \   00000008   0xD1FD             BNE.N    ??MSD_CS_Assert_0
+    169          	MSD_CS_LOW();			   					/* select the SPI slave */ 
+   \   0000000A   0x....             LDR.N    R0,??DataTable6_2  ;; 0x40011400
+   \   0000000C   0x2104             MOVS     R1,#+4
+   \   0000000E   0x....             B.N      ?Subroutine1
+    170                  SPI2_ASSERT_FLAGH = TRUE;
+    171          }
+
+   \                                 In section .text, align 2, keep-with-next
+   \                     ?Subroutine1: (+1)
+   \   00000000   0x.... 0x....      BL       GPIO_ResetBits
+   \   00000004   0x2001             MOVS     R0,#+1
+   \   00000006   0x7020             STRB     R0,[R4, #+0]
+   \   00000008   0xBD10             POP      {R4,PC}          ;; return
+    172          
+    173          
+    174          /*******************************************************************************************************************
+    175          ** Name:	  void MSD_CS_Deassert()
+    176          ** Function: not select the SPI MMC slave 
+    177          ** Input:	  NULL
+    178          ** Output:	  NULL
+    179          ********************************************************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+    180          void MSD_CS_Deassert(void)
+    181          {
+   \                     MSD_CS_Deassert: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    182          	MSD_CS_HIGH();			    		         		/* not select the SPI slave */
+   \   00000002   0x2104             MOVS     R1,#+4
+   \   00000004   0x....             LDR.N    R0,??DataTable6_2  ;; 0x40011400
+   \   00000006   0x....             B.N      ?Subroutine2
+    183                  SPI2_ASSERT_FLAGH = FALSE;
+    184          }
+
+   \                                 In section .text, align 2, keep-with-next
+   \                     ?Subroutine2: (+1)
+   \   00000000   0x.... 0x....      BL       GPIO_SetBits
+   \   00000004   0x....             LDR.N    R1,??DataTable6_1
+   \   00000006   0x2000             MOVS     R0,#+0
+   \   00000008   0x7008             STRB     R0,[R1, #+0]
+   \   0000000A   0xBD01             POP      {R0,PC}          ;; return
+    185          
+    186          /*******************************************************************************************************************
+    187          ** Name:	  void RF_CS_Assert()
+    188          ** Function: select the SPI RF slave 
+    189          ** Input:	  NULL
+    190          ** Output:	  NULL
+    191          ********************************************************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+    192          void RF_CS_Assert(void)
+    193          {
+   \                     RF_CS_Assert: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0x....             LDR.N    R4,??DataTable6_1
+   \   00000004   0x7820             LDRB     R0,[R4, #+0]
+    194                  while (SPI2_ASSERT_FLAGH);
+   \                     ??RF_CS_Assert_0: (+1)
+   \   00000006   0x2800             CMP      R0,#+0
+   \   00000008   0xD1FD             BNE.N    ??RF_CS_Assert_0
+    195                  RF_CS_LOW();			   		        		/* select the SPI slave */ 
+   \   0000000A   0x....             LDR.N    R0,??DataTable6_3  ;; 0x40010c00
+   \   0000000C   0xF44F 0x5180      MOV      R1,#+4096
+   \   00000010                      REQUIRE ?Subroutine1
+   \   00000010                      ;; // Fall through to label ?Subroutine1
+    196                  SPI2_ASSERT_FLAGH = TRUE;
+    197          }
+    198          
+    199          
+    200          /*******************************************************************************************************************
+    201          ** Name:	  void RF_CS_Deassert()
+    202          ** Function: not select the SPI RF slave 
+    203          ** Input:	  NULL
+    204          ** Output:	  NULL
+    205          ********************************************************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+    206          void RF_CS_Deassert(void)
+    207          {
+   \                     RF_CS_Deassert: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    208          	RF_CS_HIGH();			    	 	        		/* not select the SPI slave */
+   \   00000002   0xF44F 0x5180      MOV      R1,#+4096
+   \   00000006   0x....             LDR.N    R0,??DataTable6_3  ;; 0x40010c00
+   \   00000008                      REQUIRE ?Subroutine2
+   \   00000008                      ;; // Fall through to label ?Subroutine2
+    209                  SPI2_ASSERT_FLAGH = FALSE;
+    210          }
+    211          
+    212          /*******************************************************************************
+    213          * Function Name  : SPI_Config
+    214          * Description    : Initializes the SPI1 and CS pins.
+    215          * Input          : None
+    216          * Output         : None
+    217          * Return         : None
+    218          *******************************************************************************/
+    219          void SPI2_Config(void)
+    220          {
+    221            GPIO_InitTypeDef  GPIO_InitStructure;
+    222          
+    223            /* GPIOB and GPIOD Periph clock enable */
+    224            RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOD, ENABLE);
+    225            /* SPI2 Periph clock enable */
+    226            RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
+    227          
+    228            /* Configure SPI2 pins: SCK, MISO and MOSI */
+    229            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
+    230            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    231            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    232            GPIO_Init(GPIOB, &GPIO_InitStructure);
+    233          
+    234            /* Configure PD2 pin: MMC CS pin */
+    235            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+    236            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    237            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    238            GPIO_Init(GPIOD, &GPIO_InitStructure);
+    239            
+    240            /* Configure PB12 pin: RF CS pin */
+    241            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
+    242            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    243            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    244            GPIO_Init(GPIOB, &GPIO_InitStructure);
+    245            
+    246          }
+    247          
+    248          /*******************************************************************************************************************
+    249          ** Name:	  void SPI2_HardWareInit()
+    250          ** Function: initialize the hardware condiction that access sd card, and rf device
+    251          ** Input:	  NULL
+    252          ** Output:	  NULL
+    253          ********************************************************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+    254          void SPI2_HardWareInit(void)
+    255          { 
+   \                     SPI2_HardWareInit: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+    256          	SPI2_Config();								
+   \   00000002   0x2101             MOVS     R1,#+1
+   \   00000004   0x2028             MOVS     R0,#+40
+   \   00000006   0x.... 0x....      BL       RCC_APB2PeriphClockCmd
+   \   0000000A   0x2101             MOVS     R1,#+1
+   \   0000000C   0xF44F 0x4080      MOV      R0,#+16384
+   \   00000010   0x.... 0x....      BL       RCC_APB1PeriphClockCmd
+   \   00000014   0xF44F 0x4060      MOV      R0,#+57344
+   \   00000018   0xF8AD 0x0000      STRH     R0,[SP, #+0]
+   \   0000001C   0x2003             MOVS     R0,#+3
+   \   0000001E   0xF88D 0x0002      STRB     R0,[SP, #+2]
+   \   00000022   0x2018             MOVS     R0,#+24
+   \   00000024   0xF88D 0x0003      STRB     R0,[SP, #+3]
+   \   00000028   0x4669             MOV      R1,SP
+   \   0000002A   0x....             LDR.N    R4,??DataTable6_3  ;; 0x40010c00
+   \   0000002C   0x....             LDR.N    R5,??DataTable6_2  ;; 0x40011400
+   \   0000002E   0x4620             MOV      R0,R4
+   \   00000030   0x.... 0x....      BL       GPIO_Init
+   \   00000034   0x2004             MOVS     R0,#+4
+   \   00000036   0xF8AD 0x0000      STRH     R0,[SP, #+0]
+   \   0000003A   0x4669             MOV      R1,SP
+   \   0000003C   0x2003             MOVS     R0,#+3
+   \   0000003E   0xF88D 0x0002      STRB     R0,[SP, #+2]
+   \   00000042   0x2010             MOVS     R0,#+16
+   \   00000044   0xF88D 0x0003      STRB     R0,[SP, #+3]
+   \   00000048   0x4628             MOV      R0,R5
+   \   0000004A   0x.... 0x....      BL       GPIO_Init
+   \   0000004E   0xF44F 0x5080      MOV      R0,#+4096
+   \   00000052   0xF8AD 0x0000      STRH     R0,[SP, #+0]
+   \   00000056   0x4669             MOV      R1,SP
+   \   00000058   0x2003             MOVS     R0,#+3
+   \   0000005A   0xF88D 0x0002      STRB     R0,[SP, #+2]
+   \   0000005E   0x2010             MOVS     R0,#+16
+   \   00000060   0xF88D 0x0003      STRB     R0,[SP, #+3]
+   \   00000064   0x4620             MOV      R0,R4
+   \   00000066   0x.... 0x....      BL       GPIO_Init
+    257              
+    258                  SPI2_ASSERT_FLAGH = FALSE;
+   \   0000006A   0x....             LDR.N    R1,??DataTable6_1
+   \   0000006C   0x2000             MOVS     R0,#+0
+   \   0000006E   0x7008             STRB     R0,[R1, #+0]
+    259          	MSD_CS_HIGH();
+   \   00000070   0x2104             MOVS     R1,#+4
+   \   00000072   0x4628             MOV      R0,R5
+   \   00000074   0x.... 0x....      BL       GPIO_SetBits
+    260                  RF_CS_HIGH();
+   \   00000078   0xF44F 0x5180      MOV      R1,#+4096
+   \   0000007C   0x4620             MOV      R0,R4
+   \   0000007E   0x.... 0x....      BL       GPIO_SetBits
+    261          
+    262          	SPI2_Clk400k();	
+   \   00000082   0x.... 0x....      BL       SPI2_Clk400k
+    263          }
+   \   00000086   0xBD31             POP      {R0,R4,R5,PC}    ;; return
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6:
+   \   00000000   0x40003800         DC32     0x40003800
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_1:
+   \   00000000   0x........         DC32     SPI2_ASSERT_FLAGH
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_2:
+   \   00000000   0x40011400         DC32     0x40011400
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_3:
+   \   00000000   0x40010C00         DC32     0x40010c00
+    264          
+    265          
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       8   MSD_CS_Assert
+         8   -> GPIO_ResetBits
+       8   MSD_CS_Deassert
+         8   -> GPIO_SetBits
+       8   RF_CS_Assert
+         8   -> GPIO_ResetBits
+       8   RF_CS_Deassert
+         8   -> GPIO_SetBits
+      32   SPI2_Clk400k
+        32   -> SPI_Cmd
+        32   -> SPI_I2S_ITConfig
+        32   -> SPI_Init
+      32   SPI2_ClkToMax
+        32   -> SPI_Cmd
+        32   -> SPI_I2S_ITConfig
+        32   -> SPI_Init
+      16   SPI2_HardWareInit
+        16   -> GPIO_Init
+        16   -> GPIO_SetBits
+        16   -> RCC_APB1PeriphClockCmd
+        16   -> RCC_APB2PeriphClockCmd
+        16   -> SPI2_Clk400k
+       8   SPI2_RecByte
+         8   -> SPI_I2S_GetFlagStatus
+         8   -> SPI_I2S_ReceiveData
+         8   -> SPI_I2S_SendData
+      16   SPI2_SendByte
+        16   -> SPI_I2S_GetFlagStatus
+        16   -> SPI_I2S_ReceiveData
+        16   -> SPI_I2S_SendData
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable6
+       4  ??DataTable6_1
+       4  ??DataTable6_2
+       4  ??DataTable6_3
+      48  ?Subroutine0
+      10  ?Subroutine1
+      12  ?Subroutine2
+      16  MSD_CS_Assert
+       8  MSD_CS_Deassert
+      16  RF_CS_Assert
+       8  RF_CS_Deassert
+       1  SPI2_ASSERT_FLAGH
+      38  SPI2_Clk400k
+      46  SPI2_ClkToMax
+     136  SPI2_HardWareInit
+      46  SPI2_RecByte
+      48  SPI2_SendByte
+
+ 
+   1 byte  in section .bss
+ 448 bytes in section .text
+ 
+ 448 bytes of CODE memory
+   1 byte  of DATA memory
+
+Errors: none
+Warnings: none

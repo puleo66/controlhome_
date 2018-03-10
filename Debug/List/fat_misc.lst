@@ -1,0 +1,3012 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:14:51
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome -
+#        RF69w\uC-FatFS\fsl\fat\fat_misc.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome -
+#        RF69w\uC-FatFS\fsl\fat\fat_misc.c" -lCN "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\fat_misc.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\fat_misc.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\fat_misc.c
+      1          /*
+      2          **********************************************************************
+      3          *                          Micrium, Inc.
+      4          *                      949 Crestview Circle
+      5          *                     Weston,  FL 33327-1848
+      6          *
+      7          *                            uC/FS
+      8          *
+      9          *             (c) Copyright 2001 - 2003, Micrium, Inc.
+     10          *                      All rights reserved.
+     11          *
+     12          ***********************************************************************
+     13          
+     14          ----------------------------------------------------------------------
+     15          File        : fat_misc.c
+     16          Purpose     : File system's FAT File System Layer misc routines
+     17          ----------------------------------------------------------------------
+     18          Known problems or limitations with current version
+     19          ----------------------------------------------------------------------
+     20          None.
+     21          ---------------------------END-OF-HEADER------------------------------
+     22          */
+     23          
+     24          /*********************************************************************
+     25          *
+     26          *             #include Section
+     27          *
+     28          **********************************************************************
+     29          */
+     30          
+     31          #include "fs_conf.h"
+     32          #include "fs_port.h"
+     33          #include "fs_dev.h"
+     34          #include "fs_api.h"
+     35          #include "fs_fsl.h"
+     36          #include "fs_int.h"
+     37          #include "fs_os.h"
+     38          #include "fs_lbl.h"
+     39          #include "fs_fat.h"
+     40          #include "fs_clib.h"
+     41          
+     42          
+     43          /*********************************************************************
+     44          *
+     45          *             #define constants
+     46          *
+     47          **********************************************************************
+     48          */
+     49          
+     50          #ifndef FS_FAT_NOFAT32
+     51            #define FS_FAT_NOFAT32        0
+     52          #endif /* FS_FAT_NOFAT32 */
+     53          
+     54          #ifndef FS_DIR_MAXOPEN
+     55            #define FS_DIR_MAXOPEN        0
+     56          #endif /* FS_DIR_MAXOPEN */
+     57          
+     58          #define FS_MEMBLOCK_NUM   (FS_MAXOPEN+FS_DIR_MAXOPEN)*2
+     59          
+     60          
+     61          /*********************************************************************
+     62          *
+     63          *             Local data types
+     64          *
+     65          **********************************************************************
+     66          */
+     67          
+     68          typedef struct {
+     69            int status;
+     70            char memory[FS_FAT_SEC_SIZE];
+     71          } _FS_FAT_block_type;
+     72          
+     73          
+     74          /*********************************************************************
+     75          *
+     76          *             Local Variables        
+     77          *
+     78          **********************************************************************
+     79          */
+     80          
+
+   \                                 In section .bss, align 4
+     81          static _FS_FAT_block_type          _FS_memblock[FS_MEMBLOCK_NUM];
+   \                     _FS_memblock:
+   \   00000000                      DS8 5160
+     82          
+     83          
+     84          /*********************************************************************
+     85          *
+     86          *             Local functions section
+     87          *
+     88          **********************************************************************
+     89          */
+     90          
+     91          /*********************************************************************
+     92          *
+     93          *             _FS_ReadBPB
+     94          *
+     95            Description:
+     96            FS internal function. Read Bios-Parameter-Block from a device and
+     97            copy the relevant data to FS__FAT_aBPBUnit.
+     98          
+     99            Parameters:
+    100            Idx         - Index of device in the device information table 
+    101                          referred by FS__pDevInfo.
+    102            Unit        - Unit number.
+    103           
+    104            Return value:
+    105            ==0         - BPB successfully read.
+    106            <0          - An error has occured.
+    107          */
+    108          
+
+   \                                 In section .text, align 2, keep-with-next
+    109          static int _FS_ReadBPB(int Idx, FS_u32 Unit) {
+   \                     _FS_ReadBPB: (+1)
+   \   00000000   0xB5F8             PUSH     {R3-R7,LR}
+   \   00000002   0x4604             MOV      R4,R0
+   \   00000004   0x460D             MOV      R5,R1
+    110            int err;
+    111            unsigned char *buffer;
+    112            
+    113            buffer = (unsigned char*)FS__fat_malloc(FS_FAT_SEC_SIZE);
+   \   00000006   0x.... 0x....      BL       FS_X_OS_LockMem
+   \   0000000A   0x.... 0x....      LDR.W    R1,??DataTable9
+   \   0000000E   0x2000             MOVS     R0,#+0
+   \   00000010   0x460A             MOV      R2,R1
+   \                     ??_FS_ReadBPB_0: (+1)
+   \   00000012   0x6813             LDR      R3,[R2, #+0]
+   \   00000014   0xB15B             CBZ.N    R3,??_FS_ReadBPB_1
+   \   00000016   0xF8D2 0x3204      LDR      R3,[R2, #+516]
+   \   0000001A   0x1C40             ADDS     R0,R0,#+1
+   \   0000001C   0xB13B             CBZ.N    R3,??_FS_ReadBPB_1
+   \   0000001E   0x1C40             ADDS     R0,R0,#+1
+   \   00000020   0x280A             CMP      R0,#+10
+   \   00000022   0xF502 0x6281      ADD      R2,R2,#+1032
+   \   00000026   0xDBF4             BLT.N    ??_FS_ReadBPB_0
+   \   00000028   0x.... 0x....      BL       FS_X_OS_UnlockMem
+    114            if (!buffer) {
+    115              return -1;
+   \   0000002C   0xE01E             B.N      ??_FS_ReadBPB_2
+   \                     ??_FS_ReadBPB_1: (+1)
+   \   0000002E   0xEB00 0x12C0      ADD      R2,R0,R0, LSL #+7
+   \   00000032   0x0090             LSLS     R0,R2,#+2
+   \   00000034   0x2201             MOVS     R2,#+1
+   \   00000036   0x5042             STR      R2,[R0, R1]
+   \   00000038   0x1846             ADDS     R6,R0,R1
+   \   0000003A   0xF44F 0x7200      MOV      R2,#+512
+   \   0000003E   0x2100             MOVS     R1,#+0
+   \   00000040   0x1D30             ADDS     R0,R6,#+4
+   \   00000042   0x.... 0x....      BL       FS__CLIB_memset
+   \   00000046   0x.... 0x....      BL       FS_X_OS_UnlockMem
+    116            }
+    117            err = FS__lb_read(FS__pDevInfo[Idx].devdriver, Unit, 0, (void*)buffer);
+   \   0000004A   0x.... 0x....      LDR.W    R0,??DataTable9_1
+   \   0000004E   0x6800             LDR      R0,[R0, #+0]
+   \   00000050   0xEB00 0x1004      ADD      R0,R0,R4, LSL #+4
+   \   00000054   0x1D36             ADDS     R6,R6,#+4
+   \   00000056   0x6880             LDR      R0,[R0, #+8]
+   \   00000058   0x4633             MOV      R3,R6
+   \   0000005A   0x2200             MOVS     R2,#+0
+   \   0000005C   0x4629             MOV      R1,R5
+   \   0000005E   0x.... 0x....      BL       FS__lb_read
+   \   00000062   0x0007             MOVS     R7,R0
+    118            if (err < 0) {
+   \   00000064   0xD505             BPL.N    ??_FS_ReadBPB_3
+    119              FS__fat_free(buffer);
+   \   00000066   0x4630             MOV      R0,R6
+   \   00000068   0x.... 0x....      BL       FS__fat_free
+    120              return -1;
+   \                     ??_FS_ReadBPB_2: (+1)
+   \   0000006C   0xF04F 0x30FF      MOV      R0,#-1
+   \   00000070   0xBDF2             POP      {R1,R4-R7,PC}
+    121            }
+    122            /* Assign FS__FAT_aBPBUnit */
+    123            FS__FAT_aBPBUnit[Idx][Unit].BytesPerSec   = buffer[11] + 256 * buffer[12];      /* _512_,1024,2048,4096           */
+   \                     ??_FS_ReadBPB_3: (+1)
+   \   00000072   0xF106 0x000B      ADD      R0,R6,#+11
+   \   00000076   0x.... 0x....      LDR.W    R1,??DataTable9_2
+   \   0000007A   0x7802             LDRB     R2,[R0, #+0]
+   \   0000007C   0x7843             LDRB     R3,[R0, #+1]
+   \   0000007E   0xEB01 0x1144      ADD      R1,R1,R4, LSL #+5
+   \   00000082   0xEB01 0x1145      ADD      R1,R1,R5, LSL #+5
+   \   00000086   0xEB02 0x2203      ADD      R2,R2,R3, LSL #+8
+   \   0000008A   0x818A             STRH     R2,[R1, #+12]
+    124            FS__FAT_aBPBUnit[Idx][Unit].SecPerClus    = buffer[13];                         /* sec in allocation unit         */
+   \   0000008C   0x7882             LDRB     R2,[R0, #+2]
+   \   0000008E   0x770A             STRB     R2,[R1, #+28]
+    125            FS__FAT_aBPBUnit[Idx][Unit].RsvdSecCnt    = buffer[14] + 256 * buffer[15];      /* 1 for FAT12 & FAT16            */
+   \   00000090   0x7903             LDRB     R3,[R0, #+4]
+   \   00000092   0x78C2             LDRB     R2,[R0, #+3]
+   \   00000094   0xEB02 0x2203      ADD      R2,R2,R3, LSL #+8
+   \   00000098   0x834A             STRH     R2,[R1, #+26]
+    126            FS__FAT_aBPBUnit[Idx][Unit].NumFATs       = buffer[16];                         /* 2                              */
+   \   0000009A   0x7942             LDRB     R2,[R0, #+5]
+   \   0000009C   0x774A             STRB     R2,[R1, #+29]
+    127            FS__FAT_aBPBUnit[Idx][Unit].RootEntCnt    = buffer[17] + 256 * buffer[18];      /* number of root dir entries     */
+   \   0000009E   0x79C3             LDRB     R3,[R0, #+7]
+   \   000000A0   0x7982             LDRB     R2,[R0, #+6]
+   \   000000A2   0xEB02 0x2203      ADD      R2,R2,R3, LSL #+8
+   \   000000A6   0x81CA             STRH     R2,[R1, #+14]
+    128            FS__FAT_aBPBUnit[Idx][Unit].TotSec16      = buffer[19] + 256 * buffer[20];      /* RSVD + FAT + ROOT + FATA (<64k) */
+   \   000000A8   0x7A43             LDRB     R3,[R0, #+9]
+   \   000000AA   0x7A02             LDRB     R2,[R0, #+8]
+   \   000000AC   0xEB02 0x2203      ADD      R2,R2,R3, LSL #+8
+   \   000000B0   0x820A             STRH     R2,[R1, #+16]
+    129            FS__FAT_aBPBUnit[Idx][Unit].FATSz16       = buffer[22] + 256 * buffer[23];      /* number of FAT sectors          */
+   \   000000B2   0x7B03             LDRB     R3,[R0, #+12]
+   \   000000B4   0x7AC2             LDRB     R2,[R0, #+11]
+   \   000000B6   0xEB02 0x2203      ADD      R2,R2,R3, LSL #+8
+   \   000000BA   0x824A             STRH     R2,[R1, #+18]
+    130            FS__FAT_aBPBUnit[Idx][Unit].TotSec32      = buffer[32] + 0x100UL * buffer[33]   /* RSVD + FAT + ROOT + FATA (>=64k) */
+    131                                                        + 0x10000UL * buffer[34] 
+    132                                                        + 0x1000000UL * buffer[35];
+   \   000000BC   0x7D83             LDRB     R3,[R0, #+22]
+   \   000000BE   0x7D42             LDRB     R2,[R0, #+21]
+   \   000000C0   0xEB02 0x2203      ADD      R2,R2,R3, LSL #+8
+   \   000000C4   0x7DC3             LDRB     R3,[R0, #+23]
+   \   000000C6   0xEB02 0x4203      ADD      R2,R2,R3, LSL #+16
+   \   000000CA   0x7E03             LDRB     R3,[R0, #+24]
+   \   000000CC   0xEB02 0x6203      ADD      R2,R2,R3, LSL #+24
+   \   000000D0   0x600A             STR      R2,[R1, #+0]
+    133            if (FS__FAT_aBPBUnit[Idx][Unit].FATSz16 == 0) {
+   \   000000D2   0x8A4A             LDRH     R2,[R1, #+18]
+   \   000000D4   0xBB0A             CBNZ.N   R2,??_FS_ReadBPB_4
+    134              FS__FAT_aBPBUnit[Idx][Unit].FATSz32       = buffer[36] + 0x100UL * buffer[37]   /* number of FAT sectors          */
+    135                                                          + 0x10000UL * buffer[38] 
+    136                                                          + 0x1000000UL * buffer[39];
+   \   000000D6   0x7E42             LDRB     R2,[R0, #+25]
+   \   000000D8   0x7E83             LDRB     R3,[R0, #+26]
+   \   000000DA   0xEB02 0x2203      ADD      R2,R2,R3, LSL #+8
+   \   000000DE   0x7EC3             LDRB     R3,[R0, #+27]
+   \   000000E0   0xEB02 0x4203      ADD      R2,R2,R3, LSL #+16
+   \   000000E4   0x7F03             LDRB     R3,[R0, #+28]
+   \   000000E6   0xEB02 0x6203      ADD      R2,R2,R3, LSL #+24
+   \   000000EA   0x604A             STR      R2,[R1, #+4]
+    137              FS__FAT_aBPBUnit[Idx][Unit].ExtFlags      = buffer[40] + 256 * buffer[41];      /* mirroring info                 */
+   \   000000EC   0x7F42             LDRB     R2,[R0, #+29]
+   \   000000EE   0x7F80             LDRB     R0,[R0, #+30]
+   \   000000F0   0xEB02 0x2000      ADD      R0,R2,R0, LSL #+8
+   \   000000F4   0x8288             STRH     R0,[R1, #+20]
+    138              FS__FAT_aBPBUnit[Idx][Unit].RootClus      = buffer[44] + 0x100UL * buffer[45]   /* root dir clus for FAT32        */
+    139                                                          + 0x10000UL * buffer[46] 
+    140                                                          + 0x1000000UL * buffer[47];
+   \   000000F6   0xF106 0x002C      ADD      R0,R6,#+44
+   \   000000FA   0x7802             LDRB     R2,[R0, #+0]
+   \   000000FC   0x7843             LDRB     R3,[R0, #+1]
+   \   000000FE   0xEB02 0x2203      ADD      R2,R2,R3, LSL #+8
+   \   00000102   0x7883             LDRB     R3,[R0, #+2]
+   \   00000104   0xEB02 0x4203      ADD      R2,R2,R3, LSL #+16
+   \   00000108   0x78C3             LDRB     R3,[R0, #+3]
+   \   0000010A   0xEB02 0x6203      ADD      R2,R2,R3, LSL #+24
+   \   0000010E   0x608A             STR      R2,[R1, #+8]
+    141              FS__FAT_aBPBUnit[Idx][Unit].FSInfo        = buffer[48] + 256 * buffer[49];      /* position of FSInfo structure   */
+   \   00000110   0x7902             LDRB     R2,[R0, #+4]
+   \   00000112   0x7940             LDRB     R0,[R0, #+5]
+   \   00000114   0xEB02 0x2000      ADD      R0,R2,R0, LSL #+8
+   \   00000118   0xE003             B.N      ??_FS_ReadBPB_5
+    142            }
+    143            else {
+    144              FS__FAT_aBPBUnit[Idx][Unit].FATSz32       = 0;
+   \                     ??_FS_ReadBPB_4: (+1)
+   \   0000011A   0x2000             MOVS     R0,#+0
+   \   0000011C   0x6048             STR      R0,[R1, #+4]
+    145              FS__FAT_aBPBUnit[Idx][Unit].ExtFlags      = 0;
+   \   0000011E   0x8288             STRH     R0,[R1, #+20]
+    146              FS__FAT_aBPBUnit[Idx][Unit].RootClus      = 0;
+   \   00000120   0x6088             STR      R0,[R1, #+8]
+    147              FS__FAT_aBPBUnit[Idx][Unit].FSInfo        = 0;
+   \                     ??_FS_ReadBPB_5: (+1)
+   \   00000122   0x82C8             STRH     R0,[R1, #+22]
+    148            }
+    149            FS__FAT_aBPBUnit[Idx][Unit].Signature     = buffer[FS_FAT_SEC_SIZE-2] 
+    150                                                        + 256 * buffer[FS_FAT_SEC_SIZE-1];
+   \   00000124   0xF506 0x70FF      ADD      R0,R6,#+510
+   \   00000128   0x7802             LDRB     R2,[R0, #+0]
+   \   0000012A   0x7840             LDRB     R0,[R0, #+1]
+   \   0000012C   0xEB02 0x2000      ADD      R0,R2,R0, LSL #+8
+   \   00000130   0x8308             STRH     R0,[R1, #+24]
+    151            FS__fat_free(buffer);
+   \   00000132   0x4630             MOV      R0,R6
+   \   00000134   0x.... 0x....      BL       FS__fat_free
+    152            return err;
+   \   00000138   0x4638             MOV      R0,R7
+   \   0000013A   0xBDF2             POP      {R1,R4-R7,PC}    ;; return
+    153          }
+    154          
+    155          
+    156          /*********************************************************************
+    157          *
+    158          *             _FS__fat_FindFreeCluster
+    159          *
+    160            Description:
+    161            FS internal function. Find the next free entry in the FAT.
+    162          
+    163            Parameters:
+    164            Idx         - Index of device in the device information table 
+    165                          referred by FS__pDevInfo.
+    166            Unit        - Unit number.
+    167            pFATSector  - Returns the sector number of the free entry. 
+    168            pLastSector - Returns the sector number of the sector in pBuffer.
+    169            pFATOffset  - Returns the offset of the free FAT entry within the
+    170                          sector pFATSector.
+    171            LastClust   - Cluster, which will be used to link the new allocated
+    172                          cluster to. Here it is used at hint for where to start
+    173                          in the FAT.
+    174            pBuffer     - Pointer to a sector buffer.
+    175            FSysType    - ==1 => FAT12
+    176                          ==0 => FAT16
+    177                          ==2 => FAT32
+    178            FATSize     - Size of one FAT ind sectors.
+    179            BytesPerSec - Number of bytes in each sector.
+    180           
+    181            Return value:
+    182            >=0         - Number of the free cluster.
+    183            <0          - An error has occured.
+    184          */
+    185          
+
+   \                                 In section .text, align 2, keep-with-next
+    186          static FS_i32 _FS__fat_FindFreeCluster(int Idx, FS_u32 Unit, FS_i32 *pFATSector, 
+    187                                                 FS_i32 *pLastSector, FS_i32 *pFATOffset, 
+    188                                                 FS_i32 LastClust, unsigned char *pBuffer, 
+    189                                                 int FSysType, FS_u32 FATSize, FS_i32 BytesPerSec) {
+   \                     _FS__fat_FindFreeCluster: (+1)
+   \   00000000   0xE92D 0x4FF9      PUSH     {R0,R3-R11,LR}
+   \   00000004   0xB083             SUB      SP,SP,#+12
+   \   00000006   0x4615             MOV      R5,R2
+    190            FS_u32 totclst;
+    191            FS_u32 rootdirsize;
+    192            FS_i32 curclst;
+    193            FS_i32 fatindex;
+    194            int err;
+    195            int scan;
+    196            unsigned char fatentry;
+    197            unsigned char a;
+    198            unsigned char b;
+    199          #if (FS_FAT_NOFAT32==0)  
+    200            unsigned char c;
+    201            unsigned char d;
+    202          #endif  
+    203            
+    204            if (LastClust > 0) {
+   \   00000008   0x980F             LDR      R0,[SP, #+60]
+   \   0000000A   0x2801             CMP      R0,#+1
+   \   0000000C   0xBFA6             ITTE     GE 
+   \   0000000E   0x980F             LDRGE    R0,[SP, #+60]
+   \   00000010   0x1C44             ADDGE    R4,R0,#+1
+   \   00000012   0x2400             MOVLT    R4,#+0
+    205              curclst = LastClust + 1;  /* Start scan after the previous allocated sector */
+    206            }
+    207            else {
+    208              curclst = 0;  /*  Start scan at the beginning of the media */
+    209            }
+    210            scan          = 0;
+   \   00000014   0xF04F 0x0B00      MOV      R11,#+0
+   \   00000018   0x4688             MOV      R8,R1
+    211            *pFATSector   = 0;
+   \   0000001A   0xF8C5 0xB000      STR      R11,[R5, #+0]
+    212            *pLastSector  = -1;
+   \   0000001E   0xF04F 0x30FF      MOV      R0,#-1
+   \   00000022   0x9904             LDR      R1,[SP, #+16]
+   \   00000024   0x6008             STR      R0,[R1, #+0]
+    213            fatentry      = 0xff;
+   \   00000026   0x20FF             MOVS     R0,#+255
+    214            /* Calculate total number of data clusters on the media */
+    215            totclst = (FS_u32)FS__FAT_aBPBUnit[Idx][Unit].TotSec16;
+   \   00000028   0x9A03             LDR      R2,[SP, #+12]
+   \   0000002A   0x.... 0x....      LDR.W    R1,??DataTable9_2
+   \   0000002E   0xEB01 0x1142      ADD      R1,R1,R2, LSL #+5
+   \   00000032   0xEB01 0x1648      ADD      R6,R1,R8, LSL #+5
+   \   00000036   0x8A31             LDRH     R1,[R6, #+16]
+    216            if (totclst == 0) {
+   \   00000038   0xB901             CBNZ.N   R1,??_FS__fat_FindFreeCluster_0
+    217              totclst = FS__FAT_aBPBUnit[Idx][Unit].TotSec32;
+   \   0000003A   0x6831             LDR      R1,[R6, #+0]
+    218            }
+    219            rootdirsize = ((FS_u32)((FS_u32)FS__FAT_aBPBUnit[Idx][Unit].RootEntCnt) * FS_FAT_DENTRY_SIZE) / BytesPerSec;
+    220            totclst     = totclst - (FS__FAT_aBPBUnit[Idx][Unit].RsvdSecCnt + FS__FAT_aBPBUnit[Idx][Unit].NumFATs * FATSize + rootdirsize);
+    221            totclst    /= FS__FAT_aBPBUnit[Idx][Unit].SecPerClus;
+   \                     ??_FS__fat_FindFreeCluster_0: (+1)
+   \   0000003C   0x8B72             LDRH     R2,[R6, #+26]
+   \   0000003E   0x9B12             LDR      R3,[SP, #+72]
+   \   00000040   0xF8DD 0x9040      LDR      R9,[SP, #+64]
+   \   00000044   0x1A89             SUBS     R1,R1,R2
+   \   00000046   0x7F72             LDRB     R2,[R6, #+29]
+   \   00000048   0xFB03 0x1112      MLS      R1,R3,R2,R1
+   \   0000004C   0x89F2             LDRH     R2,[R6, #+14]
+   \   0000004E   0x9B13             LDR      R3,[SP, #+76]
+   \   00000050   0x0152             LSLS     R2,R2,#+5
+   \   00000052   0xFBB2 0xF2F3      UDIV     R2,R2,R3
+   \   00000056   0x1A89             SUBS     R1,R1,R2
+   \   00000058   0x7F32             LDRB     R2,[R6, #+28]
+   \   0000005A   0xFBB1 0xF1F2      UDIV     R1,R1,R2
+   \   0000005E   0x9101             STR      R1,[SP, #+4]
+   \   00000060   0x9913             LDR      R1,[SP, #+76]
+   \   00000062   0x1E49             SUBS     R1,R1,#+1
+   \   00000064   0x9100             STR      R1,[SP, #+0]
+   \   00000066   0xE003             B.N      ??_FS__fat_FindFreeCluster_1
+    222            while (1) {
+    223              if (curclst >= (FS_i32)totclst) {
+    224                scan++;
+    225                if (scan > 1) {
+    226                  break;  /* End of clusters reached after 2nd scan */
+    227                }
+    228                if (LastClust <= 0) {
+    229                  break;  /* 1st scan started already at zero */
+    230                }
+    231                curclst   = 0;  /* Try again starting at the beginning of the FAT */
+    232                fatentry  = 0xff;
+    233              }
+    234              if (fatentry == 0) {
+    235                break;  /* Free entry found */
+    236              }
+    237              if (FSysType == 1) {
+    238                fatindex = curclst + (curclst / 2);    /* FAT12 */
+    239              }
+    240              else if (FSysType == 2) {
+    241                fatindex = curclst * 4;               /* FAT32 */
+    242              }
+    243              else {
+    244                fatindex = curclst * 2;               /* FAT16 */
+    245              }
+    246              *pFATSector = FS__FAT_aBPBUnit[Idx][Unit].RsvdSecCnt + (fatindex / BytesPerSec);
+    247              *pFATOffset = fatindex % BytesPerSec;
+    248              if (*pFATSector != *pLastSector) {
+    249                err = FS__lb_read(FS__pDevInfo[Idx].devdriver, Unit, *pFATSector, (void*)pBuffer);
+    250                if (err < 0) {
+    251                  err = FS__lb_read(FS__pDevInfo[Idx].devdriver, Unit, FATSize + *pFATSector, (void*)pBuffer);
+    252                  if (err < 0) {
+    253                    return -1;
+    254                  }
+    255                  /* Try to repair original FAT sector with contents of copy */
+    256                  FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, *pFATSector, (void*)pBuffer);
+    257                }
+    258                *pLastSector = *pFATSector;
+    259              }
+    260              if (FSysType == 1) {
+    261                if (*pFATOffset == (BytesPerSec - 1)) {
+    262                  a = pBuffer[*pFATOffset];
+    263                  err = FS__lb_read(FS__pDevInfo[Idx].devdriver, Unit, *pFATSector + 1, (void*)pBuffer);
+    264                  if (err < 0) {
+    265                    err = FS__lb_read(FS__pDevInfo[Idx].devdriver, Unit, FATSize + *pFATSector + 1, (void*)pBuffer);
+    266                    if (err < 0) {
+    267                      return -1;
+    268                    }
+    269                    /* Try to repair original FAT sector with contents of copy */
+    270                    FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, *pFATSector + 1, (void*)pBuffer);
+    271                  }
+    272                  *pLastSector = *pFATSector + 1;
+    273                  b = pBuffer[0];
+    274                }
+    275                else {
+    276                  a = pBuffer[*pFATOffset];
+    277                  b = pBuffer[*pFATOffset + 1];
+    278                }
+    279                if (curclst & 1) {
+    280                  fatentry = ((a & 0xf0) >> 4 ) | b;
+    281                }
+    282                else {
+    283                  fatentry = a | (b & 0x0f);
+    284                }
+    285              }
+    286          #if (FS_FAT_NOFAT32==0)
+    287              else if (FSysType == 2) {
+    288                a = pBuffer[*pFATOffset];
+    289                b = pBuffer[*pFATOffset + 1];
+    290                c = pBuffer[*pFATOffset + 2];
+    291                d = pBuffer[*pFATOffset + 3];
+    292                fatentry = a | b | c | d;
+    293              }
+    294          #endif /* FS_FAT_NOFAT32==0 */
+    295              else {
+    296                a = pBuffer[*pFATOffset];
+    297                b = pBuffer[*pFATOffset + 1];
+    298                fatentry = a | b;
+   \                     ??_FS__fat_FindFreeCluster_2: (+1)
+   \   00000068   0x7840             LDRB     R0,[R0, #+1]
+   \                     ??_FS__fat_FindFreeCluster_3: (+1)
+   \   0000006A   0x4308             ORRS     R0,R0,R1
+    299              }
+    300              if (fatentry != 0) {
+   \                     ??_FS__fat_FindFreeCluster_4: (+1)
+   \   0000006C   0xB100             CBZ.N    R0,??_FS__fat_FindFreeCluster_1
+    301                curclst++;  /* Cluster is in use or defect, so try the next one */
+   \   0000006E   0x1C64             ADDS     R4,R4,#+1
+    302              }
+   \                     ??_FS__fat_FindFreeCluster_1: (+1)
+   \   00000070   0x9901             LDR      R1,[SP, #+4]
+   \   00000072   0x428C             CMP      R4,R1
+   \   00000074   0xDB0B             BLT.N    ??_FS__fat_FindFreeCluster_5
+   \   00000076   0xF10B 0x0B01      ADD      R11,R11,#+1
+   \   0000007A   0xF1BB 0x0F02      CMP      R11,#+2
+   \   0000007E   0xF280 0x8091      BGE.W    ??_FS__fat_FindFreeCluster_6
+   \   00000082   0x990F             LDR      R1,[SP, #+60]
+   \   00000084   0x2901             CMP      R1,#+1
+   \   00000086   0xBFA8             IT       GE 
+   \   00000088   0x2400             MOVGE    R4,#+0
+   \   0000008A   0xDA03             BGE.N    ??_FS__fat_FindFreeCluster_7
+   \   0000008C   0xE08A             B.N      ??_FS__fat_FindFreeCluster_6
+   \                     ??_FS__fat_FindFreeCluster_5: (+1)
+   \   0000008E   0x2800             CMP      R0,#+0
+   \   00000090   0xF000 0x8089      BEQ.W    ??_FS__fat_FindFreeCluster_8
+   \                     ??_FS__fat_FindFreeCluster_7: (+1)
+   \   00000094   0x9811             LDR      R0,[SP, #+68]
+   \   00000096   0x2801             CMP      R0,#+1
+   \   00000098   0xD104             BNE.N    ??_FS__fat_FindFreeCluster_9
+   \   0000009A   0xEB04 0x70D4      ADD      R0,R4,R4, LSR #+31
+   \   0000009E   0xEB04 0x0060      ADD      R0,R4,R0, ASR #+1
+   \   000000A2   0xE003             B.N      ??_FS__fat_FindFreeCluster_10
+   \                     ??_FS__fat_FindFreeCluster_9: (+1)
+   \   000000A4   0x2802             CMP      R0,#+2
+   \   000000A6   0xBF0C             ITE      EQ 
+   \   000000A8   0x00A0             LSLEQ    R0,R4,#+2
+   \   000000AA   0x0060             LSLNE    R0,R4,#+1
+   \                     ??_FS__fat_FindFreeCluster_10: (+1)
+   \   000000AC   0x9913             LDR      R1,[SP, #+76]
+   \   000000AE   0x8B72             LDRH     R2,[R6, #+26]
+   \   000000B0   0xFB90 0xF1F1      SDIV     R1,R0,R1
+   \   000000B4   0x188A             ADDS     R2,R1,R2
+   \   000000B6   0x602A             STR      R2,[R5, #+0]
+   \   000000B8   0x9A13             LDR      R2,[SP, #+76]
+   \   000000BA   0xFB02 0x0011      MLS      R0,R2,R1,R0
+   \   000000BE   0x990E             LDR      R1,[SP, #+56]
+   \   000000C0   0x6008             STR      R0,[R1, #+0]
+   \   000000C2   0x9804             LDR      R0,[SP, #+16]
+   \   000000C4   0x682A             LDR      R2,[R5, #+0]
+   \   000000C6   0x6800             LDR      R0,[R0, #+0]
+   \   000000C8   0x4282             CMP      R2,R0
+   \   000000CA   0xD01F             BEQ.N    ??_FS__fat_FindFreeCluster_11
+   \   000000CC   0x.... 0x....      LDR.W    R0,??DataTable9_1
+   \   000000D0   0x9903             LDR      R1,[SP, #+12]
+   \   000000D2   0x6800             LDR      R0,[R0, #+0]
+   \   000000D4   0xEB00 0x1701      ADD      R7,R0,R1, LSL #+4
+   \   000000D8   0x464B             MOV      R3,R9
+   \   000000DA   0x68B8             LDR      R0,[R7, #+8]
+   \   000000DC   0x4641             MOV      R1,R8
+   \   000000DE   0x.... 0x....      BL       FS__lb_read
+   \   000000E2   0x2800             CMP      R0,#+0
+   \   000000E4   0xD50F             BPL.N    ??_FS__fat_FindFreeCluster_12
+   \   000000E6   0x9812             LDR      R0,[SP, #+72]
+   \   000000E8   0x6829             LDR      R1,[R5, #+0]
+   \   000000EA   0x180A             ADDS     R2,R1,R0
+   \   000000EC   0x68B8             LDR      R0,[R7, #+8]
+   \   000000EE   0x464B             MOV      R3,R9
+   \   000000F0   0x4641             MOV      R1,R8
+   \   000000F2   0x.... 0x....      BL       FS__lb_read
+   \   000000F6   0x2800             CMP      R0,#+0
+   \   000000F8   0xD457             BMI.N    ??_FS__fat_FindFreeCluster_13
+   \   000000FA   0x682A             LDR      R2,[R5, #+0]
+   \   000000FC   0x68B8             LDR      R0,[R7, #+8]
+   \   000000FE   0x464B             MOV      R3,R9
+   \   00000100   0x4641             MOV      R1,R8
+   \   00000102   0x.... 0x....      BL       FS__lb_write
+   \                     ??_FS__fat_FindFreeCluster_12: (+1)
+   \   00000106   0x9904             LDR      R1,[SP, #+16]
+   \   00000108   0x6828             LDR      R0,[R5, #+0]
+   \   0000010A   0x6008             STR      R0,[R1, #+0]
+   \                     ??_FS__fat_FindFreeCluster_11: (+1)
+   \   0000010C   0x9811             LDR      R0,[SP, #+68]
+   \   0000010E   0x2801             CMP      R0,#+1
+   \   00000110   0xD13B             BNE.N    ??_FS__fat_FindFreeCluster_14
+   \   00000112   0x980E             LDR      R0,[SP, #+56]
+   \   00000114   0x9900             LDR      R1,[SP, #+0]
+   \   00000116   0x6800             LDR      R0,[R0, #+0]
+   \   00000118   0x4288             CMP      R0,R1
+   \   0000011A   0xD129             BNE.N    ??_FS__fat_FindFreeCluster_15
+   \   0000011C   0xF810 0xA009      LDRB     R10,[R0, R9]
+   \   00000120   0x.... 0x....      LDR.W    R0,??DataTable9_1
+   \   00000124   0x9903             LDR      R1,[SP, #+12]
+   \   00000126   0x6800             LDR      R0,[R0, #+0]
+   \   00000128   0xEB00 0x1701      ADD      R7,R0,R1, LSL #+4
+   \   0000012C   0x6828             LDR      R0,[R5, #+0]
+   \   0000012E   0x1C42             ADDS     R2,R0,#+1
+   \   00000130   0x68B8             LDR      R0,[R7, #+8]
+   \   00000132   0x464B             MOV      R3,R9
+   \   00000134   0x4641             MOV      R1,R8
+   \   00000136   0x.... 0x....      BL       FS__lb_read
+   \   0000013A   0x2800             CMP      R0,#+0
+   \   0000013C   0xD511             BPL.N    ??_FS__fat_FindFreeCluster_16
+   \   0000013E   0x9812             LDR      R0,[SP, #+72]
+   \   00000140   0x6829             LDR      R1,[R5, #+0]
+   \   00000142   0x1808             ADDS     R0,R1,R0
+   \   00000144   0x1C42             ADDS     R2,R0,#+1
+   \   00000146   0x68B8             LDR      R0,[R7, #+8]
+   \   00000148   0x464B             MOV      R3,R9
+   \   0000014A   0x4641             MOV      R1,R8
+   \   0000014C   0x.... 0x....      BL       FS__lb_read
+   \   00000150   0x2800             CMP      R0,#+0
+   \   00000152   0xD42A             BMI.N    ??_FS__fat_FindFreeCluster_13
+   \   00000154   0x6828             LDR      R0,[R5, #+0]
+   \   00000156   0x1C42             ADDS     R2,R0,#+1
+   \   00000158   0x68B8             LDR      R0,[R7, #+8]
+   \   0000015A   0x464B             MOV      R3,R9
+   \   0000015C   0x4641             MOV      R1,R8
+   \   0000015E   0x.... 0x....      BL       FS__lb_write
+   \                     ??_FS__fat_FindFreeCluster_16: (+1)
+   \   00000162   0x6828             LDR      R0,[R5, #+0]
+   \   00000164   0x9904             LDR      R1,[SP, #+16]
+   \   00000166   0x1C40             ADDS     R0,R0,#+1
+   \   00000168   0x6008             STR      R0,[R1, #+0]
+   \   0000016A   0xF899 0x0000      LDRB     R0,[R9, #+0]
+   \   0000016E   0xE003             B.N      ??_FS__fat_FindFreeCluster_17
+   \                     ??_FS__fat_FindFreeCluster_15: (+1)
+   \   00000170   0x4448             ADD      R0,R0,R9
+   \   00000172   0xF890 0xA000      LDRB     R10,[R0, #+0]
+   \   00000176   0x7840             LDRB     R0,[R0, #+1]
+   \                     ??_FS__fat_FindFreeCluster_17: (+1)
+   \   00000178   0x07E1             LSLS     R1,R4,#+31
+   \   0000017A   0xBF5A             ITTE     PL 
+   \   0000017C   0xF000 0x000F      ANDPL    R0,R0,#0xF
+   \   00000180   0xEA40 0x000A      ORRPL    R0,R0,R10
+   \   00000184   0xEA40 0x101A      ORRMI    R0,R0,R10, LSR #+4
+   \   00000188   0xE770             B.N      ??_FS__fat_FindFreeCluster_4
+   \                     ??_FS__fat_FindFreeCluster_14: (+1)
+   \   0000018A   0x2802             CMP      R0,#+2
+   \   0000018C   0x980E             LDR      R0,[SP, #+56]
+   \   0000018E   0x6800             LDR      R0,[R0, #+0]
+   \   00000190   0x4448             ADD      R0,R0,R9
+   \   00000192   0x7801             LDRB     R1,[R0, #+0]
+   \   00000194   0xF47F 0xAF68      BNE.W    ??_FS__fat_FindFreeCluster_2
+   \   00000198   0x7842             LDRB     R2,[R0, #+1]
+   \   0000019A   0x4311             ORRS     R1,R2,R1
+   \   0000019C   0x7882             LDRB     R2,[R0, #+2]
+   \   0000019E   0x78C0             LDRB     R0,[R0, #+3]
+   \   000001A0   0x4311             ORRS     R1,R2,R1
+   \   000001A2   0xE762             B.N      ??_FS__fat_FindFreeCluster_3
+    303            }
+    304            if (fatentry == 0) {
+   \                     ??_FS__fat_FindFreeCluster_6: (+1)
+   \   000001A4   0xB908             CBNZ.N   R0,??_FS__fat_FindFreeCluster_13
+    305              return curclst;  /* Free cluster found */
+   \                     ??_FS__fat_FindFreeCluster_8: (+1)
+   \   000001A6   0x4620             MOV      R0,R4
+   \   000001A8   0x....             B.N      ??Subroutine0_0
+    306            }
+    307            return -1;
+   \                     ??_FS__fat_FindFreeCluster_13: (+1)
+   \   000001AA   0x....             B.N      ?Subroutine0
+    308          }
+
+   \                                 In section .text, align 2, keep-with-next
+   \                     ?Subroutine0: (+1)
+   \   00000000   0xF04F 0x30FF      MOV      R0,#-1
+   \                     ??Subroutine0_0: (+1)
+   \   00000004   0xB005             ADD      SP,SP,#+20
+   \   00000006   0xE8BD 0x8FF0      POP      {R4-R11,PC}      ;; return
+    309          
+    310          
+    311          /*********************************************************************
+    312          *
+    313          *             _FS__fat_SetEOFMark
+    314          *
+    315            Description:
+    316            FS internal function. Set the EOF mark in the FAT for a cluster.
+    317            The function does not write the FAT sector. An exception is FAT12,
+    318            if the FAT entry is in two sectors. 
+    319          
+    320            Parameters:
+    321            Idx         - Index of device in the device information table 
+    322                          referred by FS__pDevInfo.
+    323            Unit        - Unit number.
+    324            FATSector   - FAT sector, where the cluster is located. 
+    325            pLastSector - Pointer to an FS_i32, which contains the number of the 
+    326                          sector in pBuffer.
+    327            FATOffset   - Offset of the cluster in the FAT sector.
+    328            Cluster     - Cluster number, where to set the EOF mark.
+    329            pBuffer     - Pointer to a sector buffer.
+    330            FSysType    - ==1 => FAT12
+    331                          ==0 => FAT16
+    332                          ==2 => FAT32
+    333            FATSize     - Size of one FAT ind sectors.
+    334            BytesPerSec - Number of bytes in each sector.
+    335           
+    336            Return value:
+    337            >=0         - EOF mark set.
+    338            <0          - An error has occured.
+    339          */
+    340          
+
+   \                                 In section .text, align 2, keep-with-next
+    341          static int _FS__fat_SetEOFMark(int Idx, FS_u32 Unit, FS_i32 FATSector, 
+    342                                         FS_i32 *pLastSector, FS_i32 FATOffset, 
+    343                                         FS_i32 Cluster, unsigned char *pBuffer, 
+    344                                         int FSysType, FS_u32 FATSize, FS_i32 BytesPerSec) {
+   \                     _FS__fat_SetEOFMark: (+1)
+   \   00000000   0xE92D 0x4FF8      PUSH     {R3-R11,LR}
+   \   00000004   0x4688             MOV      R8,R1
+   \   00000006   0x990D             LDR      R1,[SP, #+52]
+   \   00000008   0x9F0A             LDR      R7,[SP, #+40]
+   \   0000000A   0x9C0C             LDR      R4,[SP, #+48]
+    345            int err1;
+    346            int err2;
+    347            int lexp;
+    348            
+    349            if (FSysType == 1) {
+   \   0000000C   0x2901             CMP      R1,#+1
+   \   0000000E   0x4691             MOV      R9,R2
+   \   00000010   0x469A             MOV      R10,R3
+   \   00000012   0xD15C             BNE.N    ??_FS__fat_SetEOFMark_0
+    350              if (FATOffset == (BytesPerSec - 1)) {
+   \   00000014   0x990F             LDR      R1,[SP, #+60]
+   \   00000016   0x9D0B             LDR      R5,[SP, #+44]
+   \   00000018   0x1E49             SUBS     R1,R1,#+1
+   \   0000001A   0x428F             CMP      R7,R1
+   \   0000001C   0xD146             BNE.N    ??_FS__fat_SetEOFMark_1
+    351                /* Entry in 2 sectors (we have 2nd sector in buffer) */
+    352                if (Cluster & 1) {
+   \   0000001E   0x07E9             LSLS     R1,R5,#+31
+   \   00000020   0xBF4E             ITEE     MI 
+   \   00000022   0x21FF             MOVMI    R1,#+255
+   \   00000024   0x7821             LDRBPL   R1,[R4, #+0]
+   \   00000026   0xF041 0x010F      ORRPL    R1,R1,#0xF
+    353                  pBuffer[0]  = (char)0xff;
+    354                }
+    355                else {
+    356                  pBuffer[0] |= (char)0x0f;
+   \   0000002A   0x7021             STRB     R1,[R4, #+0]
+    357                }
+    358                err1 = FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, FATSector + 1, (void*)pBuffer);
+   \   0000002C   0x4623             MOV      R3,R4
+   \   0000002E   0x.... 0x....      LDR.W    R1,??DataTable9_1
+   \   00000032   0x6809             LDR      R1,[R1, #+0]
+   \   00000034   0xEB01 0x1600      ADD      R6,R1,R0, LSL #+4
+   \   00000038   0xF109 0x0201      ADD      R2,R9,#+1
+   \   0000003C   0x68B0             LDR      R0,[R6, #+8]
+   \   0000003E   0x4641             MOV      R1,R8
+   \   00000040   0x.... 0x....      BL       FS__lb_write
+   \   00000044   0x4683             MOV      R11,R0
+   \   00000046   0x980E             LDR      R0,[SP, #+56]
+    359                err2 = FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, FATSize + FATSector + 1, (void*)pBuffer);
+   \   00000048   0x4448             ADD      R0,R9,R0
+   \   0000004A   0x9000             STR      R0,[SP, #+0]
+   \   0000004C   0x1C42             ADDS     R2,R0,#+1
+   \   0000004E   0x68B0             LDR      R0,[R6, #+8]
+   \   00000050   0x4623             MOV      R3,R4
+   \   00000052   0x4641             MOV      R1,R8
+   \   00000054   0x.... 0x....      BL       FS__lb_write
+    360                lexp = (err1 < 0);
+   \   00000058   0xF1BB 0x0F00      CMP      R11,#+0
+   \   0000005C   0xBF58             IT       PL 
+   \   0000005E   0x2800             CMPPL    R0,#+0
+    361                lexp = lexp || (err2 < 0);
+   \   00000060   0xD40F             BMI.N    ??_FS__fat_SetEOFMark_2
+    362                if (lexp) {
+    363                  return -1;
+    364                }
+    365                err1 = FS__lb_read(FS__pDevInfo[Idx].devdriver, Unit, FATSector, (void*)pBuffer);
+    366                if (err1 < 0) {
+   \   00000062   0x68B0             LDR      R0,[R6, #+8]
+   \   00000064   0x4623             MOV      R3,R4
+   \   00000066   0x464A             MOV      R2,R9
+   \   00000068   0x4641             MOV      R1,R8
+   \   0000006A   0x.... 0x....      BL       FS__lb_read
+   \   0000006E   0x2800             CMP      R0,#+0
+   \   00000070   0xD511             BPL.N    ??_FS__fat_SetEOFMark_3
+    367                  err1 = FS__lb_read(FS__pDevInfo[Idx].devdriver, Unit, FATSize + FATSector, (void*)pBuffer);
+    368                  if (err1 < 0) {
+   \   00000072   0x9A00             LDR      R2,[SP, #+0]
+   \   00000074   0x68B0             LDR      R0,[R6, #+8]
+   \   00000076   0x4623             MOV      R3,R4
+   \   00000078   0x4641             MOV      R1,R8
+   \   0000007A   0x.... 0x....      BL       FS__lb_read
+   \   0000007E   0x2800             CMP      R0,#+0
+   \   00000080   0xD503             BPL.N    ??_FS__fat_SetEOFMark_4
+    369                    return -1;
+   \                     ??_FS__fat_SetEOFMark_2: (+1)
+   \   00000082   0xF04F 0x30FF      MOV      R0,#-1
+   \   00000086   0xE8BD 0x8FF2      POP      {R1,R4-R11,PC}
+    370                  }
+    371                  /* Try to repair original FAT sector with contents of copy */
+    372                  FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, FATSector, (void*)pBuffer);
+   \                     ??_FS__fat_SetEOFMark_4: (+1)
+   \   0000008A   0x68B0             LDR      R0,[R6, #+8]
+   \   0000008C   0x4623             MOV      R3,R4
+   \   0000008E   0x464A             MOV      R2,R9
+   \   00000090   0x4641             MOV      R1,R8
+   \   00000092   0x.... 0x....      BL       FS__lb_write
+    373                }
+    374                *pLastSector = FATSector;
+    375                if (Cluster & 1) {
+   \                     ??_FS__fat_SetEOFMark_3: (+1)
+   \   00000096   0x1938             ADDS     R0,R7,R4
+   \   00000098   0xF8CA 0x9000      STR      R9,[R10, #+0]
+   \   0000009C   0x07E9             LSLS     R1,R5,#+31
+   \   0000009E   0xBF46             ITTE     MI 
+   \   000000A0   0x7801             LDRBMI   R1,[R0, #+0]
+   \   000000A2   0xF041 0x01F0      ORRMI    R1,R1,#0xF0
+   \   000000A6   0x21FF             MOVPL    R1,#+255
+    376                  pBuffer[FATOffset] |= (char)0xf0;
+    377                }
+    378                else {
+    379                  pBuffer[FATOffset]  = (char)0xff;
+   \   000000A8   0x7001             STRB     R1,[R0, #+0]
+   \   000000AA   0xE01A             B.N      ??_FS__fat_SetEOFMark_5
+    380                }
+    381              }
+    382              else {
+    383                if (Cluster & 1) {
+   \                     ??_FS__fat_SetEOFMark_1: (+1)
+   \   000000AC   0x1938             ADDS     R0,R7,R4
+   \   000000AE   0x22FF             MOVS     R2,#+255
+   \   000000B0   0x07E9             LSLS     R1,R5,#+31
+   \   000000B2   0xD505             BPL.N    ??_FS__fat_SetEOFMark_6
+    384                  pBuffer[FATOffset]   |= (char)0xf0;
+   \   000000B4   0x7801             LDRB     R1,[R0, #+0]
+    385                  pBuffer[FATOffset+1]  = (char)0xff;
+   \   000000B6   0x7042             STRB     R2,[R0, #+1]
+   \   000000B8   0xF041 0x01F0      ORR      R1,R1,#0xF0
+   \   000000BC   0x7001             STRB     R1,[R0, #+0]
+   \   000000BE   0xE010             B.N      ??_FS__fat_SetEOFMark_5
+    386                }
+    387                else {
+    388                  pBuffer[FATOffset]    = (char)0xff;
+   \                     ??_FS__fat_SetEOFMark_6: (+1)
+   \   000000C0   0x7002             STRB     R2,[R0, #+0]
+    389                  pBuffer[FATOffset+1] |= (char)0x0f;
+   \   000000C2   0x1939             ADDS     R1,R7,R4
+   \   000000C4   0x7840             LDRB     R0,[R0, #+1]
+   \   000000C6   0xF040 0x000F      ORR      R0,R0,#0xF
+   \   000000CA   0x7048             STRB     R0,[R1, #+1]
+   \   000000CC   0xE009             B.N      ??_FS__fat_SetEOFMark_5
+    390                }
+    391              }
+    392            }
+    393          #if (FS_FAT_NOFAT32==0)
+    394            else if (FSysType == 2) { /* FAT32 */
+   \                     ??_FS__fat_SetEOFMark_0: (+1)
+   \   000000CE   0x1938             ADDS     R0,R7,R4
+   \   000000D0   0x22FF             MOVS     R2,#+255
+   \   000000D2   0x2902             CMP      R1,#+2
+   \   000000D4   0x7002             STRB     R2,[R0, #+0]
+   \   000000D6   0x7042             STRB     R2,[R0, #+1]
+   \   000000D8   0xD103             BNE.N    ??_FS__fat_SetEOFMark_5
+    395              pBuffer[FATOffset]      = (char)0xff;
+    396              pBuffer[FATOffset + 1]  = (char)0xff;
+    397              pBuffer[FATOffset + 2]  = (char)0xff;
+   \   000000DA   0x7082             STRB     R2,[R0, #+2]
+    398              pBuffer[FATOffset + 3]  = (char)0x0f;
+   \   000000DC   0x1939             ADDS     R1,R7,R4
+   \   000000DE   0x200F             MOVS     R0,#+15
+   \   000000E0   0x70C8             STRB     R0,[R1, #+3]
+    399            }
+    400          #endif /* FS_FAT_NOFAT32==0 */
+    401            else { /* FAT16 */
+    402              pBuffer[FATOffset]      = (char)0xff;
+    403              pBuffer[FATOffset + 1]  = (char)0xff;
+    404            }
+    405            return 0;
+   \                     ??_FS__fat_SetEOFMark_5: (+1)
+   \   000000E2   0x2000             MOVS     R0,#+0
+   \   000000E4   0xE8BD 0x8FF2      POP      {R1,R4-R11,PC}   ;; return
+    406          }
+    407          
+    408          
+    409          /*********************************************************************
+    410          *
+    411          *             _FS__fat_LinkCluster
+    412          *
+    413            Description:
+    414            FS internal function. Link the new cluster with the EOF mark to the 
+    415            cluster list.
+    416          
+    417            Parameters:
+    418            Idx         - Index of device in the device information table 
+    419                          referred by FS__pDevInfo.
+    420            Unit        - Unit number.
+    421            pLastSector - Pointer to an FS_i32, which contains the number of the 
+    422                          sector in pBuffer.
+    423            Cluster     - Cluster number of the new cluster with the EOF mark.
+    424            LastClust   - Number of cluster, to which the new allocated cluster
+    425                          is linked to.
+    426            pBuffer     - Pointer to a sector buffer.
+    427            FSysType    - ==1 => FAT12
+    428                          ==0 => FAT16
+    429                          ==2 => FAT32
+    430            FATSize     - Size of one FAT ind sectors.
+    431            BytesPerSec - Number of bytes in each sector.
+    432           
+    433            Return value:
+    434            >=0         - Link has been made.
+    435            <0          - An error has occured.
+    436          */
+    437          
+
+   \                                 In section .text, align 2, keep-with-next
+    438          static int _FS__fat_LinkCluster(int Idx, FS_u32 Unit, FS_i32 *pLastSector, FS_i32 Cluster,
+    439                                          FS_i32 LastClust, unsigned char *pBuffer, int FSysType, 
+    440                                          FS_u32 FATSize, FS_i32 BytesPerSec) {
+   \                     _FS__fat_LinkCluster: (+1)
+   \   00000000   0xE92D 0x4FFE      PUSH     {R1-R11,LR}
+   \   00000004   0x4683             MOV      R11,R0
+   \   00000006   0xB082             SUB      SP,SP,#+8
+    441            FS_i32 fatindex;
+    442            FS_i32 fatoffs;
+    443            FS_i32 fatsec;
+    444            int lexp;
+    445            int err;
+    446            int err2;
+    447            unsigned char a;
+    448            unsigned char b;
+    449          #if (FS_FAT_NOFAT32==0)  
+    450            unsigned char c;
+    451            unsigned char d;
+    452          #endif
+    453          
+    454            /* Link old last cluster to this one */
+    455            if (FSysType == 1) {
+   \   00000008   0x9810             LDR      R0,[SP, #+64]
+   \   0000000A   0x9C0E             LDR      R4,[SP, #+56]
+   \   0000000C   0x2801             CMP      R0,#+1
+   \   0000000E   0xD104             BNE.N    ??_FS__fat_LinkCluster_0
+    456              fatindex = LastClust + (LastClust / 2); /* FAT12 */
+   \   00000010   0xEB04 0x70D4      ADD      R0,R4,R4, LSR #+31
+   \   00000014   0xEB04 0x0060      ADD      R0,R4,R0, ASR #+1
+   \   00000018   0xE004             B.N      ??_FS__fat_LinkCluster_1
+    457            }
+    458            else if (FSysType == 2) {
+   \                     ??_FS__fat_LinkCluster_0: (+1)
+   \   0000001A   0x9810             LDR      R0,[SP, #+64]
+   \   0000001C   0x2802             CMP      R0,#+2
+   \   0000001E   0xBF0C             ITE      EQ 
+   \   00000020   0x00A0             LSLEQ    R0,R4,#+2
+   \   00000022   0x0060             LSLNE    R0,R4,#+1
+    459              fatindex = LastClust * 4;               /* FAT32 */
+    460            }
+    461            else {
+    462              fatindex = LastClust * 2;               /* FAT16 */
+    463            }
+    464            fatsec = FS__FAT_aBPBUnit[Idx][Unit].RsvdSecCnt + (fatindex / BytesPerSec);
+   \                     ??_FS__fat_LinkCluster_1: (+1)
+   \   00000024   0x.... 0x....      LDR.W    R2,??DataTable9_2
+   \   00000028   0x9B02             LDR      R3,[SP, #+8]
+   \   0000002A   0x9912             LDR      R1,[SP, #+72]
+    465            fatoffs = fatindex % BytesPerSec;
+    466            if (fatsec != *pLastSector) {
+   \   0000002C   0xF8DD 0x803C      LDR      R8,[SP, #+60]
+   \   00000030   0xEB02 0x124B      ADD      R2,R2,R11, LSL #+5
+   \   00000034   0xEB02 0x1243      ADD      R2,R2,R3, LSL #+5
+   \   00000038   0xFB90 0xF1F1      SDIV     R1,R0,R1
+   \   0000003C   0x8B52             LDRH     R2,[R2, #+26]
+   \   0000003E   0x188D             ADDS     R5,R1,R2
+   \   00000040   0x9A12             LDR      R2,[SP, #+72]
+   \   00000042   0xFB02 0x0011      MLS      R0,R2,R1,R0
+   \   00000046   0x9000             STR      R0,[SP, #+0]
+   \   00000048   0x9803             LDR      R0,[SP, #+12]
+   \   0000004A   0x6802             LDR      R2,[R0, #+0]
+   \   0000004C   0x4295             CMP      R5,R2
+   \   0000004E   0xD032             BEQ.N    ??_FS__fat_LinkCluster_2
+    467              /* 
+    468                 FAT entry, which has to be modified is not in the same FAT sector, which is
+    469                 currently in the buffer. So write it to the media now.
+    470              */
+    471              err  = FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, *pLastSector, (void*)pBuffer);
+   \   00000050   0x.... 0x....      LDR.W    R0,??DataTable9_1
+   \   00000054   0x6800             LDR      R0,[R0, #+0]
+   \   00000056   0x9902             LDR      R1,[SP, #+8]
+   \   00000058   0xEB00 0x170B      ADD      R7,R0,R11, LSL #+4
+   \   0000005C   0x4643             MOV      R3,R8
+   \   0000005E   0x68B8             LDR      R0,[R7, #+8]
+   \   00000060   0x.... 0x....      BL       FS__lb_write
+   \   00000064   0x4606             MOV      R6,R0
+    472              err2 = FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, *pLastSector + FATSize, (void*)pBuffer);
+   \   00000066   0x9803             LDR      R0,[SP, #+12]
+   \   00000068   0x9911             LDR      R1,[SP, #+68]
+   \   0000006A   0x6800             LDR      R0,[R0, #+0]
+   \   0000006C   0x180A             ADDS     R2,R1,R0
+   \   0000006E   0x9902             LDR      R1,[SP, #+8]
+   \   00000070   0x68B8             LDR      R0,[R7, #+8]
+   \   00000072   0x4643             MOV      R3,R8
+   \   00000074   0x.... 0x....      BL       FS__lb_write
+    473              lexp = (err < 0);
+   \   00000078   0x2E00             CMP      R6,#+0
+   \   0000007A   0xBF58             IT       PL 
+   \   0000007C   0x2800             CMPPL    R0,#+0
+    474              lexp = lexp || (err2 < 0);
+   \   0000007E   0xF100 0x8100      BMI.W    ??_FS__fat_LinkCluster_3
+    475              if (lexp) {
+    476                return -1;
+    477              }
+    478              err = FS__lb_read(FS__pDevInfo[Idx].devdriver, Unit, fatsec, (void*)pBuffer);
+    479              if (err < 0) {
+   \   00000082   0x9902             LDR      R1,[SP, #+8]
+   \   00000084   0x68B8             LDR      R0,[R7, #+8]
+   \   00000086   0x4643             MOV      R3,R8
+   \   00000088   0x462A             MOV      R2,R5
+   \   0000008A   0x.... 0x....      BL       FS__lb_read
+   \   0000008E   0x2800             CMP      R0,#+0
+   \   00000090   0xD50F             BPL.N    ??_FS__fat_LinkCluster_4
+    480                err = FS__lb_read(FS__pDevInfo[Idx].devdriver, Unit, FATSize + fatsec, (void*)pBuffer);
+    481                if (err<0) {
+   \   00000092   0x9811             LDR      R0,[SP, #+68]
+   \   00000094   0x9902             LDR      R1,[SP, #+8]
+   \   00000096   0x182A             ADDS     R2,R5,R0
+   \   00000098   0x68B8             LDR      R0,[R7, #+8]
+   \   0000009A   0x4643             MOV      R3,R8
+   \   0000009C   0x.... 0x....      BL       FS__lb_read
+   \   000000A0   0x2800             CMP      R0,#+0
+   \   000000A2   0xF100 0x80EE      BMI.W    ??_FS__fat_LinkCluster_3
+    482                  return -1;
+    483                }
+    484                /* Try to repair original FAT sector with contents of copy */
+    485                FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, fatsec, (void*)pBuffer);
+   \   000000A6   0x9902             LDR      R1,[SP, #+8]
+   \   000000A8   0x68B8             LDR      R0,[R7, #+8]
+   \   000000AA   0x4643             MOV      R3,R8
+   \   000000AC   0x462A             MOV      R2,R5
+   \   000000AE   0x.... 0x....      BL       FS__lb_write
+    486              }
+    487              *pLastSector = fatsec;
+   \                     ??_FS__fat_LinkCluster_4: (+1)
+   \   000000B2   0x9803             LDR      R0,[SP, #+12]
+   \   000000B4   0x6005             STR      R5,[R0, #+0]
+    488            }
+    489            a = Cluster & 0xff;
+   \                     ??_FS__fat_LinkCluster_2: (+1)
+   \   000000B6   0xA804             ADD      R0,SP,#+16
+   \   000000B8   0xF890 0x9000      LDRB     R9,[R0, #+0]
+    490            b = (Cluster / 0x100L) & 0xff;
+   \   000000BC   0x9804             LDR      R0,[SP, #+16]
+   \   000000BE   0x9904             LDR      R1,[SP, #+16]
+    491          #if (FS_FAT_NOFAT32==0)
+    492            c = (Cluster / 0x10000L) & 0xff;
+    493            d = (Cluster / 0x1000000L) & 0x0f;
+   \   000000C0   0x9A04             LDR      R2,[SP, #+16]
+    494          #endif      
+    495            if (FSysType == 1) {
+   \   000000C2   0x9B10             LDR      R3,[SP, #+64]
+   \   000000C4   0x11C0             ASRS     R0,R0,#+7
+   \   000000C6   0xEB01 0x6010      ADD      R0,R1,R0, LSR #+24
+   \   000000CA   0x0400             LSLS     R0,R0,#+16
+   \   000000CC   0xEA4F 0x6A10      LSR      R10,R0,#+24
+   \   000000D0   0x13C8             ASRS     R0,R1,#+15
+   \   000000D2   0xEB01 0x4010      ADD      R0,R1,R0, LSR #+16
+   \   000000D6   0x15C9             ASRS     R1,R1,#+23
+   \   000000D8   0xEB02 0x2111      ADD      R1,R2,R1, LSR #+8
+   \   000000DC   0x1609             ASRS     R1,R1,#+24
+   \   000000DE   0xF001 0x020F      AND      R2,R1,#0xF
+   \   000000E2   0x1400             ASRS     R0,R0,#+16
+   \   000000E4   0x9900             LDR      R1,[SP, #+0]
+   \   000000E6   0x2B01             CMP      R3,#+1
+   \   000000E8   0x4441             ADD      R1,R1,R8
+   \   000000EA   0xF040 0x8089      BNE.W    ??_FS__fat_LinkCluster_5
+    496              if (fatoffs == (BytesPerSec - 1)) {
+   \   000000EE   0x9A12             LDR      R2,[SP, #+72]
+   \   000000F0   0x9800             LDR      R0,[SP, #+0]
+   \   000000F2   0x1E52             SUBS     R2,R2,#+1
+   \   000000F4   0x4290             CMP      R0,R2
+   \   000000F6   0xD156             BNE.N    ??_FS__fat_LinkCluster_6
+    497                /* Entry in 2 sectors (we have 2nd sector in buffer) */
+    498                if (LastClust & 1) {
+   \   000000F8   0x07E0             LSLS     R0,R4,#+31
+   \   000000FA   0xD507             BPL.N    ??_FS__fat_LinkCluster_7
+    499                  pBuffer[fatoffs]   &= (char)0x0f;
+   \   000000FC   0x7808             LDRB     R0,[R1, #+0]
+   \   000000FE   0xF000 0x000F      AND      R0,R0,#0xF
+   \   00000102   0x7008             STRB     R0,[R1, #+0]
+    500                  pBuffer[fatoffs]   |= (char)((a << 4) & 0xf0);
+   \   00000104   0xEA40 0x1009      ORR      R0,R0,R9, LSL #+4
+   \   00000108   0x7008             STRB     R0,[R1, #+0]
+   \   0000010A   0xE001             B.N      ??_FS__fat_LinkCluster_8
+    501                }
+    502                else {
+    503                  pBuffer[fatoffs]    = (char)(a & 0xff);
+   \                     ??_FS__fat_LinkCluster_7: (+1)
+   \   0000010C   0xF881 0x9000      STRB     R9,[R1, #+0]
+    504                }
+    505                err  = FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, fatsec, (void*)pBuffer);
+   \                     ??_FS__fat_LinkCluster_8: (+1)
+   \   00000110   0x....             LDR.N    R0,??DataTable9_1
+   \   00000112   0x6800             LDR      R0,[R0, #+0]
+   \   00000114   0x9902             LDR      R1,[SP, #+8]
+   \   00000116   0xEB00 0x170B      ADD      R7,R0,R11, LSL #+4
+   \   0000011A   0x4643             MOV      R3,R8
+   \   0000011C   0x68B8             LDR      R0,[R7, #+8]
+   \   0000011E   0x462A             MOV      R2,R5
+   \   00000120   0x.... 0x....      BL       FS__lb_write
+   \   00000124   0x4606             MOV      R6,R0
+    506                err2 = FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, FATSize + fatsec, (void*)pBuffer);
+   \   00000126   0x9811             LDR      R0,[SP, #+68]
+   \   00000128   0x9902             LDR      R1,[SP, #+8]
+   \   0000012A   0x1828             ADDS     R0,R5,R0
+   \   0000012C   0x9001             STR      R0,[SP, #+4]
+   \   0000012E   0x4602             MOV      R2,R0
+   \   00000130   0x68B8             LDR      R0,[R7, #+8]
+   \   00000132   0x4643             MOV      R3,R8
+   \   00000134   0x.... 0x....      BL       FS__lb_write
+    507                lexp = (err < 0);
+   \   00000138   0x2E00             CMP      R6,#+0
+   \   0000013A   0xBF58             IT       PL 
+   \   0000013C   0x2800             CMPPL    R0,#+0
+    508                lexp = lexp || (err2 < 0);
+   \   0000013E   0xF100 0x80A0      BMI.W    ??_FS__fat_LinkCluster_3
+    509                if (lexp) {
+    510                  return -1;
+    511                }
+    512                err = FS__lb_read(FS__pDevInfo[Idx].devdriver, Unit, fatsec + 1, (void*)pBuffer);
+    513                if (err < 0) {
+   \   00000142   0x1C6D             ADDS     R5,R5,#+1
+   \   00000144   0x9902             LDR      R1,[SP, #+8]
+   \   00000146   0x68B8             LDR      R0,[R7, #+8]
+   \   00000148   0x4643             MOV      R3,R8
+   \   0000014A   0x462A             MOV      R2,R5
+   \   0000014C   0x.... 0x....      BL       FS__lb_read
+   \   00000150   0x2800             CMP      R0,#+0
+   \   00000152   0xF100 0x8096      BMI.W    ??_FS__fat_LinkCluster_3
+    514                  return -1;
+    515                }
+    516                *pLastSector = fatsec + 1;
+   \   00000156   0x9803             LDR      R0,[SP, #+12]
+   \   00000158   0x6005             STR      R5,[R0, #+0]
+    517                if (LastClust & 1) {
+   \   0000015A   0x07E0             LSLS     R0,R4,#+31
+   \   0000015C   0xD504             BPL.N    ??_FS__fat_LinkCluster_9
+    518                  pBuffer[0]  = (char)(((a >> 4) & 0x0f) | ((b << 4) & 0xf0));
+   \   0000015E   0xEA4F 0x1019      LSR      R0,R9,#+4
+   \   00000162   0xEA40 0x100A      ORR      R0,R0,R10, LSL #+4
+   \   00000166   0xE008             B.N      ??_FS__fat_LinkCluster_10
+    519                }
+    520                else {
+    521                  pBuffer[0] &= (char)0xf0;
+   \                     ??_FS__fat_LinkCluster_9: (+1)
+   \   00000168   0xF898 0x0000      LDRB     R0,[R8, #+0]
+   \   0000016C   0xF000 0x00F0      AND      R0,R0,#0xF0
+   \   00000170   0xF888 0x0000      STRB     R0,[R8, #+0]
+    522                  pBuffer[0] |= (char)(b & 0x0f);
+   \   00000174   0xF00A 0x010F      AND      R1,R10,#0xF
+   \   00000178   0x4308             ORRS     R0,R1,R0
+   \                     ??_FS__fat_LinkCluster_10: (+1)
+   \   0000017A   0xF888 0x0000      STRB     R0,[R8, #+0]
+    523                }
+    524                err  = FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, fatsec + 1, (void*)pBuffer);
+   \   0000017E   0x4643             MOV      R3,R8
+   \   00000180   0x9902             LDR      R1,[SP, #+8]
+   \   00000182   0x68B8             LDR      R0,[R7, #+8]
+   \   00000184   0x462A             MOV      R2,R5
+   \   00000186   0x.... 0x....      BL       FS__lb_write
+   \   0000018A   0x4606             MOV      R6,R0
+    525                err2 = FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, FATSize + fatsec + 1, (void*)pBuffer);
+   \   0000018C   0x9801             LDR      R0,[SP, #+4]
+   \   0000018E   0x9902             LDR      R1,[SP, #+8]
+   \   00000190   0x1C42             ADDS     R2,R0,#+1
+   \   00000192   0x68B8             LDR      R0,[R7, #+8]
+   \   00000194   0x4643             MOV      R3,R8
+   \   00000196   0x.... 0x....      BL       FS__lb_write
+    526                lexp = (err < 0);
+   \   0000019A   0x2E00             CMP      R6,#+0
+   \   0000019C   0xBF58             IT       PL 
+   \   0000019E   0x2800             CMPPL    R0,#+0
+    527                lexp = lexp || (err2 < 0);
+   \   000001A0   0xD46F             BMI.N    ??_FS__fat_LinkCluster_3
+    528                if (lexp) {
+    529                  return -1;
+    530                }
+    531              }
+    532              else {
+    533                if (LastClust & 1) {
+    534                  pBuffer[fatoffs]     &= (char)0x0f;
+    535                  pBuffer[fatoffs]     |= (char)((a << 4) & 0xf0);
+    536                  pBuffer[fatoffs + 1]  = (char)(((a >> 4) & 0x0f) | ((b << 4) & 0xf0));
+    537                }
+    538                else {
+    539                  pBuffer[fatoffs]      = (char)(a & 0xff);
+    540                  pBuffer[fatoffs + 1] &= (char)0xf0;
+    541                  pBuffer[fatoffs + 1] |= (char)(b & 0x0f);
+    542                }
+    543                err  = FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, fatsec, (void*)pBuffer);
+    544                err2 = FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, FATSize + fatsec, (void*)pBuffer);
+    545                lexp = (err < 0);
+    546                lexp = lexp || (err2 < 0);
+    547                if (lexp) {
+    548                  return -1;
+    549                }
+    550              }
+    551            }
+    552          #if (FS_FAT_NOFAT32==0)
+    553            else if (FSysType == 2) { /* FAT32 */
+    554              pBuffer[fatoffs]      = a;
+    555              pBuffer[fatoffs + 1]  = b;
+    556              pBuffer[fatoffs + 2]  = c;
+    557              pBuffer[fatoffs + 3]  = d;
+    558              err  = FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, fatsec, (void*)pBuffer);
+    559              err2 = FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, FATSize + fatsec, (void*)pBuffer);
+    560              lexp = (err < 0) ;
+    561              lexp = lexp || (err2 < 0);
+    562              if (lexp) {
+    563                return -1;
+    564              }
+    565            }
+    566          #endif /* FS_FAT_NOFAT32==0 */
+    567            else { /* FAT16 */
+    568              pBuffer[fatoffs]      = a;
+    569              pBuffer[fatoffs + 1]  = b;
+    570              err  = FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, fatsec, (void*)pBuffer);
+    571              err2 = FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, FATSize + fatsec, (void*)pBuffer);
+    572              lexp = (err < 0);
+    573              lexp = lexp || (err2 < 0);
+    574              if (lexp) {
+    575                return -1;
+    576              }
+    577            }
+    578            return 0;
+   \                     ??_FS__fat_LinkCluster_11: (+1)
+   \   000001A2   0x2000             MOVS     R0,#+0
+   \   000001A4   0x....             B.N      ??Subroutine0_0
+   \                     ??_FS__fat_LinkCluster_6: (+1)
+   \   000001A6   0x07E0             LSLS     R0,R4,#+31
+   \   000001A8   0xD50B             BPL.N    ??_FS__fat_LinkCluster_12
+   \   000001AA   0x7808             LDRB     R0,[R1, #+0]
+   \   000001AC   0xF000 0x000F      AND      R0,R0,#0xF
+   \   000001B0   0x7008             STRB     R0,[R1, #+0]
+   \   000001B2   0xEA40 0x1009      ORR      R0,R0,R9, LSL #+4
+   \   000001B6   0x7008             STRB     R0,[R1, #+0]
+   \   000001B8   0xEA4F 0x1019      LSR      R0,R9,#+4
+   \   000001BC   0xEA40 0x100A      ORR      R0,R0,R10, LSL #+4
+   \   000001C0   0xE00C             B.N      ??_FS__fat_LinkCluster_13
+   \                     ??_FS__fat_LinkCluster_12: (+1)
+   \   000001C2   0xF881 0x9000      STRB     R9,[R1, #+0]
+   \   000001C6   0x9800             LDR      R0,[SP, #+0]
+   \   000001C8   0x9900             LDR      R1,[SP, #+0]
+   \   000001CA   0x4440             ADD      R0,R0,R8
+   \   000001CC   0x4441             ADD      R1,R1,R8
+   \   000001CE   0x7840             LDRB     R0,[R0, #+1]
+   \   000001D0   0xF000 0x00F0      AND      R0,R0,#0xF0
+   \   000001D4   0x7048             STRB     R0,[R1, #+1]
+   \   000001D6   0xF00A 0x010F      AND      R1,R10,#0xF
+   \   000001DA   0x4308             ORRS     R0,R1,R0
+   \                     ??_FS__fat_LinkCluster_13: (+1)
+   \   000001DC   0x9900             LDR      R1,[SP, #+0]
+   \   000001DE   0x4441             ADD      R1,R1,R8
+   \   000001E0   0x4643             MOV      R3,R8
+   \   000001E2   0x7048             STRB     R0,[R1, #+1]
+   \   000001E4   0x462A             MOV      R2,R5
+   \   000001E6   0x....             LDR.N    R0,??DataTable9_1
+   \   000001E8   0x6800             LDR      R0,[R0, #+0]
+   \   000001EA   0x9902             LDR      R1,[SP, #+8]
+   \   000001EC   0xEB00 0x170B      ADD      R7,R0,R11, LSL #+4
+   \   000001F0   0x68B8             LDR      R0,[R7, #+8]
+   \   000001F2   0x.... 0x....      BL       FS__lb_write
+   \   000001F6   0x4606             MOV      R6,R0
+   \   000001F8   0x9811             LDR      R0,[SP, #+68]
+   \   000001FA   0x4643             MOV      R3,R8
+   \   000001FC   0x182A             ADDS     R2,R5,R0
+   \   000001FE   0xE01E             B.N      ??_FS__fat_LinkCluster_14
+   \                     ??_FS__fat_LinkCluster_5: (+1)
+   \   00000200   0x9B11             LDR      R3,[SP, #+68]
+   \   00000202   0x18EB             ADDS     R3,R5,R3
+   \   00000204   0x9301             STR      R3,[SP, #+4]
+   \   00000206   0x9B10             LDR      R3,[SP, #+64]
+   \   00000208   0xF881 0x9000      STRB     R9,[R1, #+0]
+   \   0000020C   0x2B02             CMP      R3,#+2
+   \   0000020E   0xD11F             BNE.N    ??_FS__fat_LinkCluster_15
+   \   00000210   0x9900             LDR      R1,[SP, #+0]
+   \   00000212   0x4441             ADD      R1,R1,R8
+   \   00000214   0x4643             MOV      R3,R8
+   \   00000216   0xF881 0xA001      STRB     R10,[R1, #+1]
+   \   0000021A   0x9900             LDR      R1,[SP, #+0]
+   \   0000021C   0x4441             ADD      R1,R1,R8
+   \   0000021E   0x7088             STRB     R0,[R1, #+2]
+   \   00000220   0x9800             LDR      R0,[SP, #+0]
+   \   00000222   0x4440             ADD      R0,R0,R8
+   \   00000224   0x70C2             STRB     R2,[R0, #+3]
+   \   00000226   0x462A             MOV      R2,R5
+   \   00000228   0x....             LDR.N    R0,??DataTable9_1
+   \   0000022A   0x6800             LDR      R0,[R0, #+0]
+   \   0000022C   0x9902             LDR      R1,[SP, #+8]
+   \   0000022E   0xEB00 0x170B      ADD      R7,R0,R11, LSL #+4
+   \   00000232   0x68B8             LDR      R0,[R7, #+8]
+   \   00000234   0x.... 0x....      BL       FS__lb_write
+   \   00000238   0x9A01             LDR      R2,[SP, #+4]
+   \   0000023A   0x4606             MOV      R6,R0
+   \   0000023C   0x4643             MOV      R3,R8
+   \                     ??_FS__fat_LinkCluster_14: (+1)
+   \   0000023E   0x9902             LDR      R1,[SP, #+8]
+   \   00000240   0x68B8             LDR      R0,[R7, #+8]
+   \   00000242   0x.... 0x....      BL       FS__lb_write
+   \   00000246   0x2E00             CMP      R6,#+0
+   \   00000248   0xD41B             BMI.N    ??_FS__fat_LinkCluster_3
+   \   0000024A   0x2800             CMP      R0,#+0
+   \   0000024C   0xD5A9             BPL.N    ??_FS__fat_LinkCluster_11
+   \   0000024E   0xE018             B.N      ??_FS__fat_LinkCluster_3
+   \                     ??_FS__fat_LinkCluster_15: (+1)
+   \   00000250   0x9800             LDR      R0,[SP, #+0]
+   \   00000252   0x4440             ADD      R0,R0,R8
+   \   00000254   0x4643             MOV      R3,R8
+   \   00000256   0xF880 0xA001      STRB     R10,[R0, #+1]
+   \   0000025A   0x462A             MOV      R2,R5
+   \   0000025C   0x....             LDR.N    R0,??DataTable9_1
+   \   0000025E   0x6800             LDR      R0,[R0, #+0]
+   \   00000260   0x9902             LDR      R1,[SP, #+8]
+   \   00000262   0xEB00 0x170B      ADD      R7,R0,R11, LSL #+4
+   \   00000266   0x68B8             LDR      R0,[R7, #+8]
+   \   00000268   0x.... 0x....      BL       FS__lb_write
+   \   0000026C   0x4606             MOV      R6,R0
+   \   0000026E   0x9A01             LDR      R2,[SP, #+4]
+   \   00000270   0x9902             LDR      R1,[SP, #+8]
+   \   00000272   0x68B8             LDR      R0,[R7, #+8]
+   \   00000274   0x4643             MOV      R3,R8
+   \   00000276   0x.... 0x....      BL       FS__lb_write
+   \   0000027A   0x2E00             CMP      R6,#+0
+   \   0000027C   0xBF58             IT       PL 
+   \   0000027E   0x2800             CMPPL    R0,#+0
+   \   00000280   0xD58F             BPL.N    ??_FS__fat_LinkCluster_11
+   \                     ??_FS__fat_LinkCluster_3: (+1)
+   \   00000282                      REQUIRE ?Subroutine0
+   \   00000282                      ;; // Fall through to label ?Subroutine0
+    579          }
+    580          
+    581          
+    582          /*********************************************************************
+    583          *
+    584          *             Global functions section
+    585          *
+    586          **********************************************************************
+    587          
+    588            Functions in this section are used by FAT File System layer only
+    589            
+    590          */
+    591          
+    592          /*********************************************************************
+    593          *
+    594          *             FS__fat_block_init
+    595          *
+    596            Description:
+    597            FS internal function. Init FAT block memory management.
+    598          
+    599            Parameters:
+    600            None.
+    601           
+    602            Return value:
+    603            None.
+    604          */
+    605          
+
+   \                                 In section .text, align 2, keep-with-next
+    606          void FS__fat_block_init(void) {
+   \                     FS__fat_block_init: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    607            int i;
+    608          
+    609            FS_X_OS_LockMem();
+   \   00000002   0x.... 0x....      BL       FS_X_OS_LockMem
+    610            for (i = 0; i < FS_MEMBLOCK_NUM; i++) {
+   \   00000006   0x....             LDR.N    R0,??DataTable9
+   \   00000008   0x2105             MOVS     R1,#+5
+   \   0000000A   0x2200             MOVS     R2,#+0
+    611              _FS_memblock[i].status = 0;
+   \                     ??FS__fat_block_init_0: (+1)
+   \   0000000C   0x6002             STR      R2,[R0, #+0]
+   \   0000000E   0xF8C0 0x2204      STR      R2,[R0, #+516]
+    612            }
+   \   00000012   0x1E49             SUBS     R1,R1,#+1
+   \   00000014   0xF500 0x6081      ADD      R0,R0,#+1032
+   \   00000018   0xD1F8             BNE.N    ??FS__fat_block_init_0
+    613            FS_X_OS_UnlockMem();
+   \   0000001A   0xE8BD 0x4001      POP      {R0,LR}
+   \   0000001E   0x.... 0x....      B.W      FS_X_OS_UnlockMem
+    614          }
+    615          
+    616          
+    617          /*********************************************************************
+    618          *
+    619          *             FS__fat_malloc
+    620          *
+    621            Description:
+    622            FS internal function. Allocate a sector buffer.
+    623          
+    624            Parameters:
+    625            Size        - Size of the sector buffer. Normally this is 512.
+    626                          Parameter is for future extension.
+    627           
+    628            Return value:
+    629            ==0         - Cannot allocate a buffer.
+    630            !=0         - Address of a buffer.
+    631          */
+    632          
+    633          
+
+   \                                 In section .text, align 2, keep-with-next
+    634          char *FS__fat_malloc(unsigned int Size) {
+   \                     FS__fat_malloc: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0x4604             MOV      R4,R0
+    635            int i;
+    636          
+    637            FS_X_OS_LockMem();
+   \   00000004   0x.... 0x....      BL       FS_X_OS_LockMem
+    638            if (Size <= FS_FAT_SEC_SIZE) {
+   \   00000008   0xF5B4 0x7F00      CMP      R4,#+512
+   \   0000000C   0xD81E             BHI.N    ??FS__fat_malloc_0
+    639              for (i = 0; i < FS_MEMBLOCK_NUM; i++) {
+   \   0000000E   0x....             LDR.N    R1,??DataTable9
+   \   00000010   0x2000             MOVS     R0,#+0
+   \   00000012   0x460A             MOV      R2,R1
+    640                if (_FS_memblock[i].status == 0) {
+   \                     ??FS__fat_malloc_1: (+1)
+   \   00000014   0x6813             LDR      R3,[R2, #+0]
+   \   00000016   0xB97B             CBNZ.N   R3,??FS__fat_malloc_2
+    641                  _FS_memblock[i].status = 1;
+   \                     ??FS__fat_malloc_3: (+1)
+   \   00000018   0xEB00 0x12C0      ADD      R2,R0,R0, LSL #+7
+   \   0000001C   0x0090             LSLS     R0,R2,#+2
+   \   0000001E   0x2201             MOVS     R2,#+1
+   \   00000020   0x5042             STR      R2,[R0, R1]
+    642                  FS__CLIB_memset((void*)_FS_memblock[i].memory, 0, (FS_size_t)FS_FAT_SEC_SIZE);
+   \   00000022   0x1844             ADDS     R4,R0,R1
+   \   00000024   0xF44F 0x7200      MOV      R2,#+512
+   \   00000028   0x2100             MOVS     R1,#+0
+   \   0000002A   0x1D20             ADDS     R0,R4,#+4
+   \   0000002C   0x.... 0x....      BL       FS__CLIB_memset
+    643                  FS_X_OS_UnlockMem();
+   \   00000030   0x.... 0x....      BL       FS_X_OS_UnlockMem
+    644                  return ((void*)_FS_memblock[i].memory);
+   \   00000034   0x1D20             ADDS     R0,R4,#+4
+   \   00000036   0xBD10             POP      {R4,PC}
+    645                }
+   \                     ??FS__fat_malloc_2: (+1)
+   \   00000038   0xF8D2 0x3204      LDR      R3,[R2, #+516]
+   \   0000003C   0x1C40             ADDS     R0,R0,#+1
+   \   0000003E   0x2B00             CMP      R3,#+0
+   \   00000040   0xD0EA             BEQ.N    ??FS__fat_malloc_3
+    646              }
+   \   00000042   0x1C40             ADDS     R0,R0,#+1
+   \   00000044   0x280A             CMP      R0,#+10
+   \   00000046   0xF502 0x6281      ADD      R2,R2,#+1032
+   \   0000004A   0xDBE3             BLT.N    ??FS__fat_malloc_1
+    647            }
+    648            FS_X_OS_UnlockMem();
+   \                     ??FS__fat_malloc_0: (+1)
+   \   0000004C   0x.... 0x....      BL       FS_X_OS_UnlockMem
+    649            return 0;
+   \   00000050   0x2000             MOVS     R0,#+0
+   \   00000052   0xBD10             POP      {R4,PC}          ;; return
+    650          }
+    651          
+    652          
+    653          /*********************************************************************
+    654          *
+    655          *             FS__fat_free
+    656          *
+    657            Description:
+    658            FS internal function. Free sector buffer.
+    659          
+    660            Parameters:
+    661            pBuffer     - Pointer to a buffer, which has to be set free.
+    662           
+    663            Return value:
+    664            None.
+    665          */
+    666          
+
+   \                                 In section .text, align 2, keep-with-next
+    667          void FS__fat_free(void *pBuffer) {
+   \                     FS__fat_free: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0x4604             MOV      R4,R0
+    668            int i;
+    669          
+    670            FS_X_OS_LockMem();
+   \   00000004   0x.... 0x....      BL       FS_X_OS_LockMem
+    671            for (i = 0; i < FS_MEMBLOCK_NUM; i++) {
+   \   00000008   0x....             LDR.N    R1,??DataTable9
+   \   0000000A   0x2000             MOVS     R0,#+0
+   \   0000000C   0x1D0A             ADDS     R2,R1,#+4
+    672              if (((void*)_FS_memblock[i].memory) == pBuffer) {
+   \                     ??FS__fat_free_0: (+1)
+   \   0000000E   0x42A2             CMP      R2,R4
+   \   00000010   0xD105             BNE.N    ??FS__fat_free_1
+    673                _FS_memblock[i].status = 0;
+   \   00000012   0xEB00 0x13C0      ADD      R3,R0,R0, LSL #+7
+   \   00000016   0x0098             LSLS     R0,R3,#+2
+   \   00000018   0x2200             MOVS     R2,#+0
+   \   0000001A   0x5042             STR      R2,[R0, R1]
+    674                FS_X_OS_UnlockMem();
+   \   0000001C   0xE004             B.N      ??FS__fat_free_2
+    675                return;
+    676              }
+    677            }
+   \                     ??FS__fat_free_1: (+1)
+   \   0000001E   0x1C40             ADDS     R0,R0,#+1
+   \   00000020   0x280A             CMP      R0,#+10
+   \   00000022   0xF502 0x7201      ADD      R2,R2,#+516
+   \   00000026   0xDBF2             BLT.N    ??FS__fat_free_0
+    678            FS_X_OS_UnlockMem();
+   \                     ??FS__fat_free_2: (+1)
+   \   00000028   0xE8BD 0x4010      POP      {R4,LR}
+   \   0000002C   0x.... 0x....      B.W      FS_X_OS_UnlockMem
+    679          }
+    680          
+    681          
+    682          /*********************************************************************
+    683          *
+    684          *             FS__fat_checkunit
+    685          *
+    686            Description:
+    687            FS internal function. Read Bios-Parameter-Block from a device and
+    688            check, if it contains valid data.
+    689          
+    690            Parameters:
+    691            Idx         - Index of device in the device information table 
+    692                          referred by FS__pDevInfo.
+    693            Unit        - Unit number.
+    694           
+    695            Return value:
+    696            ==1         - BPB is okay.
+    697            ==0         - An error has occured.
+    698          */
+    699          
+
+   \                                 In section .text, align 2, keep-with-next
+    700          int FS__fat_checkunit(int Idx, FS_u32 Unit) {
+   \                     FS__fat_checkunit: (+1)
+   \   00000000   0xB5F8             PUSH     {R3-R7,LR}
+   \   00000002   0x4604             MOV      R4,R0
+    701            int err;
+    702            int status;
+    703            int lexp;
+    704            
+    705            status = FS__lb_status(FS__pDevInfo[Idx].devdriver, Unit);
+   \   00000004   0x....             LDR.N    R0,??DataTable9_1
+   \   00000006   0x6800             LDR      R0,[R0, #+0]
+   \   00000008   0xEB00 0x1004      ADD      R0,R0,R4, LSL #+4
+   \   0000000C   0x460D             MOV      R5,R1
+   \   0000000E   0x6880             LDR      R0,[R0, #+8]
+   \   00000010   0x.... 0x....      BL       FS__lb_status
+    706            if (status < 0) {
+   \   00000014   0x2800             CMP      R0,#+0
+   \   00000016   0xD422             BMI.N    ??FS__fat_checkunit_0
+    707              return 0;
+    708            }
+    709            if (status == FS_LBL_MEDIACHANGED) {
+   \   00000018   0x2801             CMP      R0,#+1
+   \   0000001A   0xD105             BNE.N    ??FS__fat_checkunit_1
+    710              /* Mount new volume */
+    711              err = _FS_ReadBPB(Idx, Unit);
+    712              if (err < 0) {
+   \   0000001C   0x4629             MOV      R1,R5
+   \   0000001E   0x4620             MOV      R0,R4
+   \   00000020   0x.... 0x....      BL       _FS_ReadBPB
+   \   00000024   0x2800             CMP      R0,#+0
+   \   00000026   0xD41A             BMI.N    ??FS__fat_checkunit_0
+    713                return 0;
+    714              }
+    715            }
+    716            if (FS__FAT_aBPBUnit[Idx][Unit].Signature != 0xaa55) {
+   \                     ??FS__fat_checkunit_1: (+1)
+   \   00000028   0x....             LDR.N    R0,??DataTable9_2
+   \   0000002A   0xEB00 0x1044      ADD      R0,R0,R4, LSL #+5
+   \   0000002E   0xEB00 0x1645      ADD      R6,R0,R5, LSL #+5
+   \   00000032   0xF64A 0x2755      MOVW     R7,#+43605
+   \   00000036   0x8B30             LDRH     R0,[R6, #+24]
+   \   00000038   0x42B8             CMP      R0,R7
+   \   0000003A   0xD008             BEQ.N    ??FS__fat_checkunit_2
+    717              err = _FS_ReadBPB(Idx, Unit);
+    718              lexp = (err < 0);
+   \   0000003C   0x4629             MOV      R1,R5
+   \   0000003E   0x4620             MOV      R0,R4
+   \   00000040   0x.... 0x....      BL       _FS_ReadBPB
+   \   00000044   0x2800             CMP      R0,#+0
+   \   00000046   0xD40A             BMI.N    ??FS__fat_checkunit_0
+    719              lexp = lexp || (FS__FAT_aBPBUnit[Idx][Unit].Signature != 0xaa55);
+   \   00000048   0x8B30             LDRH     R0,[R6, #+24]
+   \   0000004A   0x42B8             CMP      R0,R7
+   \   0000004C   0xD107             BNE.N    ??FS__fat_checkunit_0
+    720              if (lexp) {
+    721                return 0;
+    722              }
+    723            }
+    724            if (FS__FAT_aBPBUnit[Idx][Unit].NumFATs != 2) {
+   \                     ??FS__fat_checkunit_2: (+1)
+   \   0000004E   0x7F70             LDRB     R0,[R6, #+29]
+   \   00000050   0x2802             CMP      R0,#+2
+   \   00000052   0xD104             BNE.N    ??FS__fat_checkunit_0
+    725              return 0;  /* Only 2 FATs are supported */
+    726            }
+    727            if (FS__FAT_aBPBUnit[Idx][Unit].FATSz16 == 0) {
+   \   00000054   0x8A70             LDRH     R0,[R6, #+18]
+   \   00000056   0xB920             CBNZ.N   R0,??FS__fat_checkunit_3
+    728              if (FS__FAT_aBPBUnit[Idx][Unit].ExtFlags & 0x0080) {
+   \   00000058   0x7D30             LDRB     R0,[R6, #+20]
+   \   0000005A   0x0600             LSLS     R0,R0,#+24
+   \   0000005C   0xD501             BPL.N    ??FS__fat_checkunit_3
+    729                return 0;  /* Only mirroring at runtime supported */
+   \                     ??FS__fat_checkunit_0: (+1)
+   \   0000005E   0x2000             MOVS     R0,#+0
+   \   00000060   0xBDF2             POP      {R1,R4-R7,PC}
+    730              }
+    731            }
+    732            return 1;
+   \                     ??FS__fat_checkunit_3: (+1)
+   \   00000062   0x2001             MOVS     R0,#+1
+   \   00000064   0xBDF2             POP      {R1,R4-R7,PC}    ;; return
+    733          }
+    734          
+    735          
+    736          /*********************************************************************
+    737          *
+    738          *             FS__fat_which_type
+    739          *
+    740            Description:
+    741            FS internal function. Determine FAT type used on a media. This
+    742            function is following the MS specification very closely.
+    743          
+    744            Parameters:
+    745            Idx         - Index of device in the device information table 
+    746                          referred by FS__pDevInfo.
+    747            Unit        - Unit number.
+    748           
+    749            Return value:
+    750            ==0         - FAT16.
+    751            ==1         - FAT12.
+    752            ==2         - FAT32
+    753          */
+    754          
+
+   \                                 In section .text, align 2, keep-with-next
+    755          int FS__fat_which_type(int Idx, FS_u32 Unit) {
+    756            FS_u32 coc;
+    757            FS_u32 fatsize;
+    758            FS_u32 totsec;
+    759            FS_u32 datasec;
+    760            FS_u32 bytespersec;
+    761            FS_u32 dsize;
+    762          
+    763            bytespersec   = (FS_u32)FS__FAT_aBPBUnit[Idx][Unit].BytesPerSec;
+    764            dsize         = ((FS_u32)((FS_u32)FS__FAT_aBPBUnit[Idx][Unit].RootEntCnt) * FS_FAT_DENTRY_SIZE) / bytespersec;
+   \                     FS__fat_which_type: (+1)
+   \   00000000   0x....             LDR.N    R2,??DataTable9_2
+   \   00000002   0xEB02 0x1040      ADD      R0,R2,R0, LSL #+5
+   \   00000006   0xEB00 0x1041      ADD      R0,R0,R1, LSL #+5
+   \   0000000A   0x89C1             LDRH     R1,[R0, #+14]
+   \   0000000C   0x8982             LDRH     R2,[R0, #+12]
+   \   0000000E   0x0149             LSLS     R1,R1,#+5
+   \   00000010   0xFBB1 0xF1F2      UDIV     R1,R1,R2
+    765            fatsize       = FS__FAT_aBPBUnit[Idx][Unit].FATSz16;
+   \   00000014   0x8A42             LDRH     R2,[R0, #+18]
+    766            if (fatsize == 0) {
+   \   00000016   0xB902             CBNZ.N   R2,??FS__fat_which_type_0
+    767              fatsize = FS__FAT_aBPBUnit[Idx][Unit].FATSz32;
+   \   00000018   0x6842             LDR      R2,[R0, #+4]
+    768            }
+    769            totsec = (FS_u32)FS__FAT_aBPBUnit[Idx][Unit].TotSec16;
+   \                     ??FS__fat_which_type_0: (+1)
+   \   0000001A   0x8A03             LDRH     R3,[R0, #+16]
+    770            if (totsec == 0) {
+   \   0000001C   0xB903             CBNZ.N   R3,??FS__fat_which_type_1
+    771              totsec = FS__FAT_aBPBUnit[Idx][Unit].TotSec32;
+   \   0000001E   0x6803             LDR      R3,[R0, #+0]
+    772            }
+    773            datasec = totsec - (FS__FAT_aBPBUnit[Idx][Unit].RsvdSecCnt +
+    774                                FS__FAT_aBPBUnit[Idx][Unit].NumFATs * fatsize + dsize);
+    775            coc     = datasec / FS__FAT_aBPBUnit[Idx][Unit].SecPerClus;
+   \                     ??FS__fat_which_type_1: (+1)
+   \   00000020   0xF8B0 0xC01A      LDRH     R12,[R0, #+26]
+   \   00000024   0xEBA3 0x030C      SUB      R3,R3,R12
+   \   00000028   0xF890 0xC01D      LDRB     R12,[R0, #+29]
+   \   0000002C   0x7F00             LDRB     R0,[R0, #+28]
+   \   0000002E   0xFB02 0x321C      MLS      R2,R2,R12,R3
+   \   00000032   0x1A51             SUBS     R1,R2,R1
+   \   00000034   0xFBB1 0xF0F0      UDIV     R0,R1,R0
+    776            if (coc < 4085) {
+   \   00000038   0xF640 0x71F5      MOVW     R1,#+4085
+   \   0000003C   0x4288             CMP      R0,R1
+   \   0000003E   0xD201             BCS.N    ??FS__fat_which_type_2
+    777              return 1;  /* FAT12 */
+   \   00000040   0x2001             MOVS     R0,#+1
+   \   00000042   0x4770             BX       LR
+    778            }
+    779            else if (coc < 65525) {
+   \                     ??FS__fat_which_type_2: (+1)
+   \   00000044   0xF64F 0x71F5      MOVW     R1,#+65525
+   \   00000048   0x4288             CMP      R0,R1
+   \   0000004A   0xBF34             ITE      CC 
+   \   0000004C   0x2000             MOVCC    R0,#+0
+   \   0000004E   0x2002             MOVCS    R0,#+2
+    780              return 0;  /* FAT16 */
+    781            }
+    782            return 2;  /* FAT32 */
+   \   00000050   0x4770             BX       LR
+    783          }
+    784          
+    785          
+    786          /*********************************************************************
+    787          *
+    788          *             FS__fat_FAT_find_eof
+    789          *
+    790            Description:
+    791            FS internal function. Find the next EOF mark in the FAT.
+    792          
+    793            Parameters:
+    794            Idx         - Index of device in the device information table 
+    795                          referred by FS__pDevInfo.
+    796            Unit        - Unit number.
+    797            StrtClst    - Starting cluster in FAT.
+    798            pClstCnt    - If not zero, this is a pointer to an FS_u32, which
+    799                          is used to return the number of clusters found
+    800                          between StrtClst and the next EOF mark.
+    801           
+    802            Return value:
+    803            >=0         - Cluster, which contains the EOF mark.
+    804            <0          - An error has occured.
+    805          */
+    806          
+
+   \                                 In section .text, align 4, keep-with-next
+    807          FS_i32 FS__fat_FAT_find_eof(int Idx, FS_u32 Unit, FS_i32 StrtClst, FS_u32 *pClstCnt) {
+   \                     FS__fat_FAT_find_eof: (+1)
+   \   00000000   0xE92D 0x4FFB      PUSH     {R0,R1,R3-R11,LR}
+   \   00000004   0xB086             SUB      SP,SP,#+24
+   \   00000006   0x4616             MOV      R6,R2
+    808            FS_u32 clstcount;
+    809            FS_u32 fatsize;
+    810            FS_u32 maxclst;
+    811            FS_i32 fatindex;
+    812            FS_i32 fatsec;
+    813            FS_i32 fatoffs;
+    814            FS_i32 lastsec;
+    815            FS_i32 curclst;
+    816            FS_i32 bytespersec;
+    817            FS_i32 eofclst;
+    818            int fattype;
+    819            int err;
+    820            char *buffer;
+    821            unsigned char a;
+    822            unsigned char b;
+    823          #if (FS_FAT_NOFAT32==0)
+    824            unsigned char c;
+    825            unsigned char d;
+    826          #endif /* FS_FAT_NOFAT32==0 */
+    827            
+    828            fattype = FS__fat_which_type(Idx, Unit);
+   \   00000008   0x.... 0x....      BL       FS__fat_which_type
+   \   0000000C   0x9000             STR      R0,[SP, #+0]
+    829            if (fattype == 1) {
+   \   0000000E   0x2801             CMP      R0,#+1
+   \   00000010   0xBF08             IT       EQ 
+   \   00000012   0xF640 0x7AF5      MOVWEQ   R10,#+4085
+    830              maxclst = 4085UL;       /* FAT12 */
+   \   00000016   0xD005             BEQ.N    ??FS__fat_FAT_find_eof_0
+    831            }
+    832            else if (fattype == 2) {
+   \   00000018   0x2802             CMP      R0,#+2
+   \   0000001A   0xBF0C             ITE      EQ 
+   \   0000001C   0xF8DF 0xA190      LDREQ.W  R10,??FS__fat_FAT_find_eof_1  ;; 0xffffff0
+   \   00000020   0xF64F 0x7AF5      MOVWNE   R10,#+65525
+    833          #if (FS_FAT_NOFAT32 == 0)
+    834              maxclst = 0x0ffffff0UL; /* FAT32 */
+    835          #else
+    836              return -1;
+    837          #endif /* (FS_FAT_NOFAT32==0) */    
+    838            }
+    839            else {
+    840              maxclst = 65525UL;      /* FAT16 */
+    841            }
+    842            buffer = FS__fat_malloc(FS_FAT_SEC_SIZE);
+   \                     ??FS__fat_FAT_find_eof_0: (+1)
+   \   00000024   0x.... 0x....      BL       FS_X_OS_LockMem
+   \   00000028   0x4962             LDR.N    R1,??FS__fat_FAT_find_eof_1+0x4
+   \   0000002A   0x2000             MOVS     R0,#+0
+   \   0000002C   0x460A             MOV      R2,R1
+   \                     ??FS__fat_FAT_find_eof_2: (+1)
+   \   0000002E   0x6813             LDR      R3,[R2, #+0]
+   \   00000030   0xB15B             CBZ.N    R3,??FS__fat_FAT_find_eof_3
+   \   00000032   0xF8D2 0x3204      LDR      R3,[R2, #+516]
+   \   00000036   0x1C40             ADDS     R0,R0,#+1
+   \   00000038   0xB13B             CBZ.N    R3,??FS__fat_FAT_find_eof_3
+   \   0000003A   0x1C40             ADDS     R0,R0,#+1
+   \   0000003C   0x280A             CMP      R0,#+10
+   \   0000003E   0xF502 0x6281      ADD      R2,R2,#+1032
+   \   00000042   0xDBF4             BLT.N    ??FS__fat_FAT_find_eof_2
+   \   00000044   0x.... 0x....      BL       FS_X_OS_UnlockMem
+    843            if (!buffer) {
+    844              return -1;
+   \   00000048   0xE0CE             B.N      ??FS__fat_FAT_find_eof_4
+   \                     ??FS__fat_FAT_find_eof_3: (+1)
+   \   0000004A   0xEB00 0x12C0      ADD      R2,R0,R0, LSL #+7
+   \   0000004E   0x0090             LSLS     R0,R2,#+2
+   \   00000050   0x2201             MOVS     R2,#+1
+   \   00000052   0x5042             STR      R2,[R0, R1]
+   \   00000054   0x1845             ADDS     R5,R0,R1
+   \   00000056   0xF44F 0x7200      MOV      R2,#+512
+   \   0000005A   0x2100             MOVS     R1,#+0
+   \   0000005C   0x1D28             ADDS     R0,R5,#+4
+   \   0000005E   0x.... 0x....      BL       FS__CLIB_memset
+   \   00000062   0x.... 0x....      BL       FS_X_OS_UnlockMem
+    845            }
+    846            fatsize = FS__FAT_aBPBUnit[Idx][Unit].FATSz16;
+   \   00000066   0x9906             LDR      R1,[SP, #+24]
+   \   00000068   0x4853             LDR.N    R0,??FS__fat_FAT_find_eof_1+0x8
+   \   0000006A   0xEB00 0x1041      ADD      R0,R0,R1, LSL #+5
+   \   0000006E   0x9907             LDR      R1,[SP, #+28]
+   \   00000070   0xEB00 0x1041      ADD      R0,R0,R1, LSL #+5
+   \   00000074   0x9002             STR      R0,[SP, #+8]
+   \   00000076   0x1D2D             ADDS     R5,R5,#+4
+   \   00000078   0x8A40             LDRH     R0,[R0, #+18]
+   \   0000007A   0x9001             STR      R0,[SP, #+4]
+    847            if (fatsize == 0) {
+   \   0000007C   0xB910             CBNZ.N   R0,??FS__fat_FAT_find_eof_5
+    848              fatsize = FS__FAT_aBPBUnit[Idx][Unit].FATSz32;
+   \   0000007E   0x9802             LDR      R0,[SP, #+8]
+   \   00000080   0x6840             LDR      R0,[R0, #+4]
+   \   00000082   0x9001             STR      R0,[SP, #+4]
+    849            }
+    850            bytespersec   = (FS_i32)FS__FAT_aBPBUnit[Idx][Unit].BytesPerSec;
+    851            curclst       = StrtClst;
+    852            lastsec       = -1;
+    853            clstcount     = 0;
+   \                     ??FS__fat_FAT_find_eof_5: (+1)
+   \   00000084   0x2700             MOVS     R7,#+0
+   \   00000086   0x9802             LDR      R0,[SP, #+8]
+   \   00000088   0x8980             LDRH     R0,[R0, #+12]
+   \   0000008A   0x9003             STR      R0,[SP, #+12]
+   \   0000008C   0xF04F 0x30FF      MOV      R0,#-1
+   \   00000090   0x9903             LDR      R1,[SP, #+12]
+   \   00000092   0x1E49             SUBS     R1,R1,#+1
+   \   00000094   0x9105             STR      R1,[SP, #+20]
+    854            while (clstcount < maxclst) {
+   \                     ??FS__fat_FAT_find_eof_6: (+1)
+   \   00000096   0x4557             CMP      R7,R10
+   \   00000098   0xF080 0x80A3      BCS.W    ??FS__fat_FAT_find_eof_7
+    855              eofclst = curclst;
+    856              clstcount++;
+    857              if (fattype == 1) {
+   \   0000009C   0x9900             LDR      R1,[SP, #+0]
+   \   0000009E   0x9604             STR      R6,[SP, #+16]
+   \   000000A0   0x1C7F             ADDS     R7,R7,#+1
+   \   000000A2   0x2901             CMP      R1,#+1
+   \   000000A4   0xD104             BNE.N    ??FS__fat_FAT_find_eof_8
+    858                fatindex = curclst + (curclst / 2);   /* FAT12 */
+   \   000000A6   0xEB06 0x71D6      ADD      R1,R6,R6, LSR #+31
+   \   000000AA   0xEB06 0x0161      ADD      R1,R6,R1, ASR #+1
+   \   000000AE   0xE004             B.N      ??FS__fat_FAT_find_eof_9
+    859              }
+    860          #if (FS_FAT_NOFAT32==0)    
+    861              else if (fattype == 2) {
+   \                     ??FS__fat_FAT_find_eof_8: (+1)
+   \   000000B0   0x9900             LDR      R1,[SP, #+0]
+   \   000000B2   0x2902             CMP      R1,#+2
+   \   000000B4   0xBF0C             ITE      EQ 
+   \   000000B6   0x00B1             LSLEQ    R1,R6,#+2
+   \   000000B8   0x0071             LSLNE    R1,R6,#+1
+    862                fatindex = curclst * 4;               /* FAT32 */
+    863              }
+    864          #endif /* FS_FAT_NOFAT32==0 */    
+    865              else {
+    866                fatindex = curclst * 2;               /* FAT16 */
+    867              }
+    868              fatsec  = FS__FAT_aBPBUnit[Idx][Unit].RsvdSecCnt + (fatindex / bytespersec);
+   \                     ??FS__fat_FAT_find_eof_9: (+1)
+   \   000000BA   0x9B02             LDR      R3,[SP, #+8]
+   \   000000BC   0x9A03             LDR      R2,[SP, #+12]
+   \   000000BE   0x8B5B             LDRH     R3,[R3, #+26]
+   \   000000C0   0xFB91 0xF2F2      SDIV     R2,R1,R2
+   \   000000C4   0xEB02 0x0803      ADD      R8,R2,R3
+    869              fatoffs = fatindex % bytespersec;
+   \   000000C8   0x9B03             LDR      R3,[SP, #+12]
+    870              if (fatsec != lastsec) {
+   \   000000CA   0x4580             CMP      R8,R0
+   \   000000CC   0xFB03 0x1B12      MLS      R11,R3,R2,R1
+   \   000000D0   0xD01D             BEQ.N    ??FS__fat_FAT_find_eof_10
+    871                err = FS__lb_read(FS__pDevInfo[Idx].devdriver, Unit, fatsec, (void*)buffer);
+    872                if (err < 0) {
+   \   000000D2   0x483A             LDR.N    R0,??FS__fat_FAT_find_eof_1+0xC
+   \   000000D4   0x9906             LDR      R1,[SP, #+24]
+   \   000000D6   0x6800             LDR      R0,[R0, #+0]
+   \   000000D8   0xEB00 0x1401      ADD      R4,R0,R1, LSL #+4
+   \   000000DC   0x9907             LDR      R1,[SP, #+28]
+   \   000000DE   0x68A0             LDR      R0,[R4, #+8]
+   \   000000E0   0x462B             MOV      R3,R5
+   \   000000E2   0x4642             MOV      R2,R8
+   \   000000E4   0x.... 0x....      BL       FS__lb_read
+   \   000000E8   0x2800             CMP      R0,#+0
+   \   000000EA   0xD50F             BPL.N    ??FS__fat_FAT_find_eof_11
+    873                  err = FS__lb_read(FS__pDevInfo[Idx].devdriver, Unit, fatsize + fatsec, (void*)buffer);
+    874                  if (err < 0) {
+   \   000000EC   0x9801             LDR      R0,[SP, #+4]
+   \   000000EE   0x9907             LDR      R1,[SP, #+28]
+   \   000000F0   0xEB08 0x0200      ADD      R2,R8,R0
+   \   000000F4   0x68A0             LDR      R0,[R4, #+8]
+   \   000000F6   0x462B             MOV      R3,R5
+   \   000000F8   0x.... 0x....      BL       FS__lb_read
+   \   000000FC   0x2800             CMP      R0,#+0
+   \   000000FE   0xD470             BMI.N    ??FS__fat_FAT_find_eof_7
+    875                    FS__fat_free(buffer);
+    876                    return -1;
+    877                  }
+    878                  /* Try to repair original FAT sector with contents of copy */
+    879                  FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, fatsec, (void*)buffer);
+   \   00000100   0x9907             LDR      R1,[SP, #+28]
+   \   00000102   0x68A0             LDR      R0,[R4, #+8]
+   \   00000104   0x462B             MOV      R3,R5
+   \   00000106   0x4642             MOV      R2,R8
+   \   00000108   0x.... 0x....      BL       FS__lb_write
+    880                }
+    881                lastsec = fatsec;
+   \                     ??FS__fat_FAT_find_eof_11: (+1)
+   \   0000010C   0x4640             MOV      R0,R8
+    882              }
+    883              if (fattype == 1) {
+   \                     ??FS__fat_FAT_find_eof_10: (+1)
+   \   0000010E   0x9A00             LDR      R2,[SP, #+0]
+   \   00000110   0x2A01             CMP      R2,#+1
+   \   00000112   0xEB0B 0x0105      ADD      R1,R11,R5
+   \   00000116   0xD134             BNE.N    ??FS__fat_FAT_find_eof_12
+    884                if (fatoffs == (bytespersec - 1)) {
+   \   00000118   0x9A05             LDR      R2,[SP, #+20]
+   \   0000011A   0xF891 0x9000      LDRB     R9,[R1, #+0]
+   \   0000011E   0x4593             CMP      R11,R2
+   \   00000120   0xD121             BNE.N    ??FS__fat_FAT_find_eof_13
+    885                  a   = buffer[fatoffs];
+    886                  err = FS__lb_read(FS__pDevInfo[Idx].devdriver, Unit, fatsec + 1, (void*)buffer);
+    887                  if (err < 0) {
+   \   00000122   0x4826             LDR.N    R0,??FS__fat_FAT_find_eof_1+0xC
+   \   00000124   0x9906             LDR      R1,[SP, #+24]
+   \   00000126   0x6800             LDR      R0,[R0, #+0]
+   \   00000128   0xEB00 0x1401      ADD      R4,R0,R1, LSL #+4
+   \   0000012C   0xF108 0x0B01      ADD      R11,R8,#+1
+   \   00000130   0x9907             LDR      R1,[SP, #+28]
+   \   00000132   0x68A0             LDR      R0,[R4, #+8]
+   \   00000134   0x462B             MOV      R3,R5
+   \   00000136   0x465A             MOV      R2,R11
+   \   00000138   0x.... 0x....      BL       FS__lb_read
+   \   0000013C   0x2800             CMP      R0,#+0
+   \   0000013E   0xD50F             BPL.N    ??FS__fat_FAT_find_eof_14
+    888                    err = FS__lb_read(FS__pDevInfo[Idx].devdriver, Unit, fatsize + fatsec + 1, (void*)buffer);
+    889                    if (err < 0) {
+   \   00000140   0x9801             LDR      R0,[SP, #+4]
+   \   00000142   0x9907             LDR      R1,[SP, #+28]
+   \   00000144   0x4440             ADD      R0,R8,R0
+   \   00000146   0x1C42             ADDS     R2,R0,#+1
+   \   00000148   0x68A0             LDR      R0,[R4, #+8]
+   \   0000014A   0x462B             MOV      R3,R5
+   \   0000014C   0x.... 0x....      BL       FS__lb_read
+   \   00000150   0x2800             CMP      R0,#+0
+   \   00000152   0xD446             BMI.N    ??FS__fat_FAT_find_eof_7
+    890                      FS__fat_free(buffer);
+    891                      return -1;
+    892                    }
+    893                    /* Try to repair original FAT sector with contents of copy */
+    894                    FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, fatsec + 1, (void*)buffer);
+   \   00000154   0x9907             LDR      R1,[SP, #+28]
+   \   00000156   0x68A0             LDR      R0,[R4, #+8]
+   \   00000158   0x462B             MOV      R3,R5
+   \   0000015A   0x465A             MOV      R2,R11
+   \   0000015C   0x.... 0x....      BL       FS__lb_write
+    895          
+    896                  }
+    897                  lastsec = fatsec + 1;
+    898                  b       = buffer[0];
+   \                     ??FS__fat_FAT_find_eof_14: (+1)
+   \   00000160   0x7829             LDRB     R1,[R5, #+0]
+   \   00000162   0x4658             MOV      R0,R11
+   \   00000164   0xE000             B.N      ??FS__fat_FAT_find_eof_15
+    899                }
+    900                else {
+    901                  a = buffer[fatoffs];
+    902                  b = buffer[fatoffs + 1];
+   \                     ??FS__fat_FAT_find_eof_13: (+1)
+   \   00000166   0x7849             LDRB     R1,[R1, #+1]
+    903                }
+    904                if (curclst & 1) {
+   \                     ??FS__fat_FAT_find_eof_15: (+1)
+   \   00000168   0x07F2             LSLS     R2,R6,#+31
+   \   0000016A   0xBF47             ITTEE    MI 
+   \   0000016C   0xEA4F 0x1219      LSRMI    R2,R9,#+4
+   \   00000170   0xEB02 0x1601      ADDMI    R6,R2,R1, LSL #+4
+   \   00000174   0xF001 0x010F      ANDPL    R1,R1,#0xF
+   \   00000178   0xEB09 0x2601      ADDPL    R6,R9,R1, LSL #+8
+    905                  curclst = ((a & 0xf0) >> 4 ) + 16 * b;
+    906                }
+    907                else {
+    908                  curclst = a + 256 * (b & 0x0f);
+    909                }
+    910                curclst &= 0x0fffL;
+    911                if (curclst >= 0x0ff8L) {
+   \   0000017C   0xF640 0x71F8      MOVW     R1,#+4088
+   \   00000180   0xE024             B.N      ??FS__fat_FAT_find_eof_16
+    912                  /* EOF found */
+    913                  FS__fat_free(buffer);
+    914                  if (pClstCnt) {
+    915                    *pClstCnt = clstcount;
+    916                  }
+    917                  return eofclst;
+    918                }
+    919              }
+    920          #if (FS_FAT_NOFAT32==0)
+    921              else if (fattype == 2) {
+   \                     ??FS__fat_FAT_find_eof_12: (+1)
+   \   00000182   0x2A02             CMP      R2,#+2
+   \   00000184   0xEB0B 0x0205      ADD      R2,R11,R5
+   \   00000188   0x7809             LDRB     R1,[R1, #+0]
+   \   0000018A   0x7852             LDRB     R2,[R2, #+1]
+   \   0000018C   0xD11A             BNE.N    ??FS__fat_FAT_find_eof_17
+    922                a         = buffer[fatoffs];
+    923                b         = buffer[fatoffs + 1];
+    924                c         = buffer[fatoffs + 2];
+    925                d         = buffer[fatoffs + 3];
+    926                curclst   = a + 0x100L * b + 0x10000L * c + 0x1000000L * d;
+    927                curclst  &= 0x0fffffffL;
+   \   0000018E   0xEB01 0x2102      ADD      R1,R1,R2, LSL #+8
+   \   00000192   0xEB0B 0x0205      ADD      R2,R11,R5
+   \   00000196   0x7892             LDRB     R2,[R2, #+2]
+   \   00000198   0xEB01 0x4102      ADD      R1,R1,R2, LSL #+16
+   \   0000019C   0xEB0B 0x0205      ADD      R2,R11,R5
+   \   000001A0   0x78D2             LDRB     R2,[R2, #+3]
+   \   000001A2   0xEB01 0x6102      ADD      R1,R1,R2, LSL #+24
+   \   000001A6   0x010E             LSLS     R6,R1,#+4
+   \   000001A8   0x0936             LSRS     R6,R6,#+4
+    928                if (curclst >= (FS_i32)0x0ffffff8L) {
+   \   000001AA   0x4905             LDR.N    R1,??FS__fat_FAT_find_eof_1+0x10  ;; 0xffffff8
+   \   000001AC   0xE00E             B.N      ??FS__fat_FAT_find_eof_16
+   \   000001AE   0xBF00             Nop      
+   \                     ??FS__fat_FAT_find_eof_1:
+   \   000001B0   0x0FFFFFF0         DC32     0xffffff0
+   \   000001B4   0x........         DC32     _FS_memblock
+   \   000001B8   0x........         DC32     FS__FAT_aBPBUnit
+   \   000001BC   0x........         DC32     FS__pDevInfo
+   \   000001C0   0x0FFFFFF8         DC32     0xffffff8
+    929                  /* EOF found */
+    930                  FS__fat_free(buffer);
+    931                  if (pClstCnt) {
+    932                    *pClstCnt = clstcount;
+    933                  }
+    934                  return eofclst;
+    935                }
+    936              }
+    937          #endif /* FS_FAT_NOFAT32==0 */
+    938              else {
+    939                a         = buffer[fatoffs];
+    940                b         = buffer[fatoffs + 1];
+    941                curclst   = a + 256 * b;
+    942                curclst  &= 0xffffL;
+   \                     ??FS__fat_FAT_find_eof_17: (+1)
+   \   000001C4   0xEB01 0x2602      ADD      R6,R1,R2, LSL #+8
+    943                if (curclst >= (FS_i32)0xfff8L) {
+   \   000001C8   0xF64F 0x71F8      MOVW     R1,#+65528
+   \                     ??FS__fat_FAT_find_eof_16: (+1)
+   \   000001CC   0x428E             CMP      R6,R1
+   \   000001CE   0xF6FF 0xAF62      BLT.W    ??FS__fat_FAT_find_eof_6
+    944                  /* EOF found */
+    945                  FS__fat_free(buffer);
+   \   000001D2   0x4628             MOV      R0,R5
+   \   000001D4   0x.... 0x....      BL       FS__fat_free
+    946                  if (pClstCnt) {
+   \   000001D8   0x9808             LDR      R0,[SP, #+32]
+   \   000001DA   0xB100             CBZ.N    R0,??FS__fat_FAT_find_eof_18
+    947                    *pClstCnt = clstcount;
+   \   000001DC   0x6007             STR      R7,[R0, #+0]
+    948                  }
+    949                  return eofclst;
+   \                     ??FS__fat_FAT_find_eof_18: (+1)
+   \   000001DE   0x9804             LDR      R0,[SP, #+16]
+   \   000001E0   0x....             B.N      ?Subroutine1
+    950                }
+    951              }
+    952            } /* while (clstcount<maxclst) */
+    953            FS__fat_free(buffer);
+   \                     ??FS__fat_FAT_find_eof_7: (+1)
+   \   000001E2   0x4628             MOV      R0,R5
+   \   000001E4   0x.... 0x....      BL       FS__fat_free
+    954            return -1;
+   \                     ??FS__fat_FAT_find_eof_4: (+1)
+   \   000001E8   0xF04F 0x30FF      MOV      R0,#-1
+   \   000001EC                      REQUIRE ?Subroutine1
+   \   000001EC                      ;; // Fall through to label ?Subroutine1
+    955          }
+
+   \                                 In section .text, align 2, keep-with-next
+   \                     ?Subroutine1: (+1)
+   \   00000000   0xB009             ADD      SP,SP,#+36
+   \   00000002   0xE8BD 0x8FF0      POP      {R4-R11,PC}      ;; return
+    956          
+    957          
+    958          /*********************************************************************
+    959          *
+    960          *             FS__fat_FAT_alloc
+    961          *
+    962            Description:
+    963            FS internal function. Allocate a new cluster in the FAT and link it
+    964            to LastClust. Assign an EOF mark to the new allocated cluster.
+    965            The function has grown a lot, since it supports all FAT types (FAT12,
+    966            FAT16 & FAT32). There is also room for performance improvement, when
+    967            makeing the new FAT entry and the old entry is within the same FAT
+    968            sector.
+    969          
+    970            Parameters:
+    971            Idx         - Index of device in the device information table 
+    972                          referred by FS__pDevInfo.
+    973            Unit        - Unit number.
+    974            LastClust   - Number of cluster, to which the new allocated cluster
+    975                          is linked to. If this is negative, the new cluster is
+    976                          not linked to anything and only the EOF mark is set.
+    977           
+    978            Return value:
+    979            >=0         - Number of new allocated cluster, which contains the 
+    980                          EOF mark.
+    981            <0          - An error has occured.
+    982          */
+    983          
+
+   \                                 In section .text, align 4, keep-with-next
+    984          FS_i32 FS__fat_FAT_alloc(int Idx, FS_u32 Unit, FS_i32 LastClust) {
+   \                     FS__fat_FAT_alloc: (+1)
+   \   00000000   0xE92D 0x4FF0      PUSH     {R4-R11,LR}
+   \   00000004   0xB08B             SUB      SP,SP,#+44
+   \   00000006   0x4681             MOV      R9,R0
+    985            FS_u32 fatsize;
+    986            FS_i32 fatoffs = 0;
+   \   00000008   0x2000             MOVS     R0,#+0
+   \   0000000A   0x9009             STR      R0,[SP, #+36]
+   \   0000000C   0x468A             MOV      R10,R1
+   \   0000000E   0x4617             MOV      R7,R2
+    987            FS_i32 bytespersec;
+    988            FS_i32 curclst;
+    989            FS_i32 fatsec;
+    990            FS_i32 lastsec;
+    991            unsigned char *buffer;
+    992            int fattype;
+    993            int err;
+    994            int err2;
+    995            int lexp;
+    996            
+    997            buffer = (unsigned char*)FS__fat_malloc(FS_FAT_SEC_SIZE);
+   \   00000010   0x.... 0x....      BL       FS_X_OS_LockMem
+   \   00000014   0x496D             LDR.N    R1,??FS__fat_FAT_alloc_0
+   \   00000016   0x2000             MOVS     R0,#+0
+   \   00000018   0x460A             MOV      R2,R1
+   \                     ??FS__fat_FAT_alloc_1: (+1)
+   \   0000001A   0x6813             LDR      R3,[R2, #+0]
+   \   0000001C   0xB15B             CBZ.N    R3,??FS__fat_FAT_alloc_2
+   \   0000001E   0xF8D2 0x3204      LDR      R3,[R2, #+516]
+   \   00000022   0x1C40             ADDS     R0,R0,#+1
+   \   00000024   0xB13B             CBZ.N    R3,??FS__fat_FAT_alloc_2
+   \   00000026   0x1C40             ADDS     R0,R0,#+1
+   \   00000028   0x280A             CMP      R0,#+10
+   \   0000002A   0xF502 0x6281      ADD      R2,R2,#+1032
+   \   0000002E   0xDBF4             BLT.N    ??FS__fat_FAT_alloc_1
+   \   00000030   0x.... 0x....      BL       FS_X_OS_UnlockMem
+    998            if (!buffer) {
+    999              return -1;
+   \   00000034   0xE0C7             B.N      ??FS__fat_FAT_alloc_3
+   \                     ??FS__fat_FAT_alloc_2: (+1)
+   \   00000036   0xEB00 0x12C0      ADD      R2,R0,R0, LSL #+7
+   \   0000003A   0x0090             LSLS     R0,R2,#+2
+   \   0000003C   0x2201             MOVS     R2,#+1
+   \   0000003E   0x5042             STR      R2,[R0, R1]
+   \   00000040   0x1846             ADDS     R6,R0,R1
+   \   00000042   0xF44F 0x7200      MOV      R2,#+512
+   \   00000046   0x2100             MOVS     R1,#+0
+   \   00000048   0x1D30             ADDS     R0,R6,#+4
+   \   0000004A   0x.... 0x....      BL       FS__CLIB_memset
+   \   0000004E   0x.... 0x....      BL       FS_X_OS_UnlockMem
+   1000            }
+   1001            fattype = FS__fat_which_type(Idx, Unit);
+   \   00000052   0x4651             MOV      R1,R10
+   \   00000054   0x4648             MOV      R0,R9
+   \   00000056   0x.... 0x....      BL       FS__fat_which_type
+   \   0000005A   0x4683             MOV      R11,R0
+   1002          #if (FS_FAT_NOFAT32!=0)
+   1003            if (fattype == 2) {
+   1004              FS__fat_free(buffer);
+   1005              return -1;
+   1006            }
+   1007          #endif /* FS_FAT_NOFAT32!=0 */
+   1008            fatsize = FS__FAT_aBPBUnit[Idx][Unit].FATSz16;
+   \   0000005C   0x485C             LDR.N    R0,??FS__fat_FAT_alloc_0+0x4
+   \   0000005E   0xEB00 0x1049      ADD      R0,R0,R9, LSL #+5
+   \   00000062   0xEB00 0x184A      ADD      R8,R0,R10, LSL #+5
+   \   00000066   0x1D36             ADDS     R6,R6,#+4
+   \   00000068   0xF8B8 0x4012      LDRH     R4,[R8, #+18]
+   1009            if (fatsize == 0) {
+   \   0000006C   0xB90C             CBNZ.N   R4,??FS__fat_FAT_alloc_4
+   1010              fatsize = FS__FAT_aBPBUnit[Idx][Unit].FATSz32;
+   \   0000006E   0xF8D8 0x4004      LDR      R4,[R8, #+4]
+   1011            }
+   1012            bytespersec   = (FS_i32)FS__FAT_aBPBUnit[Idx][Unit].BytesPerSec;
+   \                     ??FS__fat_FAT_alloc_4: (+1)
+   \   00000072   0xF8B8 0x000C      LDRH     R0,[R8, #+12]
+   \   00000076   0x9007             STR      R0,[SP, #+28]
+   1013            /* Find a free cluster in the FAT */
+   1014            curclst       = _FS__fat_FindFreeCluster(Idx, Unit, &fatsec, &lastsec, &fatoffs, LastClust, buffer, fattype, fatsize, bytespersec);
+   \   00000078   0x9005             STR      R0,[SP, #+20]
+   \   0000007A   0x9404             STR      R4,[SP, #+16]
+   \   0000007C   0xF8CD 0xB00C      STR      R11,[SP, #+12]
+   \   00000080   0x9602             STR      R6,[SP, #+8]
+   \   00000082   0x9701             STR      R7,[SP, #+4]
+   \   00000084   0xA809             ADD      R0,SP,#+36
+   \   00000086   0x9000             STR      R0,[SP, #+0]
+   \   00000088   0xAB06             ADD      R3,SP,#+24
+   \   0000008A   0xAA08             ADD      R2,SP,#+32
+   \   0000008C   0x4651             MOV      R1,R10
+   \   0000008E   0x4648             MOV      R0,R9
+   \   00000090   0x.... 0x....      BL       _FS__fat_FindFreeCluster
+   \   00000094   0x4605             MOV      R5,R0
+   1015            if (curclst < 0) {
+   \   00000096   0x2D00             CMP      R5,#+0
+   \   00000098   0xF100 0x8092      BMI.W    ??FS__fat_FAT_alloc_5
+   1016              FS__fat_free(buffer);   /* No free cluster found. */
+   1017              return -1;
+   1018            }
+   1019            /* Make an EOF entry for the new cluster */
+   1020            err = _FS__fat_SetEOFMark(Idx, Unit, fatsec, &lastsec, fatoffs, curclst, buffer, fattype, fatsize, bytespersec);
+   1021            if (err < 0) {
+   \   0000009C   0x9807             LDR      R0,[SP, #+28]
+   \   0000009E   0x9005             STR      R0,[SP, #+20]
+   \   000000A0   0x9404             STR      R4,[SP, #+16]
+   \   000000A2   0xF8CD 0xB00C      STR      R11,[SP, #+12]
+   \   000000A6   0x9602             STR      R6,[SP, #+8]
+   \   000000A8   0x9501             STR      R5,[SP, #+4]
+   \   000000AA   0xAB06             ADD      R3,SP,#+24
+   \   000000AC   0x9809             LDR      R0,[SP, #+36]
+   \   000000AE   0x9A08             LDR      R2,[SP, #+32]
+   \   000000B0   0x9000             STR      R0,[SP, #+0]
+   \   000000B2   0x4651             MOV      R1,R10
+   \   000000B4   0x4648             MOV      R0,R9
+   \   000000B6   0x.... 0x....      BL       _FS__fat_SetEOFMark
+   \   000000BA   0x2800             CMP      R0,#+0
+   \   000000BC   0xF100 0x8080      BMI.W    ??FS__fat_FAT_alloc_5
+   1022              FS__fat_free(buffer);
+   1023              return -1;
+   1024            }
+   1025            /* Link the new cluster to the cluster list */
+   1026            if (LastClust < 0) {
+   \   000000C0   0x2F00             CMP      R7,#+0
+   \   000000C2   0xD517             BPL.N    ??FS__fat_FAT_alloc_6
+   1027              err  = FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, lastsec, (void*)buffer);
+   \   000000C4   0x4843             LDR.N    R0,??FS__fat_FAT_alloc_0+0x8
+   \   000000C6   0x6800             LDR      R0,[R0, #+0]
+   \   000000C8   0x9A06             LDR      R2,[SP, #+24]
+   \   000000CA   0xEB00 0x1709      ADD      R7,R0,R9, LSL #+4
+   \   000000CE   0x4633             MOV      R3,R6
+   \   000000D0   0x68B8             LDR      R0,[R7, #+8]
+   \   000000D2   0x4651             MOV      R1,R10
+   \   000000D4   0x.... 0x....      BL       FS__lb_write
+   \   000000D8   0x9000             STR      R0,[SP, #+0]
+   1028              err2 = FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, fatsize + lastsec, (void*)buffer);
+   \   000000DA   0x4633             MOV      R3,R6
+   \   000000DC   0x9806             LDR      R0,[SP, #+24]
+   \   000000DE   0x1902             ADDS     R2,R0,R4
+   \   000000E0   0x68B8             LDR      R0,[R7, #+8]
+   \   000000E2   0x4651             MOV      R1,R10
+   \   000000E4   0x.... 0x....      BL       FS__lb_write
+   1029              lexp = (err < 0);
+   \   000000E8   0x9900             LDR      R1,[SP, #+0]
+   \   000000EA   0x2900             CMP      R1,#+0
+   \   000000EC   0xD468             BMI.N    ??FS__fat_FAT_alloc_5
+   1030              lexp = lexp || (err2 < 0);
+   \   000000EE   0x2800             CMP      R0,#+0
+   \   000000F0   0xD50F             BPL.N    ??FS__fat_FAT_alloc_7
+   \   000000F2   0xE065             B.N      ??FS__fat_FAT_alloc_5
+   1031              if (lexp) {
+   1032                FS__fat_free(buffer);
+   1033                return -1;
+   1034              }
+   1035            }
+   1036            else {
+   1037              err = _FS__fat_LinkCluster(Idx, Unit, &lastsec, curclst, LastClust, buffer, fattype, fatsize, bytespersec);
+   1038              if (err < 0) {
+   \                     ??FS__fat_FAT_alloc_6: (+1)
+   \   000000F4   0x9807             LDR      R0,[SP, #+28]
+   \   000000F6   0x9004             STR      R0,[SP, #+16]
+   \   000000F8   0x9403             STR      R4,[SP, #+12]
+   \   000000FA   0xF8CD 0xB008      STR      R11,[SP, #+8]
+   \   000000FE   0x9601             STR      R6,[SP, #+4]
+   \   00000100   0x9700             STR      R7,[SP, #+0]
+   \   00000102   0x462B             MOV      R3,R5
+   \   00000104   0xAA06             ADD      R2,SP,#+24
+   \   00000106   0x4651             MOV      R1,R10
+   \   00000108   0x4648             MOV      R0,R9
+   \   0000010A   0x.... 0x....      BL       _FS__fat_LinkCluster
+   \   0000010E   0x2800             CMP      R0,#+0
+   \   00000110   0xD456             BMI.N    ??FS__fat_FAT_alloc_5
+   1039                FS__fat_free(buffer);
+   1040                return -1;
+   1041              }
+   1042            }
+   1043            
+   1044          #if (FS_FAT_NOFAT32==0)
+   1045            /* Update the FSInfo structure */
+   1046            if (fattype == 2) {  /* FAT32 */
+   \                     ??FS__fat_FAT_alloc_7: (+1)
+   \   00000112   0xF1BB 0x0F02      CMP      R11,#+2
+   \   00000116   0xD15F             BNE.N    ??FS__fat_FAT_alloc_8
+   1047              /* Modify FSInfo */
+   1048              err = FS__lb_read(FS__pDevInfo[Idx].devdriver, Unit, FS__FAT_aBPBUnit[Idx][Unit].FSInfo, (void*)buffer);
+   1049              if (err < 0) {
+   \   00000118   0x482E             LDR.N    R0,??FS__fat_FAT_alloc_0+0x8
+   \   0000011A   0x6800             LDR      R0,[R0, #+0]
+   \   0000011C   0xF8B8 0x2016      LDRH     R2,[R8, #+22]
+   \   00000120   0xEB00 0x1709      ADD      R7,R0,R9, LSL #+4
+   \   00000124   0x4633             MOV      R3,R6
+   \   00000126   0x68B8             LDR      R0,[R7, #+8]
+   \   00000128   0x4651             MOV      R1,R10
+   \   0000012A   0x.... 0x....      BL       FS__lb_read
+   \   0000012E   0x2800             CMP      R0,#+0
+   \   00000130   0xD446             BMI.N    ??FS__fat_FAT_alloc_5
+   1050                FS__fat_free(buffer);
+   1051                return -1;
+   1052              }
+   1053              /* Check for FSInfo structure in buffer */
+   1054              if (buffer[0] == (char)0x52) {
+   \   00000132   0x7830             LDRB     R0,[R6, #+0]
+   \   00000134   0x2852             CMP      R0,#+82
+   \   00000136   0xBF02             ITTT     EQ 
+   \   00000138   0x1C70             ADDEQ    R0,R6,#+1
+   \   0000013A   0x7801             LDRBEQ   R1,[R0, #+0]
+   \   0000013C   0x2952             CMPEQ    R1,#+82
+   1055                if (buffer[1] == (char)0x52) {
+   \   0000013E   0xD14B             BNE.N    ??FS__fat_FAT_alloc_8
+   1056                  if (buffer[2] == (char)0x61) {
+   \   00000140   0x7841             LDRB     R1,[R0, #+1]
+   \   00000142   0x2961             CMP      R1,#+97
+   \   00000144   0xBF04             ITT      EQ 
+   \   00000146   0x7880             LDRBEQ   R0,[R0, #+2]
+   \   00000148   0x2841             CMPEQ    R0,#+65
+   1057                    if (buffer[3] == (char)0x41) {
+   \   0000014A   0xD145             BNE.N    ??FS__fat_FAT_alloc_8
+   1058                      if (buffer[484] == (char)0x72) {
+   \   0000014C   0xF506 0x70F2      ADD      R0,R6,#+484
+   \   00000150   0x7801             LDRB     R1,[R0, #+0]
+   \   00000152   0x2972             CMP      R1,#+114
+   \   00000154   0xBF04             ITT      EQ 
+   \   00000156   0x7841             LDRBEQ   R1,[R0, #+1]
+   \   00000158   0x2972             CMPEQ    R1,#+114
+   1059                        if (buffer[485] == (char)0x72) {
+   \   0000015A   0xD13D             BNE.N    ??FS__fat_FAT_alloc_8
+   1060                          if (buffer[486] == (char)0x41) {
+   \   0000015C   0x7881             LDRB     R1,[R0, #+2]
+   \   0000015E   0x2941             CMP      R1,#+65
+   \   00000160   0xBF04             ITT      EQ 
+   \   00000162   0x78C1             LDRBEQ   R1,[R0, #+3]
+   \   00000164   0x2961             CMPEQ    R1,#+97
+   1061                            if (buffer[487] == (char)0x61) {
+   \   00000166   0xD137             BNE.N    ??FS__fat_FAT_alloc_8
+   1062                              if (buffer[508] == (char)0x00) {
+   \   00000168   0x7E01             LDRB     R1,[R0, #+24]
+   \   0000016A   0x2900             CMP      R1,#+0
+   \   0000016C   0xBF04             ITT      EQ 
+   \   0000016E   0x7E41             LDRBEQ   R1,[R0, #+25]
+   \   00000170   0x2900             CMPEQ    R1,#+0
+   1063                                if (buffer[509] == (char)0x00) {
+   \   00000172   0xD131             BNE.N    ??FS__fat_FAT_alloc_8
+   1064                                  if (buffer[510] == (char)0x55) {
+   \   00000174   0x7E81             LDRB     R1,[R0, #+26]
+   \   00000176   0x2955             CMP      R1,#+85
+   \   00000178   0xBF04             ITT      EQ 
+   \   0000017A   0x7EC1             LDRBEQ   R1,[R0, #+27]
+   \   0000017C   0x29AA             CMPEQ    R1,#+170
+   1065                                    if (buffer[511] == (char)0xaa) {
+   \   0000017E   0xD12B             BNE.N    ??FS__fat_FAT_alloc_8
+   1066                                      /* Invalidate last known free cluster count */
+   1067                                      buffer[488] = (char)0xff;
+   \   00000180   0x21FF             MOVS     R1,#+255
+   \   00000182   0x7101             STRB     R1,[R0, #+4]
+   1068                                      buffer[489] = (char)0xff;
+   \   00000184   0x7141             STRB     R1,[R0, #+5]
+   1069                                      buffer[490] = (char)0xff;
+   \   00000186   0x7181             STRB     R1,[R0, #+6]
+   1070                                      buffer[491] = (char)0xff;
+   \   00000188   0x71C1             STRB     R1,[R0, #+7]
+   1071                                      /* Give hint for free cluster search */
+   1072                                      buffer[492] = curclst & 0xff;
+   \   0000018A   0x7205             STRB     R5,[R0, #+8]
+   1073                                      buffer[493] = (curclst / 0x100L) & 0xff;
+   \   0000018C   0x11E9             ASRS     R1,R5,#+7
+   \   0000018E   0xEB05 0x6111      ADD      R1,R5,R1, LSR #+24
+   \   00000192   0x1209             ASRS     R1,R1,#+8
+   \   00000194   0x7241             STRB     R1,[R0, #+9]
+   1074                                      buffer[494] = (curclst / 0x10000L) & 0xff;
+   1075                                      buffer[495] = (curclst / 0x1000000L) & 0x0f;
+   1076                                      err  = FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, FS__FAT_aBPBUnit[Idx][Unit].FSInfo, (void*)buffer);
+   1077                                      if (err < 0) {
+   \   00000196   0x4633             MOV      R3,R6
+   \   00000198   0x13E9             ASRS     R1,R5,#+15
+   \   0000019A   0xEB05 0x4111      ADD      R1,R5,R1, LSR #+16
+   \   0000019E   0x1409             ASRS     R1,R1,#+16
+   \   000001A0   0x7281             STRB     R1,[R0, #+10]
+   \   000001A2   0x15E9             ASRS     R1,R5,#+23
+   \   000001A4   0xEB05 0x2111      ADD      R1,R5,R1, LSR #+8
+   \   000001A8   0x1609             ASRS     R1,R1,#+24
+   \   000001AA   0xF001 0x010F      AND      R1,R1,#0xF
+   \   000001AE   0x72C1             STRB     R1,[R0, #+11]
+   \   000001B0   0xF8B8 0x2016      LDRH     R2,[R8, #+22]
+   \   000001B4   0x68B8             LDR      R0,[R7, #+8]
+   \   000001B6   0x4651             MOV      R1,R10
+   \   000001B8   0x.... 0x....      BL       FS__lb_write
+   \   000001BC   0x2800             CMP      R0,#+0
+   \   000001BE   0xD50B             BPL.N    ??FS__fat_FAT_alloc_8
+   1078                                        FS__fat_free(buffer);
+   \                     ??FS__fat_FAT_alloc_5: (+1)
+   \   000001C0   0x4630             MOV      R0,R6
+   \   000001C2   0x.... 0x....      BL       FS__fat_free
+   1079                                        return -1;
+   \                     ??FS__fat_FAT_alloc_3: (+1)
+   \   000001C6   0xF04F 0x30FF      MOV      R0,#-1
+   1080                                      }
+   1081                                    }
+   1082                                  }
+   1083                                }
+   1084                              }
+   1085                            }
+   1086                          }
+   1087                        }
+   1088                      }
+   1089                    }
+   1090                  }
+   1091                }
+   1092              } /* buffer contains FSInfo structure */
+   1093            } /* FS_Info modification for fattype==2 */
+   \   000001CA   0x....             B.N      ?Subroutine2
+   \                     ??FS__fat_FAT_alloc_0:
+   \   000001CC   0x........         DC32     _FS_memblock
+   \   000001D0   0x........         DC32     FS__FAT_aBPBUnit
+   \   000001D4   0x........         DC32     FS__pDevInfo
+   1094          #endif /* FS_FAT_NOFAT32==0 */
+   1095            FS__fat_free(buffer);
+   \                     ??FS__fat_FAT_alloc_8: (+1)
+   \   000001D8   0x4630             MOV      R0,R6
+   \   000001DA   0x.... 0x....      BL       FS__fat_free
+   1096            return curclst;
+   \   000001DE   0x4628             MOV      R0,R5
+   \   000001E0                      REQUIRE ?Subroutine2
+   \   000001E0                      ;; // Fall through to label ?Subroutine2
+   1097          }
+
+   \                                 In section .text, align 2, keep-with-next
+   \                     ?Subroutine2: (+1)
+   \   00000000   0xB00B             ADD      SP,SP,#+44
+   \   00000002   0xE8BD 0x8FF0      POP      {R4-R11,PC}      ;; return
+   1098          
+   1099          
+   1100          /*********************************************************************
+   1101          *
+   1102          *             FS__fat_diskclust
+   1103          *
+   1104            Description:
+   1105            FS internal function. Walk through the FAT starting at StrtClst for
+   1106            ClstNum times. Return the found cluster number of the media. This is
+   1107            very similar to FS__fat_FAT_find_eof.
+   1108            
+   1109            Parameters:
+   1110            Idx         - Index of device in the device information table 
+   1111                          referred by FS__pDevInfo.
+   1112            Unit        - Unit number.
+   1113            StrtClst    - Starting point for FAT walk.
+   1114            ClstNum     - Number of steps.
+   1115           
+   1116            Return value:
+   1117            > 0         - Number of cluster found after ClstNum steps.
+   1118            ==0         - An error has occured.
+   1119          */
+   1120          
+
+   \                                 In section .text, align 4, keep-with-next
+   1121          FS_i32 FS__fat_diskclust(int Idx, FS_u32 Unit, FS_i32 StrtClst, FS_i32 ClstNum) {
+   \                     FS__fat_diskclust: (+1)
+   \   00000000   0xE92D 0x4FF1      PUSH     {R0,R4-R11,LR}
+   \   00000004   0xB086             SUB      SP,SP,#+24
+   \   00000006   0x468A             MOV      R10,R1
+   \   00000008   0x4616             MOV      R6,R2
+   \   0000000A   0x469B             MOV      R11,R3
+   1122            FS_u32 fatsize;
+   1123            FS_i32 fatindex;
+   1124            FS_i32 fatsec;
+   1125            FS_i32 fatoffs;
+   1126            FS_i32 lastsec;
+   1127            FS_i32 curclst;
+   1128            FS_i32 todo;
+   1129            FS_i32 bytespersec;
+   1130            int err;
+   1131            int fattype;
+   1132            char *buffer;
+   1133            unsigned char a;
+   1134            unsigned char b;
+   1135          #if (FS_FAT_NOFAT32==0)
+   1136            unsigned char c;
+   1137            unsigned char d;
+   1138          #endif /* FS_FAT_NOFAT32==0 */
+   1139          
+   1140            fattype = FS__fat_which_type(Idx, Unit);
+   \   0000000C   0x.... 0x....      BL       FS__fat_which_type
+   \   00000010   0x9002             STR      R0,[SP, #+8]
+   1141          #if (FS_FAT_NOFAT32!=0)
+   1142            if (fattype == 2) {
+   1143              return 0;
+   1144            }
+   1145          #endif  /* FS_FAT_NOFAT32!=0 */
+   1146            buffer = FS__fat_malloc(FS_FAT_SEC_SIZE);
+   \   00000012   0x.... 0x....      BL       FS_X_OS_LockMem
+   \   00000016   0x4962             LDR.N    R1,??FS__fat_diskclust_0
+   \   00000018   0x2000             MOVS     R0,#+0
+   \   0000001A   0x460A             MOV      R2,R1
+   \                     ??FS__fat_diskclust_1: (+1)
+   \   0000001C   0x6813             LDR      R3,[R2, #+0]
+   \   0000001E   0xB15B             CBZ.N    R3,??FS__fat_diskclust_2
+   \   00000020   0xF8D2 0x3204      LDR      R3,[R2, #+516]
+   \   00000024   0x1C40             ADDS     R0,R0,#+1
+   \   00000026   0xB13B             CBZ.N    R3,??FS__fat_diskclust_2
+   \   00000028   0x1C40             ADDS     R0,R0,#+1
+   \   0000002A   0x280A             CMP      R0,#+10
+   \   0000002C   0xF502 0x6281      ADD      R2,R2,#+1032
+   \   00000030   0xDBF4             BLT.N    ??FS__fat_diskclust_1
+   \   00000032   0x.... 0x....      BL       FS_X_OS_UnlockMem
+   1147            if (!buffer) {
+   1148              return 0;
+   \   00000036   0xE0C6             B.N      ??FS__fat_diskclust_3
+   \                     ??FS__fat_diskclust_2: (+1)
+   \   00000038   0xEB00 0x12C0      ADD      R2,R0,R0, LSL #+7
+   \   0000003C   0x0090             LSLS     R0,R2,#+2
+   \   0000003E   0x2201             MOVS     R2,#+1
+   \   00000040   0x5042             STR      R2,[R0, R1]
+   \   00000042   0x1845             ADDS     R5,R0,R1
+   \   00000044   0xF44F 0x7200      MOV      R2,#+512
+   \   00000048   0x2100             MOVS     R1,#+0
+   \   0000004A   0x1D28             ADDS     R0,R5,#+4
+   \   0000004C   0x.... 0x....      BL       FS__CLIB_memset
+   \   00000050   0x.... 0x....      BL       FS_X_OS_UnlockMem
+   1149            }
+   1150            fatsize = FS__FAT_aBPBUnit[Idx][Unit].FATSz16;
+   \   00000054   0x9906             LDR      R1,[SP, #+24]
+   \   00000056   0x4853             LDR.N    R0,??FS__fat_diskclust_0+0x4
+   \   00000058   0xEB00 0x1041      ADD      R0,R0,R1, LSL #+5
+   \   0000005C   0xEB00 0x104A      ADD      R0,R0,R10, LSL #+5
+   \   00000060   0x9001             STR      R0,[SP, #+4]
+   \   00000062   0x1D2D             ADDS     R5,R5,#+4
+   \   00000064   0x8A40             LDRH     R0,[R0, #+18]
+   \   00000066   0x9000             STR      R0,[SP, #+0]
+   1151            if (fatsize == 0) {
+   \   00000068   0xB910             CBNZ.N   R0,??FS__fat_diskclust_4
+   1152              fatsize = FS__FAT_aBPBUnit[Idx][Unit].FATSz32;
+   \   0000006A   0x9801             LDR      R0,[SP, #+4]
+   \   0000006C   0x6840             LDR      R0,[R0, #+4]
+   \   0000006E   0x9000             STR      R0,[SP, #+0]
+   1153            }
+   1154            bytespersec = (FS_i32)FS__FAT_aBPBUnit[Idx][Unit].BytesPerSec;
+   1155            todo        = ClstNum;
+   1156            curclst     = StrtClst;
+   1157            lastsec     = -1;
+   \                     ??FS__fat_diskclust_4: (+1)
+   \   00000070   0xF1BB 0x0F00      CMP      R11,#+0
+   \   00000074   0x9801             LDR      R0,[SP, #+4]
+   \   00000076   0x8980             LDRH     R0,[R0, #+12]
+   \   00000078   0x9003             STR      R0,[SP, #+12]
+   \   0000007A   0xF04F 0x30FF      MOV      R0,#-1
+   \   0000007E   0xD075             BEQ.N    ??FS__fat_diskclust_5
+   \   00000080   0x9903             LDR      R1,[SP, #+12]
+   \   00000082   0x1E49             SUBS     R1,R1,#+1
+   \   00000084   0x9104             STR      R1,[SP, #+16]
+   1158            while (todo) {
+   1159              if (fattype == 1) {
+   \                     ??FS__fat_diskclust_6: (+1)
+   \   00000086   0x9902             LDR      R1,[SP, #+8]
+   \   00000088   0x2901             CMP      R1,#+1
+   \   0000008A   0xD104             BNE.N    ??FS__fat_diskclust_7
+   1160                fatindex = curclst + (curclst / 2);    /* FAT12 */
+   \   0000008C   0xEB06 0x71D6      ADD      R1,R6,R6, LSR #+31
+   \   00000090   0xEB06 0x0161      ADD      R1,R6,R1, ASR #+1
+   \   00000094   0xE003             B.N      ??FS__fat_diskclust_8
+   1161              }
+   1162          #if (FS_FAT_NOFAT32==0)
+   1163              else if (fattype == 2) {
+   \                     ??FS__fat_diskclust_7: (+1)
+   \   00000096   0x2902             CMP      R1,#+2
+   \   00000098   0xBF0C             ITE      EQ 
+   \   0000009A   0x00B1             LSLEQ    R1,R6,#+2
+   \   0000009C   0x0071             LSLNE    R1,R6,#+1
+   1164                fatindex = curclst * 4;               /* FAT32 */
+   1165              }
+   1166          #endif /* FS_FAT_NOFAT32==0 */
+   1167              else {
+   1168                fatindex = curclst * 2;               /* FAT16 */
+   1169              }
+   1170              fatsec  = FS__FAT_aBPBUnit[Idx][Unit].RsvdSecCnt + (fatindex / bytespersec);
+   \                     ??FS__fat_diskclust_8: (+1)
+   \   0000009E   0x9B01             LDR      R3,[SP, #+4]
+   \   000000A0   0x9A03             LDR      R2,[SP, #+12]
+   \   000000A2   0x8B5B             LDRH     R3,[R3, #+26]
+   \   000000A4   0xFB91 0xF2F2      SDIV     R2,R1,R2
+   \   000000A8   0xEB02 0x0803      ADD      R8,R2,R3
+   1171              fatoffs = fatindex % bytespersec;
+   \   000000AC   0x9B03             LDR      R3,[SP, #+12]
+   1172              if (fatsec != lastsec) {
+   \   000000AE   0x4580             CMP      R8,R0
+   \   000000B0   0xFB03 0x1712      MLS      R7,R3,R2,R1
+   \   000000B4   0xD01D             BEQ.N    ??FS__fat_diskclust_9
+   1173                err = FS__lb_read(FS__pDevInfo[Idx].devdriver, Unit, fatsec, (void*)buffer);
+   1174                if (err < 0) {
+   \   000000B6   0x483C             LDR.N    R0,??FS__fat_diskclust_0+0x8
+   \   000000B8   0x9906             LDR      R1,[SP, #+24]
+   \   000000BA   0x6800             LDR      R0,[R0, #+0]
+   \   000000BC   0xEB00 0x1401      ADD      R4,R0,R1, LSL #+4
+   \   000000C0   0x462B             MOV      R3,R5
+   \   000000C2   0x68A0             LDR      R0,[R4, #+8]
+   \   000000C4   0x4642             MOV      R2,R8
+   \   000000C6   0x4651             MOV      R1,R10
+   \   000000C8   0x.... 0x....      BL       FS__lb_read
+   \   000000CC   0x2800             CMP      R0,#+0
+   \   000000CE   0xD50F             BPL.N    ??FS__fat_diskclust_10
+   1175                  err = FS__lb_read(FS__pDevInfo[Idx].devdriver, Unit, fatsize + fatsec, (void*)buffer);
+   1176                  if (err < 0) {
+   \   000000D0   0x9800             LDR      R0,[SP, #+0]
+   \   000000D2   0xEB08 0x0200      ADD      R2,R8,R0
+   \   000000D6   0x68A0             LDR      R0,[R4, #+8]
+   \   000000D8   0x462B             MOV      R3,R5
+   \   000000DA   0x4651             MOV      R1,R10
+   \   000000DC   0x.... 0x....      BL       FS__lb_read
+   \   000000E0   0x2800             CMP      R0,#+0
+   \   000000E2   0xD46D             BMI.N    ??FS__fat_diskclust_11
+   1177                    FS__fat_free(buffer);
+   1178                    return 0;
+   1179                  }
+   1180                  /* Try to repair original FAT sector with contents of copy */
+   1181                  FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, fatsec, (void*)buffer);
+   \   000000E4   0x68A0             LDR      R0,[R4, #+8]
+   \   000000E6   0x462B             MOV      R3,R5
+   \   000000E8   0x4642             MOV      R2,R8
+   \   000000EA   0x4651             MOV      R1,R10
+   \   000000EC   0x.... 0x....      BL       FS__lb_write
+   1182                }
+   1183                lastsec = fatsec;
+   \                     ??FS__fat_diskclust_10: (+1)
+   \   000000F0   0x4640             MOV      R0,R8
+   1184              }
+   1185              if (fattype == 1) {
+   \                     ??FS__fat_diskclust_9: (+1)
+   \   000000F2   0x9A02             LDR      R2,[SP, #+8]
+   \   000000F4   0x1979             ADDS     R1,R7,R5
+   \   000000F6   0x2A01             CMP      R2,#+1
+   \   000000F8   0xD13D             BNE.N    ??FS__fat_diskclust_12
+   1186                if (fatoffs == (bytespersec - 1)) {
+   \   000000FA   0x9A04             LDR      R2,[SP, #+16]
+   \   000000FC   0xF891 0x9000      LDRB     R9,[R1, #+0]
+   \   00000100   0x4297             CMP      R7,R2
+   \   00000102   0xD121             BNE.N    ??FS__fat_diskclust_13
+   1187                  a = buffer[fatoffs];
+   1188                  err = FS__lb_read(FS__pDevInfo[Idx].devdriver, Unit, fatsec + 1, (void*)buffer);
+   1189                  if (err < 0) {
+   \   00000104   0x4828             LDR.N    R0,??FS__fat_diskclust_0+0x8
+   \   00000106   0x9906             LDR      R1,[SP, #+24]
+   \   00000108   0x6800             LDR      R0,[R0, #+0]
+   \   0000010A   0xF108 0x0701      ADD      R7,R8,#+1
+   \   0000010E   0xEB00 0x1401      ADD      R4,R0,R1, LSL #+4
+   \   00000112   0x462B             MOV      R3,R5
+   \   00000114   0x68A0             LDR      R0,[R4, #+8]
+   \   00000116   0x463A             MOV      R2,R7
+   \   00000118   0x4651             MOV      R1,R10
+   \   0000011A   0x.... 0x....      BL       FS__lb_read
+   \   0000011E   0x2800             CMP      R0,#+0
+   \   00000120   0xD50F             BPL.N    ??FS__fat_diskclust_14
+   1190                    err = FS__lb_read(FS__pDevInfo[Idx].devdriver, Unit, fatsize + fatsec + 1, (void*)buffer);
+   1191                    if (err < 0) {
+   \   00000122   0x9800             LDR      R0,[SP, #+0]
+   \   00000124   0x4440             ADD      R0,R8,R0
+   \   00000126   0x1C42             ADDS     R2,R0,#+1
+   \   00000128   0x68A0             LDR      R0,[R4, #+8]
+   \   0000012A   0x462B             MOV      R3,R5
+   \   0000012C   0x4651             MOV      R1,R10
+   \   0000012E   0x.... 0x....      BL       FS__lb_read
+   \   00000132   0x2800             CMP      R0,#+0
+   \   00000134   0xD444             BMI.N    ??FS__fat_diskclust_11
+   1192                      FS__fat_free(buffer);
+   1193                      return 0;
+   1194                    }
+   1195                    /* Try to repair original FAT sector with contents of copy */
+   1196                    FS__lb_write(FS__pDevInfo[Idx].devdriver, Unit, fatsec + 1, (void*)buffer);
+   \   00000136   0x68A0             LDR      R0,[R4, #+8]
+   \   00000138   0x462B             MOV      R3,R5
+   \   0000013A   0x463A             MOV      R2,R7
+   \   0000013C   0x4651             MOV      R1,R10
+   \   0000013E   0x.... 0x....      BL       FS__lb_write
+   1197                  }
+   1198                  lastsec = fatsec + 1;
+   1199                  b = buffer[0];
+   \                     ??FS__fat_diskclust_14: (+1)
+   \   00000142   0x7829             LDRB     R1,[R5, #+0]
+   \   00000144   0x4638             MOV      R0,R7
+   \   00000146   0xE000             B.N      ??FS__fat_diskclust_15
+   1200                }
+   1201                else {
+   1202                  a = buffer[fatoffs];
+   1203                  b = buffer[fatoffs + 1];
+   \                     ??FS__fat_diskclust_13: (+1)
+   \   00000148   0x7849             LDRB     R1,[R1, #+1]
+   1204                }
+   1205                if (curclst & 1) {
+   \                     ??FS__fat_diskclust_15: (+1)
+   \   0000014A   0x07F2             LSLS     R2,R6,#+31
+   \   0000014C   0xBF47             ITTEE    MI 
+   \   0000014E   0xEA4F 0x1219      LSRMI    R2,R9,#+4
+   \   00000152   0xEB02 0x1601      ADDMI    R6,R2,R1, LSL #+4
+   \   00000156   0xF001 0x010F      ANDPL    R1,R1,#0xF
+   \   0000015A   0xEB09 0x2601      ADDPL    R6,R9,R1, LSL #+8
+   1206                  curclst = ((a & 0xf0) >> 4) + 16 * b;
+   1207                }
+   1208                else {
+   1209                  curclst = a + 256 * (b & 0x0f);
+   1210                }
+   1211                curclst &= 0x0fffL;
+   1212                if (curclst >= 0x0ff8L) {
+   \   0000015E   0xF640 0x71F8      MOVW     R1,#+4088
+   \   00000162   0x428E             CMP      R6,R1
+   \   00000164   0xDA2C             BGE.N    ??FS__fat_diskclust_11
+   1213                  FS__fat_free(buffer);
+   1214                  return 0;
+   1215                }
+   1216              }
+   1217          #if (FS_FAT_NOFAT32==0)
+   1218              else if (fattype == 2) {
+   1219                a = buffer[fatoffs];
+   1220                b = buffer[fatoffs + 1];
+   1221                c = buffer[fatoffs + 2];
+   1222                d = buffer[fatoffs + 3];
+   1223                curclst = a + 0x100L * b + 0x10000L * c + 0x1000000L * d;
+   1224                curclst &= 0x0fffffffL;
+   1225                if (curclst >= (FS_i32)0x0ffffff8L) {
+   1226                  FS__fat_free(buffer);
+   1227                  return 0;
+   1228                }
+   1229              }
+   1230          #endif /* FS_FAT_NOFAT32==0 */
+   1231              else {
+   1232                a = buffer[fatoffs];
+   1233                b = buffer[fatoffs + 1];
+   1234                curclst  = a + 256 * b;
+   1235                curclst &= 0xffffL;
+   1236                if (curclst >= (FS_i32)0xfff8L) {
+   1237                  FS__fat_free(buffer);
+   1238                  return 0;
+   1239                }
+   1240              }
+   1241              todo--;
+   \                     ??FS__fat_diskclust_16: (+1)
+   \   00000166   0xF1BB 0x0B01      SUBS     R11,R11,#+1
+   \   0000016A   0xD18C             BNE.N    ??FS__fat_diskclust_6
+   1242            }
+   1243            FS__fat_free(buffer);
+   \                     ??FS__fat_diskclust_5: (+1)
+   \   0000016C   0x4628             MOV      R0,R5
+   \   0000016E   0x.... 0x....      BL       FS__fat_free
+   1244            return curclst;
+   \   00000172   0x4630             MOV      R0,R6
+   \   00000174   0x....             B.N      ?Subroutine3
+   \                     ??FS__fat_diskclust_12: (+1)
+   \   00000176   0x2A02             CMP      R2,#+2
+   \   00000178   0x7809             LDRB     R1,[R1, #+0]
+   \   0000017A   0xD119             BNE.N    ??FS__fat_diskclust_17
+   \   0000017C   0x197A             ADDS     R2,R7,R5
+   \   0000017E   0x7852             LDRB     R2,[R2, #+1]
+   \   00000180   0xEB01 0x2102      ADD      R1,R1,R2, LSL #+8
+   \   00000184   0x197A             ADDS     R2,R7,R5
+   \   00000186   0x7892             LDRB     R2,[R2, #+2]
+   \   00000188   0xEB01 0x4102      ADD      R1,R1,R2, LSL #+16
+   \   0000018C   0x197A             ADDS     R2,R7,R5
+   \   0000018E   0x78D2             LDRB     R2,[R2, #+3]
+   \   00000190   0xEB01 0x6102      ADD      R1,R1,R2, LSL #+24
+   \   00000194   0x010E             LSLS     R6,R1,#+4
+   \   00000196   0x0936             LSRS     R6,R6,#+4
+   \   00000198   0x4904             LDR.N    R1,??FS__fat_diskclust_0+0xC  ;; 0xffffff8
+   \   0000019A   0x428E             CMP      R6,R1
+   \   0000019C   0xDBE3             BLT.N    ??FS__fat_diskclust_16
+   \   0000019E   0xE00F             B.N      ??FS__fat_diskclust_11
+   \                     ??FS__fat_diskclust_0:
+   \   000001A0   0x........         DC32     _FS_memblock
+   \   000001A4   0x........         DC32     FS__FAT_aBPBUnit
+   \   000001A8   0x........         DC32     FS__pDevInfo
+   \   000001AC   0x0FFFFFF8         DC32     0xffffff8
+   \                     ??FS__fat_diskclust_17: (+1)
+   \   000001B0   0x197A             ADDS     R2,R7,R5
+   \   000001B2   0x7852             LDRB     R2,[R2, #+1]
+   \   000001B4   0xEB01 0x2602      ADD      R6,R1,R2, LSL #+8
+   \   000001B8   0xF64F 0x71F8      MOVW     R1,#+65528
+   \   000001BC   0x428E             CMP      R6,R1
+   \   000001BE   0xDBD2             BLT.N    ??FS__fat_diskclust_16
+   \                     ??FS__fat_diskclust_11: (+1)
+   \   000001C0   0x4628             MOV      R0,R5
+   \   000001C2   0x.... 0x....      BL       FS__fat_free
+   \                     ??FS__fat_diskclust_3: (+1)
+   \   000001C6   0x2000             MOVS     R0,#+0
+   \   000001C8                      REQUIRE ?Subroutine3
+   \   000001C8                      ;; // Fall through to label ?Subroutine3
+   1245          }
+
+   \                                 In section .text, align 2, keep-with-next
+   \                     ?Subroutine3: (+1)
+   \   00000000   0xB007             ADD      SP,SP,#+28
+   \   00000002   0xE8BD 0x8FF0      POP      {R4-R11,PC}
+   1246          
+   1247          
+   1248          /*********************************************************************
+   1249          *
+   1250          *             Global Variables
+   1251          *
+   1252          **********************************************************************
+   1253          */
+   1254          
+
+   \                                 In section .rodata, align 4, keep-with-next
+   1255          const FS__fsl_type FS__fat_functable = {
+   \                     FS__fat_functable:
+   \   00000000   0x........         DC32 ?_0, FS__fat_fopen, FS__fat_fclose, FS__fat_fread, FS__fat_fwrite
+   \              0x........   
+   \              0x........   
+   \              0x........   
+   \              0x........   
+   \   00000014   0x00000000         DC32 0H, 0H, FS__fat_ioctl, FS__fat_opendir, FS__fat_closedir
+   \              0x00000000   
+   \              0x........   
+   \              0x........   
+   \              0x........   
+   \   00000028   0x........         DC32 FS__fat_readdir, 0H, FS__fat_MkRmDir, FS__fat_MkRmDir
+   \              0x00000000   
+   \              0x........   
+   \              0x........   
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable9:
+   \   00000000   0x........         DC32     _FS_memblock
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable9_1:
+   \   00000000   0x........         DC32     FS__pDevInfo
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable9_2:
+   \   00000000   0x........         DC32     FS__FAT_aBPBUnit
+
+   \                                 In section .rodata, align 4, keep-with-next
+   \                     ?_0:
+   \   00000000   0x46 0x41          DC8 "FAT12/FAT16/FAT32"
+   \              0x54 0x31    
+   \              0x32 0x2F    
+   \              0x46 0x41    
+   \              0x54 0x31    
+   \              0x36 0x2F    
+   \              0x46 0x41    
+   \              0x54 0x33    
+   \              0x32 0x00    
+   \   00000012   0x00 0x00          DC8 0, 0
+   1256          #if (FS_FAT_NOFAT32==0)
+   1257            "FAT12/FAT16/FAT32",
+   1258          #else
+   1259            "FAT12/FAT16",
+   1260          #endif /* FS_FAT_NOFAT32==0 */
+   1261            FS__fat_fopen,        /* open  */
+   1262            FS__fat_fclose,       /* close */
+   1263            FS__fat_fread,        /* read  */
+   1264            FS__fat_fwrite,       /* write */
+   1265            0,                    /* tell  */
+   1266            0,                    /* seek  */
+   1267            FS__fat_ioctl,        /* ioctl */
+   1268          #if FS_POSIX_DIR_SUPPORT
+   1269            FS__fat_opendir,      /* opendir   */
+   1270            FS__fat_closedir,     /* closedir  */
+   1271            FS__fat_readdir,      /* readdir   */
+   1272            0,                    /* rewinddir */
+   1273            FS__fat_MkRmDir,      /* mkdir     */
+   1274            FS__fat_MkRmDir,      /* rmdir     */
+   1275          #endif  /* FS_POSIX_DIR_SUPPORT */
+   1276          };
+   1277          
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      80   FS__fat_FAT_alloc
+        80   -> FS_X_OS_LockMem
+        80   -> FS_X_OS_UnlockMem
+        80   -> FS__CLIB_memset
+        80   -> FS__fat_free
+        80   -> FS__fat_which_type
+        80   -> FS__lb_read
+        80   -> FS__lb_write
+        80   -> _FS__fat_FindFreeCluster
+        80   -> _FS__fat_LinkCluster
+        80   -> _FS__fat_SetEOFMark
+      72   FS__fat_FAT_find_eof
+        72   -> FS_X_OS_LockMem
+        72   -> FS_X_OS_UnlockMem
+        72   -> FS__CLIB_memset
+        72   -> FS__fat_free
+        72   -> FS__fat_which_type
+        72   -> FS__lb_read
+        72   -> FS__lb_write
+       8   FS__fat_block_init
+         8   -> FS_X_OS_LockMem
+         0   -> FS_X_OS_UnlockMem
+      24   FS__fat_checkunit
+        24   -> FS__lb_status
+        24   -> _FS_ReadBPB
+      64   FS__fat_diskclust
+        64   -> FS_X_OS_LockMem
+        64   -> FS_X_OS_UnlockMem
+        64   -> FS__CLIB_memset
+        64   -> FS__fat_free
+        64   -> FS__fat_which_type
+        64   -> FS__lb_read
+        64   -> FS__lb_write
+       8   FS__fat_free
+         8   -> FS_X_OS_LockMem
+         0   -> FS_X_OS_UnlockMem
+       8   FS__fat_malloc
+         8   -> FS_X_OS_LockMem
+         8   -> FS_X_OS_UnlockMem
+         8   -> FS__CLIB_memset
+       0   FS__fat_which_type
+      24   _FS_ReadBPB
+        24   -> FS_X_OS_LockMem
+        24   -> FS_X_OS_UnlockMem
+        24   -> FS__CLIB_memset
+        24   -> FS__fat_free
+        24   -> FS__lb_read
+      56   _FS__fat_FindFreeCluster
+        56   -> FS__lb_read
+        56   -> FS__lb_write
+      56   _FS__fat_LinkCluster
+        56   -> FS__lb_read
+        56   -> FS__lb_write
+      40   _FS__fat_SetEOFMark
+        40   -> FS__lb_read
+        40   -> FS__lb_write
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable9
+       4  ??DataTable9_1
+       4  ??DataTable9_2
+      10  ?Subroutine0
+       6  ?Subroutine1
+       6  ?Subroutine2
+       6  ?Subroutine3
+      20  ?_0
+     480  FS__fat_FAT_alloc
+     492  FS__fat_FAT_find_eof
+      34  FS__fat_block_init
+     102  FS__fat_checkunit
+     456  FS__fat_diskclust
+      48  FS__fat_free
+      56  FS__fat_functable
+      84  FS__fat_malloc
+      82  FS__fat_which_type
+     316  _FS_ReadBPB
+     428  _FS__fat_FindFreeCluster
+     642  _FS__fat_LinkCluster
+     232  _FS__fat_SetEOFMark
+    5160  _FS_memblock
+
+ 
+ 5 160 bytes in section .bss
+    76 bytes in section .rodata
+ 3 436 bytes in section .text
+ 
+ 3 436 bytes of CODE  memory
+    76 bytes of CONST memory
+ 5 160 bytes of DATA  memory
+
+Errors: none
+Warnings: none

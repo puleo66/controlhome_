@@ -1,0 +1,316 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       01/Aug/2017  12:15:33
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp_os.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp_os.c" -lCN "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\bsp_os.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\bsp_os.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp_os.c
+      1          /*
+      2          *********************************************************************************************************
+      3          *                                     MICRIUM BOARD SUPPORT SUPPORT
+      4          *
+      5          *                          (c) Copyright 2003-2009; Micrium, Inc.; Weston, FL
+      6          *
+      7          *               All rights reserved.  Protected by international copyright laws.
+      8          *               Knowledge of the source code may NOT be used to develop a similar product.
+      9          *               Please help us continue to provide the Embedded community with the finest
+     10          *               software available.  Your honesty is greatly appreciated.
+     11          *********************************************************************************************************
+     12          */
+     13          
+     14          /*
+     15          *********************************************************************************************************
+     16          *
+     17          *                                    MICRIUM BOARD SUPPORT PACKAGE
+     18          *                                             OS LAYER
+     19          *
+     20          * Filename      : bsp_os.c
+     21          * Version       : V1.00
+     22          * Programmer(s) : FT
+     23          *                 EHS
+     24          *********************************************************************************************************
+     25          */
+     26          
+     27          
+     28          /*
+     29          *********************************************************************************************************
+     30          *                                             INCLUDE FILES
+     31          *********************************************************************************************************
+     32          */
+     33          
+     34          #define  BSP_OS_MODULE
+     35          #include <bsp.h>
+     36          
+     37          
+     38          /*
+     39          *********************************************************************************************************
+     40          *                                            LOCAL DEFINES
+     41          *********************************************************************************************************
+     42          */
+     43          
+     44          
+     45          /*
+     46          *********************************************************************************************************
+     47          *                                           LOCAL CONSTANTS
+     48          *********************************************************************************************************
+     49          */
+     50          
+     51          
+     52          /*
+     53          *********************************************************************************************************
+     54          *                                          LOCAL DATA TYPES
+     55          *********************************************************************************************************
+     56          */
+     57          
+     58          
+     59          /*
+     60          *********************************************************************************************************
+     61          *                                            LOCAL TABLES
+     62          *********************************************************************************************************
+     63          */
+     64          
+     65          
+     66          /*
+     67          *********************************************************************************************************
+     68          *                                       LOCAL GLOBAL VARIABLES
+     69          *********************************************************************************************************
+     70          */
+     71          
+     72          
+     73          /*
+     74          *********************************************************************************************************
+     75          *                                      LOCAL FUNCTION PROTOTYPES
+     76          *********************************************************************************************************
+     77          */
+     78          
+     79          
+     80          /*
+     81          *********************************************************************************************************
+     82          *                                     LOCAL CONFIGURATION ERRORS
+     83          *********************************************************************************************************
+     84          */
+     85          
+     86          /*
+     87          *********************************************************************************************************
+     88          *********************************************************************************************************
+     89          **                                         GLOBAL FUNCTIONS
+     90          *********************************************************************************************************
+     91          *********************************************************************************************************
+     92          */
+     93          
+     94          
+     95          /*
+     96          *********************************************************************************************************
+     97          *********************************************************************************************************
+     98          **                                     BSP OS LOCKS FUNCTIONS
+     99          *********************************************************************************************************
+    100          *********************************************************************************************************
+    101          */
+    102          
+    103          /*
+    104          *********************************************************************************************************
+    105          *********************************************************************************************************
+    106          **                                     BSP OS LOCKS FUNCTIONS
+    107          *********************************************************************************************************
+    108          *********************************************************************************************************
+    109          */
+    110          
+    111          /*
+    112          *********************************************************************************************************
+    113          *                                      BSP_OS_SemCreate()
+    114          *
+    115          * Description : Creates a sempahore to lock/unlock
+    116          *
+    117          * Argument(s) : p_sem        Pointer to a BSP_OS_SEM structure
+    118          *
+    119          *               sem_val      Initial value of the semaphore.
+    120          *
+    121          *               p_sem_name   Pointer to the semaphore name.
+    122          *
+    123          * Return(s)   : DEF_OK       if the semaphore was created.
+    124          *               DEF_FAIL     if the sempahore could not be created.
+    125          *
+    126          * Caller(s)   : Application.
+    127          *
+    128          * Note(s)     : none.
+    129          *
+    130          *********************************************************************************************************
+    131          */
+    132          
+    133          CPU_BOOLEAN  BSP_OS_SemCreate (BSP_OS_SEM       *p_sem,
+    134                                         BSP_OS_SEM_VAL    sem_val,
+    135                                         CPU_CHAR         *p_sem_name)
+    136          {
+    137              OS_ERR     err;
+    138          
+    139          
+    140              OSSemCreate((OS_SEM    *)p_sem,
+    141                          (CPU_CHAR  *)p_sem_name,
+    142                          (OS_SEM_CTR )sem_val,
+    143                          (OS_ERR    *)&err);
+    144          
+    145              if (err != OS_ERR_NONE) {
+    146                  return (DEF_FAIL);
+    147              }
+    148          
+    149              return (DEF_OK);
+    150          }
+    151          
+    152          
+    153          /*
+    154          *********************************************************************************************************
+    155          *                                     BSP_OS_SemWait()
+    156          *
+    157          * Description : Wait on a semaphore to become available
+    158          *
+    159          * Argument(s) : sem          sempahore handler
+    160          *
+    161          *               dly_ms       delay in miliseconds to wait on the semaphore
+    162          *
+    163          * Return(s)   : DEF_OK       if the semaphore was acquire
+    164          *               DEF_FAIL     if the sempahore could not be acquire
+    165          *
+    166          * Caller(s)   : Application.
+    167          *
+    168          * Note(s)     : none.
+    169          *********************************************************************************************************
+    170          */
+    171          
+    172          CPU_BOOLEAN  BSP_OS_SemWait (BSP_OS_SEM  *p_sem,
+    173                                       CPU_INT32U   dly_ms)
+    174          {
+    175              OS_ERR      err;
+    176              CPU_INT32U  dly_ticks;
+    177          
+    178          
+    179              dly_ticks  = ((dly_ms * DEF_TIME_NBR_mS_PER_SEC) / OSCfg_TickRate_Hz);
+    180          
+    181              OSSemPend((OS_SEM *)p_sem,
+    182                        (OS_TICK )dly_ticks,
+    183                        (OS_OPT  )OS_OPT_PEND_BLOCKING,
+    184                        (CPU_TS  )0,
+    185                        (OS_ERR *)&err);
+    186          
+    187              if (err != OS_ERR_NONE) {
+    188                 return (DEF_FAIL);
+    189              }
+    190          
+    191              return (DEF_OK);
+    192          }
+    193          
+    194          /*
+    195          *********************************************************************************************************
+    196          *                                      BSP_OS_SemPost()
+    197          *
+    198          * Description : Post a semaphore
+    199          *
+    200          * Argument(s) : sem          Semaphore handler
+    201          *
+    202          * Return(s)   : DEF_OK     if the semaphore was posted.
+    203          *               DEF_FAIL      if the sempahore could not be posted.
+    204          *
+    205          * Caller(s)   : Application.
+    206          *
+    207          * Note(s)     : none.
+    208          *********************************************************************************************************
+    209          */
+    210          
+    211          CPU_BOOLEAN  BSP_OS_SemPost (BSP_OS_SEM *p_sem)
+    212          {
+    213              OS_ERR  err;
+    214          
+    215          
+    216              OSSemPost((OS_SEM *)p_sem,
+    217                        (OS_OPT  )OS_OPT_POST_1,
+    218                        (OS_ERR *)&err);
+    219          
+    220              if (err != OS_ERR_NONE) {
+    221                  return (DEF_FAIL);
+    222              }
+    223          
+    224              return (DEF_OK);
+    225          }
+    226          
+    227          
+    228          /*
+    229          *********************************************************************************************************
+    230          *********************************************************************************************************
+    231          **                                     uC/OS-II TIMER FUNCTIONS
+    232          *********************************************************************************************************
+    233          *********************************************************************************************************
+    234          */
+    235          
+    236          /*
+    237          *********************************************************************************************************
+    238          *                                    BSP_TimeDlyMs()
+    239          *
+    240          * Description : This function delay the exceution for specifi amount of miliseconds
+    241          *
+    242          * Argument(s) : dly_ms       Delay in miliseconds
+    243          *
+    244          * Return(s)   : none.
+    245          *
+    246          * Caller(s)   : Application
+    247          *
+    248          * Note(s)     : none.
+    249          *
+    250          *********************************************************************************************************
+    251          */
+    252          
+    253          void   BSP_OS_TimeDlyMs (CPU_INT32U  dly_ms)
+    254          {
+    255              CPU_INT16U  ms;
+    256              CPU_INT16U  sec;
+    257              OS_ERR      err;
+    258          
+    259          
+    260              if (dly_ms > 10000u) {                                       /* Limit delays to 10 seconds.                        */
+    261                  dly_ms = 10000u;
+    262              }
+    263          
+    264              if (dly_ms >= 1000u) {
+    265                  ms  = dly_ms % 1000u;
+    266                  sec = dly_ms / 1000u;
+    267              } else {
+    268                  ms  = dly_ms;
+    269                  sec = 0u;
+    270              }
+    271                  
+    272          
+    273              OSTimeDlyHMSM((CPU_INT16U) 0u,
+    274                            (CPU_INT16U) 0u,
+    275                            (CPU_INT16U) sec,
+    276                            (CPU_INT32U) ms,
+    277                            (OS_OPT    ) OS_OPT_TIME_HMSM_STRICT,
+    278                            (OS_ERR   *)&err);
+    279          }
+    280          
+
+Errors: 20
+Warnings: 3

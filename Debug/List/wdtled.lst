@@ -1,0 +1,264 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:15:20
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\WDT_LED\wdtled.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\WDT_LED\wdtled.c" -lCN
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\wdtled.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\wdtled.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\WDT_LED\wdtled.c
+      1          /*
+      2          *********************************************************************************************************
+      3          *                                           WDT Led Interface
+      4          *
+      5          *
+      6          *
+      7          * Filename   : wdtled.c
+      8          * Version    : V1.00
+      9          * Programmer : Puleo
+     10          *********************************************************************************************************
+     11          */
+     12          
+     13          #define  WDTLED_GLOBALS
+     14          #include <includes.h>
+     15          
+     16          #if WDTLED_MODULE == DEF_ENABLED
+     17          
+     18          /*
+     19          *********************************************************************************************************
+     20          *                                               CONSTANTS
+     21          *********************************************************************************************************
+     22          */
+     23          
+     24          /*
+     25          *********************************************************************************************************
+     26          *                                           LOCAL VARIABLES
+     27          *********************************************************************************************************
+     28          */
+     29          
+     30          #if WDTLED_PARSE_TASK > 0
+
+   \                                 In section .bss, align 4
+     31          static  OS_STK     WdtLed_TaskStk[WDTLED_TASK_STK_SIZE];
+   \                     WdtLed_TaskStk:
+   \   00000000                      DS8 128
+     32          
+     33          #endif
+     34          
+     35          
+     36          /*
+     37          *********************************************************************************************************
+     38          *                                      LOCAL FUNCTION PROTOTYPES
+     39          *********************************************************************************************************
+     40          */
+     41          
+     42          #if WDTLED_PARSE_TASK > 0
+     43          static  void    WdtLed_InitOS(void);
+     44          static  void    WdtLed_Task(void *p_arg);
+     45          #endif
+     46          
+     47          /*
+     48          *********************************************************************************************************
+     49          *                                       INITIALIZE WDTLed
+     50          *********************************************************************************************************
+     51          */
+     52          
+
+   \                                 In section .text, align 2, keep-with-next
+     53          void   WdtLed_Init (void)
+     54          {
+   \                     WdtLed_Init: (+1)
+   \   00000000   0xB500             PUSH     {LR}
+   \   00000002   0xB087             SUB      SP,SP,#+28
+     55          
+     56          #if WDTLED_PARSE_TASK > 0
+     57              WdtLed_InitOS();
+   \   00000004   0x2103             MOVS     R1,#+3
+   \   00000006   0x9104             STR      R1,[SP, #+16]
+   \   00000008   0x2100             MOVS     R1,#+0
+   \   0000000A   0x9103             STR      R1,[SP, #+12]
+   \   0000000C   0x2120             MOVS     R1,#+32
+   \   0000000E   0x9102             STR      R1,[SP, #+8]
+   \   00000010   0x210B             MOVS     R1,#+11
+   \   00000012   0x....             LDR.N    R0,??DataTable1
+   \   00000014   0x9001             STR      R0,[SP, #+4]
+   \   00000016   0x9100             STR      R1,[SP, #+0]
+   \   00000018   0xF100 0x027C      ADD      R2,R0,#+124
+   \   0000001C   0x2307             MOVS     R3,#+7
+   \   0000001E   0x2100             MOVS     R1,#+0
+   \   00000020   0x.... 0x....      ADR.W    R0,WdtLed_Task
+   \   00000024   0x.... 0x....      BL       OSTaskCreateExt
+   \   00000028   0xAA05             ADD      R2,SP,#+20
+   \   0000002A   0x.... 0x....      ADR.W    R1,?_0
+   \   0000002E   0x2007             MOVS     R0,#+7
+   \   00000030   0x.... 0x....      BL       OSTaskNameSet
+     58          #endif
+     59          
+     60          }
+   \   00000034   0xB007             ADD      SP,SP,#+28
+   \   00000036   0xBD00             POP      {PC}             ;; return
+     61          
+     62          /*
+     63          *********************************************************************************************************
+     64          *                             INITIALIZE THE WDTLed TASK AND OS OBJECTS
+     65          *********************************************************************************************************
+     66          */
+     67          
+     68          #if WDTLED_PARSE_TASK > 0
+     69          static  void  WdtLed_InitOS (void)
+     70          {
+     71          #if OS_TASK_NAME_SIZE > 0 || OS_EVENT_NAME_SIZE > 7
+     72              INT8U  err;
+     73          #endif
+     74          
+     75              (void)OSTaskCreateExt(WdtLed_Task,
+     76                                    (void *)0,                                    /* No arguments passed to Wifly_Task() */
+     77                                    &WdtLed_TaskStk[WDTLED_TASK_STK_SIZE - 1],    /* Set Top-Of-Stack                     */
+     78                                    WDTLED_TASK_PRIO,                             /* Lowest priority level                */
+     79                                    WDTLED_TASK_ID,
+     80                                    &WdtLed_TaskStk[0],                           /* Set Bottom-Of-Stack                  */
+     81                                    WDTLED_TASK_STK_SIZE,
+     82                                    (void *)0,                                    /* No TCB extension                     */
+     83                                    OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR);   /* Enable stack checking + clear stack  */
+     84          
+     85          #if OS_TASK_NAME_SIZE > 11
+     86              OSTaskNameSet(WDTLED_TASK_PRIO, (INT8U *)"Wdt Led Task", &err);
+     87          #endif
+     88          }
+     89          #endif
+     90          
+     91          /*
+     92          *********************************************************************************************************
+     93          *                                           WDTLed TASK
+     94          *********************************************************************************************************
+     95          */
+     96          
+     97          #if WDTLED_PARSE_TASK > 0
+
+   \                                 In section .text, align 4, keep-with-next
+     98          static  void  WdtLed_Task (void *p_arg)
+     99          {
+   \                     WdtLed_Task: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    100            (void)p_arg;
+    101              
+    102              green_led_on();
+   \                     ??WdtLed_Task_0: (+1)
+   \   00000002   0x.... 0x....      BL       green_led_on
+    103              OSTimeDlyHMSM(0, 0, 10, 0);
+   \   00000006   0x2300             MOVS     R3,#+0
+   \   00000008   0x220A             MOVS     R2,#+10
+   \   0000000A   0x2100             MOVS     R1,#+0
+   \   0000000C   0x2000             MOVS     R0,#+0
+   \   0000000E   0x.... 0x....      BL       OSTimeDlyHMSM
+    104          
+    105              
+    106              while (1) {
+    107                green_led_off();
+   \   00000012   0x.... 0x....      BL       green_led_off
+    108                OSTimeDlyHMSM(0, 0, 10, 0);
+   \   00000016   0x2300             MOVS     R3,#+0
+   \   00000018   0x220A             MOVS     R2,#+10
+   \   0000001A   0x2100             MOVS     R1,#+0
+   \   0000001C   0x2000             MOVS     R0,#+0
+   \   0000001E   0x.... 0x....      BL       OSTimeDlyHMSM
+    109                
+    110                green_led_on();
+   \   00000022   0xE7EE             B.N      ??WdtLed_Task_0
+    111                OSTimeDlyHMSM(0, 0, 10, 0);
+    112                
+    113              }      
+    114          }    
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable1:
+   \   00000000   0x........         DC32     WdtLed_TaskStk
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ?_0:
+   \   00000000   0x57 0x64          DC8 "Wdt Led Task"
+   \              0x74 0x20    
+   \              0x4C 0x65    
+   \              0x64 0x20    
+   \              0x54 0x61    
+   \              0x73 0x6B    
+   \              0x00         
+   \   0000000D   0x00 0x00          DC8 0, 0, 0
+   \              0x00         
+    115          
+    116          #endif
+    117          
+    118          #endif
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      32   WdtLed_Init
+        32   -> OSTaskCreateExt
+        32   -> OSTaskNameSet
+       8   WdtLed_Task
+         8   -> OSTimeDlyHMSM
+         8   -> green_led_off
+         8   -> green_led_on
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable1
+      16  ?_0
+      56  WdtLed_Init
+      36  WdtLed_Task
+     128  WdtLed_TaskStk
+
+ 
+ 128 bytes in section .bss
+ 112 bytes in section .text
+ 
+ 112 bytes of CODE memory
+ 128 bytes of DATA memory
+
+Errors: none
+Warnings: none

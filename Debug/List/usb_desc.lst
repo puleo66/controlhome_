@@ -1,0 +1,364 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:15:13
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\uc-terminal\src\usb_desc.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome -
+#        RF69w\uc-terminal\src\usb_desc.c" -lCN "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\usb_desc.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\usb_desc.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uc-terminal\src\usb_desc.c
+      1          /*
+      2          *********************************************************************************************************
+      3          *	                                  
+      4          *	模块名称 : USB设备描述符模块    
+      5          *	文件名称 : usb_istr.c
+      6          *	版    本 : V2.0
+      7          *	USB固件库驱动 : V3.3.0
+      8          *	说    明 : 定义虚拟串口设备的描述符
+      9          *	修改记录 :
+     10          *		版本号  日期       作者    说明
+     11          *		v0.1    2009-12-27 armfly  创建该文件，ST固件库版本为V3.1.2
+     12          *		v1.0    2011-01-11 armfly  ST固件库升级到V3.4.0版本。
+     13          *		v2.0    2011-10-16 armfly  ST固件库升级到V3.5.0版本。优化工程结构。
+     14          *
+     15          *	Copyright (C), 2010-2011, 安富莱电子 www.armfly.com
+     16          *
+     17          *********************************************************************************************************
+     18          */
+     19          
+     20          #include "includes.h"
+     21          #if USBD_MODULE == DEF_ENABLED
+     22          
+     23          /* USB 标准设备描述符 */
+
+   \                                 In section .rodata, align 4, keep-with-next
+     24          const INT8U Virtual_Com_Port_DeviceDescriptor[] =
+   \                     Virtual_Com_Port_DeviceDescriptor:
+   \   00000000   0x12 0x01          DC8 18, 1, 0, 2, 2, 0, 0, 64, 131, 4, 64, 87, 0, 2, 1, 2, 3, 1, 0, 0
+   \              0x00 0x02    
+   \              0x02 0x00    
+   \              0x00 0x40    
+   \              0x83 0x04    
+   \              0x40 0x57    
+   \              0x00 0x02    
+   \              0x01 0x02    
+   \              0x03 0x01    
+   \              0x00 0x00    
+     25          {
+     26          	0x12,   /* bLength */
+     27          	USB_DEVICE_DESCRIPTOR_TYPE,     /* bDescriptorType */
+     28          	0x00,
+     29          	0x02,   /* bcdUSB = 2.00 */
+     30          	0x02,   /* bDeviceClass: CDC */
+     31          	0x00,   /* bDeviceSubClass */
+     32          	0x00,   /* bDeviceProtocol */
+     33          	0x40,   /* bMaxPacketSize0 */
+     34          	0x83,
+     35          	0x04,   /* idVendor = 0x0483 */
+     36          	0x40,
+     37          	0x57,   /* idProduct = 0x7540 */
+     38          	0x00,
+     39          	0x02,   /* bcdDevice = 2.00 */
+     40          	1,              /* Index of string descriptor describing manufacturer */
+     41          	2,              /* Index of string descriptor describing product */
+     42          	3,              /* Index of string descriptor describing the device's serial number */
+     43          	0x01    /* bNumConfigurations */
+     44          };
+     45          
+
+   \                                 In section .rodata, align 4, keep-with-next
+     46          const INT8U Virtual_Com_Port_ConfigDescriptor[] =
+   \                     Virtual_Com_Port_ConfigDescriptor:
+   \   00000000   0x09 0x02          DC8 9, 2, 67, 0, 2, 1, 0, 192, 50, 9, 4, 0, 0, 1, 2, 2, 1, 0, 5, 36, 0
+   \              0x43 0x00    
+   \              0x02 0x01    
+   \              0x00 0xC0    
+   \              0x32 0x09    
+   \              0x04 0x00    
+   \              0x00 0x01    
+   \              0x02 0x02    
+   \              0x01 0x00    
+   \              0x05 0x24    
+   \              0x00         
+   \   00000015   0x10 0x01          DC8 16, 1, 5, 36, 1, 0, 1, 4, 36, 2, 2, 5, 36, 6, 0, 1, 7, 5, 130, 3, 8
+   \              0x05 0x24    
+   \              0x01 0x00    
+   \              0x01 0x04    
+   \              0x24 0x02    
+   \              0x02 0x05    
+   \              0x24 0x06    
+   \              0x00 0x01    
+   \              0x07 0x05    
+   \              0x82 0x03    
+   \              0x08         
+   \   0000002A   0x00 0xFF          DC8 0, 255, 9, 4, 1, 0, 2, 10, 0, 0, 0, 7, 5, 3, 2, 64, 0, 0, 7, 5, 129
+   \              0x09 0x04    
+   \              0x01 0x00    
+   \              0x02 0x0A    
+   \              0x00 0x00    
+   \              0x00 0x07    
+   \              0x05 0x03    
+   \              0x02 0x40    
+   \              0x00 0x00    
+   \              0x07 0x05    
+   \              0x81         
+   \   0000003F   0x02 0x40          DC8 2, 64, 0, 0, 0
+   \              0x00 0x00    
+   \              0x00         
+     47          {
+     48          	/*Configuration Descriptor*/
+     49          	0x09,   /* bLength: Configuration Descriptor size */
+     50          	USB_CONFIGURATION_DESCRIPTOR_TYPE,      /* bDescriptorType: Configuration */
+     51          	VIRTUAL_COM_PORT_SIZ_CONFIG_DESC,       /* wTotalLength:no of returned bytes */
+     52          	0x00,
+     53          	0x02,   /* bNumInterfaces: 2 interface */
+     54          	0x01,   /* bConfigurationValue: Configuration value */
+     55          	0x00,   /* iConfiguration: Index of string descriptor describing the configuration */
+     56          	0xC0,   /* bmAttributes: self powered */
+     57          	0x32,   /* MaxPower 0 mA */
+     58          	/*Interface Descriptor*/
+     59          	0x09,   /* bLength: Interface Descriptor size */
+     60          	USB_INTERFACE_DESCRIPTOR_TYPE,  /* bDescriptorType: Interface */
+     61          	/* Interface descriptor type */
+     62          	0x00,   /* bInterfaceNumber: Number of Interface */
+     63          	0x00,   /* bAlternateSetting: Alternate setting */
+     64          	0x01,   /* bNumEndpoints: One endpoints used */
+     65          	0x02,   /* bInterfaceClass: Communication Interface Class */
+     66          	0x02,   /* bInterfaceSubClass: Abstract Control Model */
+     67          	0x01,   /* bInterfaceProtocol: Common AT commands */
+     68          	0x00,   /* iInterface: */
+     69          	/*Header Functional Descriptor*/
+     70          	0x05,   /* bLength: Endpoint Descriptor size */
+     71          	0x24,   /* bDescriptorType: CS_INTERFACE */
+     72          	0x00,   /* bDescriptorSubtype: Header Func Desc */
+     73          	0x10,   /* bcdCDC: spec release number */
+     74          	0x01,
+     75          	/*Call Management Functional Descriptor*/
+     76          	0x05,   /* bFunctionLength */
+     77          	0x24,   /* bDescriptorType: CS_INTERFACE */
+     78          	0x01,   /* bDescriptorSubtype: Call Management Func Desc */
+     79          	0x00,   /* bmCapabilities: D0+D1 */
+     80          	0x01,   /* bDataInterface: 1 */
+     81          	/*ACM Functional Descriptor*/
+     82          	0x04,   /* bFunctionLength */
+     83          	0x24,   /* bDescriptorType: CS_INTERFACE */
+     84          	0x02,   /* bDescriptorSubtype: Abstract Control Management desc */
+     85          	0x02,   /* bmCapabilities */
+     86          	/*Union Functional Descriptor*/
+     87          	0x05,   /* bFunctionLength */
+     88          	0x24,   /* bDescriptorType: CS_INTERFACE */
+     89          	0x06,   /* bDescriptorSubtype: Union func desc */
+     90          	0x00,   /* bMasterInterface: Communication class interface */
+     91          	0x01,   /* bSlaveInterface0: Data Class Interface */
+     92          	/*Endpoint 2 Descriptor*/
+     93          	0x07,   /* bLength: Endpoint Descriptor size */
+     94          	USB_ENDPOINT_DESCRIPTOR_TYPE,   /* bDescriptorType: Endpoint */
+     95          	0x82,   /* bEndpointAddress: (IN2) */
+     96          	0x03,   /* bmAttributes: Interrupt */
+     97          	VIRTUAL_COM_PORT_INT_SIZE,      /* wMaxPacketSize: */
+     98          	0x00,
+     99          	0xFF,   /* bInterval: */
+    100          	/*Data class interface descriptor*/
+    101          	0x09,   /* bLength: Endpoint Descriptor size */
+    102          	USB_INTERFACE_DESCRIPTOR_TYPE,  /* bDescriptorType: */
+    103          	0x01,   /* bInterfaceNumber: Number of Interface */
+    104          	0x00,   /* bAlternateSetting: Alternate setting */
+    105          	0x02,   /* bNumEndpoints: Two endpoints used */
+    106          	0x0A,   /* bInterfaceClass: CDC */
+    107          	0x00,   /* bInterfaceSubClass: */
+    108          	0x00,   /* bInterfaceProtocol: */
+    109          	0x00,   /* iInterface: */
+    110          	/*Endpoint 3 Descriptor*/
+    111          	0x07,   /* bLength: Endpoint Descriptor size */
+    112          	USB_ENDPOINT_DESCRIPTOR_TYPE,   /* bDescriptorType: Endpoint */
+    113          	0x03,   /* bEndpointAddress: (OUT3) */
+    114          	0x02,   /* bmAttributes: Bulk */
+    115          	VIRTUAL_COM_PORT_DATA_SIZE,             /* wMaxPacketSize: */
+    116          	0x00,
+    117          	0x00,   /* bInterval: ignore for Bulk transfer */
+    118          	/*Endpoint 1 Descriptor*/
+    119          	0x07,   /* bLength: Endpoint Descriptor size */
+    120          	USB_ENDPOINT_DESCRIPTOR_TYPE,   /* bDescriptorType: Endpoint */
+    121          	0x81,   /* bEndpointAddress: (IN1) */
+    122          	0x02,   /* bmAttributes: Bulk */
+    123          	VIRTUAL_COM_PORT_DATA_SIZE,             /* wMaxPacketSize: */
+    124          	0x00,
+    125          	0x00    /* bInterval */
+    126          };
+    127          
+    128          /* USB String Descriptors */
+
+   \                                 In section .rodata, align 4, keep-with-next
+    129          const INT8U Virtual_Com_Port_StringLangID[VIRTUAL_COM_PORT_SIZ_STRING_LANGID] =
+   \                     Virtual_Com_Port_StringLangID:
+   \   00000000   0x04 0x03          DC8 4, 3, 9, 4
+   \              0x09 0x04    
+    130          {
+    131              VIRTUAL_COM_PORT_SIZ_STRING_LANGID,
+    132              USB_STRING_DESCRIPTOR_TYPE,
+    133              0x09,
+    134              0x04 /* LangID = 0x0409: U.S. English */
+    135          };
+    136          
+
+   \                                 In section .rodata, align 4, keep-with-next
+    137          const INT8U Virtual_Com_Port_StringVendor[VIRTUAL_COM_PORT_SIZ_STRING_VENDOR] =
+   \                     Virtual_Com_Port_StringVendor:
+   \   00000000   0x26 0x03          DC8 38, 3, 83, 0, 84, 0, 77, 0, 105, 0, 99, 0, 114, 0, 111, 0, 101, 0
+   \              0x53 0x00    
+   \              0x54 0x00    
+   \              0x4D 0x00    
+   \              0x69 0x00    
+   \              0x63 0x00    
+   \              0x72 0x00    
+   \              0x6F 0x00    
+   \              0x65 0x00    
+   \   00000012   0x6C 0x00          DC8 108, 0, 101, 0, 99, 0, 116, 0, 114, 0, 111, 0, 110, 0, 105, 0, 99
+   \              0x65 0x00    
+   \              0x63 0x00    
+   \              0x74 0x00    
+   \              0x72 0x00    
+   \              0x6F 0x00    
+   \              0x6E 0x00    
+   \              0x69 0x00    
+   \              0x63         
+   \   00000023   0x00 0x73          DC8 0, 115, 0, 0, 0
+   \              0x00 0x00    
+   \              0x00         
+    138          {
+    139              VIRTUAL_COM_PORT_SIZ_STRING_VENDOR,     /* Size of Vendor string */
+    140              USB_STRING_DESCRIPTOR_TYPE,             /* bDescriptorType*/
+    141              /* Manufacturer: "STMicroelectronics" */
+    142              'S', 0, 'T', 0, 'M', 0, 'i', 0, 'c', 0, 'r', 0, 'o', 0, 'e', 0,
+    143              'l', 0, 'e', 0, 'c', 0, 't', 0, 'r', 0, 'o', 0, 'n', 0, 'i', 0,
+    144              'c', 0, 's', 0
+    145          };
+    146          
+
+   \                                 In section .rodata, align 4, keep-with-next
+    147          const INT8U Virtual_Com_Port_StringProduct[VIRTUAL_COM_PORT_SIZ_STRING_PRODUCT] =
+   \                     Virtual_Com_Port_StringProduct:
+   \   00000000   0x32 0x03          DC8 50, 3, 83, 0, 84, 0, 77, 0, 51, 0, 50, 0, 32, 0, 86, 0, 105, 0, 114
+   \              0x53 0x00    
+   \              0x54 0x00    
+   \              0x4D 0x00    
+   \              0x33 0x00    
+   \              0x32 0x00    
+   \              0x20 0x00    
+   \              0x56 0x00    
+   \              0x69 0x00    
+   \              0x72         
+   \   00000013   0x00 0x74          DC8 0, 116, 0, 117, 0, 97, 0, 108, 0, 32, 0, 67, 0, 79, 0, 77, 0, 32, 0
+   \              0x00 0x75    
+   \              0x00 0x61    
+   \              0x00 0x6C    
+   \              0x00 0x20    
+   \              0x00 0x43    
+   \              0x00 0x4F    
+   \              0x00 0x4D    
+   \              0x00 0x20    
+   \              0x00         
+   \   00000026   0x50 0x00          DC8 80, 0, 111, 0, 114, 0, 116, 0, 32, 0, 32, 0, 0, 0
+   \              0x6F 0x00    
+   \              0x72 0x00    
+   \              0x74 0x00    
+   \              0x20 0x00    
+   \              0x20 0x00    
+   \              0x00 0x00    
+    148          {
+    149              VIRTUAL_COM_PORT_SIZ_STRING_PRODUCT,          /* bLength */
+    150              USB_STRING_DESCRIPTOR_TYPE,        /* bDescriptorType */
+    151              /* Product name: "STM32 Virtual COM Port" */
+    152              'S', 0, 'T', 0, 'M', 0, '3', 0, '2', 0, ' ', 0, 'V', 0, 'i', 0,
+    153              'r', 0, 't', 0, 'u', 0, 'a', 0, 'l', 0, ' ', 0, 'C', 0, 'O', 0,
+    154              'M', 0, ' ', 0, 'P', 0, 'o', 0, 'r', 0, 't', 0, ' ', 0, ' ', 0
+    155          };
+    156          
+
+   \                                 In section .data, align 4
+    157          INT8U Virtual_Com_Port_StringSerial[VIRTUAL_COM_PORT_SIZ_STRING_SERIAL] =
+   \                     Virtual_Com_Port_StringSerial:
+   \   00000000   0x1A 0x03          DC8 26, 3, 83, 0, 84, 0, 77, 0, 51, 0, 50, 0, 49, 0, 48, 0, 0, 0, 0, 0
+   \              0x53 0x00    
+   \              0x54 0x00    
+   \              0x4D 0x00    
+   \              0x33 0x00    
+   \              0x32 0x00    
+   \              0x31 0x00    
+   \              0x30 0x00    
+   \              0x00 0x00    
+   \              0x00 0x00    
+   \   00000014   0x00 0x00          DC8 0, 0, 0, 0, 0, 0, 0, 0
+   \              0x00 0x00    
+   \              0x00 0x00    
+   \              0x00 0x00    
+    158          {
+    159              VIRTUAL_COM_PORT_SIZ_STRING_SERIAL,           /* bLength */
+    160              USB_STRING_DESCRIPTOR_TYPE,                   /* bDescriptorType */
+    161              'S', 0, 'T', 0, 'M', 0, '3', 0, '2', 0, '1', 0, '0', 0
+    162          };
+    163          
+    164          #endif
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      68  Virtual_Com_Port_ConfigDescriptor
+      20  Virtual_Com_Port_DeviceDescriptor
+       4  Virtual_Com_Port_StringLangID
+      52  Virtual_Com_Port_StringProduct
+      28  Virtual_Com_Port_StringSerial
+      40  Virtual_Com_Port_StringVendor
+
+ 
+  28 bytes in section .data
+ 184 bytes in section .rodata
+ 
+ 184 bytes of CONST memory
+  28 bytes of DATA  memory
+
+Errors: none
+Warnings: none

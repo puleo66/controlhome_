@@ -1,0 +1,442 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       16/Oct/2017  15:58:42
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\uc-terminal\src\viewport.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome -
+#        RF69w\uc-terminal\src\viewport.c" -lCN "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\viewport.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\viewport.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uc-terminal\src\viewport.c
+      1          /*
+      2          *********************************************************************************************************
+      3          *                                               uC/OS-View
+      4          *
+      5          *                                 (c) Copyright 2005, Micrium, Weston, FL
+      6          *                                           All Rights Reserved
+      7          *
+      8          *                                            ST STM32 (Cortex-M3)
+      9          *                                             IAR C Compiler
+     10          *
+     11          *
+     12          * Filename   : OS_VIEWc.C
+     13          * Version    : V1.20
+     14          * Programmer : Jean J. Labrosse
+     15          *********************************************************************************************************
+     16          */
+     17          
+     18          #include <includes.h>
+     19          
+     20          #if OS_VIEW_MODULE == DEF_ENABLED
+     21          
+     22          /*
+     23          *********************************************************************************************************
+     24          *                                              CONSTANTS
+     25          *********************************************************************************************************
+     26          */
+     27          
+     28          #define  BIT0      0x01
+     29          #define  BIT1      0x02
+     30          #define  BIT2      0x04
+     31          #define  BIT3      0x08
+     32          #define  BIT4      0x10
+     33          #define  BIT5      0x20
+     34          #define  BIT6      0x40
+     35          #define  BIT7      0x80
+     36          
+     37          static void  OSView_RxTxISRHandler (void);
+     38          
+     39          /*$PAGE*/
+     40          /*
+     41          *********************************************************************************************************
+     42          *                                           EXIT uC/OS-View
+     43          *
+     44          * Description: This function is called if your target needs to 'uninstall' uC/OS-View.
+     45          *
+     46          * Note(s)    :
+     47          *********************************************************************************************************
+     48          */
+     49          
+     50          void  OSView_Exit (void)
+     51          {
+     52          }
+     53          
+     54          /*
+     55          *********************************************************************************************************
+     56          *                                           Obtain CPU name
+     57          *********************************************************************************************************
+     58          */
+     59          
+     60          void  OSView_GetCPUName (INT8U *s)
+     61          {
+     62              INT8U  cpu_clk_freq;
+     63          
+     64          
+     65              cpu_clk_freq = (INT8U)(BSP_CPU_ClkFreq() / 1000000L);
+     66              strcpy((char *)s, "ST STM32 (Cortex-M3) (xx MHz)");
+     67              s[22] = cpu_clk_freq / 10 + '0';
+     68              s[23] = cpu_clk_freq % 10 + '0';
+     69          }
+     70          
+     71          /*
+     72          *********************************************************************************************************
+     73          *                                  Obtain Interrupt Stack information
+     74          *********************************************************************************************************
+     75          */
+     76          
+     77          INT32U  OSView_GetIntStkBase (void)
+     78          {
+     79              return (0);                                       /* We are not using an ISR stack                 */
+     80          }
+     81          
+     82          
+     83          INT32U  OSView_GetIntStkSize (void)
+     84          {
+     85              return (0);                                       /* We are not using an ISR stack                 */
+     86          }
+     87          
+     88          /*$PAGE*/
+     89          /*
+     90          *********************************************************************************************************
+     91          *                                    INITIALISE uC/OS-View COM PORT
+     92          *
+     93          * Description: Initialize the hardware required for the OS to run. This will work on any target hardware,
+     94          *              but may have to be tailored a little (regarding the clock frequency). Of course the same
+     95          *              holds true if for some reason you choose to use another timer.
+     96          *
+     97          * Note(s)    : 1) This function assumes that a free running timer has been initialized.  The timer can
+     98          *                 either be a 16 bits or 32 bits timer.  Your application needs to provide a function
+     99          *                 called OSView_TmrRd() that reads the current counts of this timer.  The free running
+    100          *                 timer is initialized by the BSP function OSView_TmrInit().
+    101          *********************************************************************************************************
+    102          */
+    103          
+    104          void  OSView_InitTarget (INT32U baud_rate)
+    105          {
+    106          
+    107              GPIO_InitTypeDef        gpio_init;
+    108              USART_InitTypeDef       usart_init;
+    109              USART_ClockInitTypeDef  usart_clk_init;
+    110          
+    111          	OSView_TmrInit();                                    /* Initialize the free running timer          */
+    112          
+    113          
+    114                                                                          /* ----------------- INIT USART STRUCT ---------------- */
+    115              usart_init.USART_BaudRate            = baud_rate;
+    116              usart_init.USART_WordLength          = USART_WordLength_8b;
+    117              usart_init.USART_StopBits            = USART_StopBits_1;
+    118              usart_init.USART_Parity              = USART_Parity_No ;
+    119              usart_init.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    120              usart_init.USART_Mode                = USART_Mode_Rx | USART_Mode_Tx;
+    121          
+    122          
+    123              usart_clk_init.USART_Clock           = USART_Clock_Disable;
+    124              usart_clk_init.USART_CPOL            = USART_CPOL_Low;
+    125              usart_clk_init.USART_CPHA            = USART_CPHA_2Edge;
+    126              usart_clk_init.USART_LastBit         = USART_LastBit_Disable;
+    127          
+    128          
+    129          #if (OS_VIEW_COMM_SEL == OS_VIEW_UART_1)
+    130              BSP_PeriphEn(BSP_PERIPH_ID_USART1);
+    131          
+    132                                                                          /* ----------------- SETUP USART1 GPIO ---------------- */
+    133              BSP_PeriphEn(BSP_PERIPH_ID_IOPA);
+    134          
+    135                                                                          /* Configure GPIOA.9 as push-pull                       */
+    136              gpio_init.GPIO_Pin   = GPIO_Pin_9;
+    137              gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+    138              gpio_init.GPIO_Mode  = GPIO_Mode_AF_PP;
+    139              GPIO_Init(GPIOA, &gpio_init);
+    140          
+    141                                                                          /* Configure GPIOA.10 as input floating                 */
+    142              gpio_init.GPIO_Pin   = GPIO_Pin_10;
+    143              gpio_init.GPIO_Mode  = GPIO_Mode_IN_FLOATING;
+    144              GPIO_Init(GPIOA, &gpio_init);
+    145          
+    146                                                                          /* ------------------ SETUP USART1 -------------------- */
+    147              USART_Init(USART1, &usart_init);
+    148              USART_ClockInit(USART1, &usart_clk_init);
+    149              USART_Cmd(USART1, ENABLE);
+    150          
+    151              BSP_IntVectSet(BSP_INT_ID_USART1, OSView_RxTxISRHandler);
+    152              BSP_IntEn(BSP_INT_ID_USART1);
+    153          #endif
+    154          
+    155          #if (OS_VIEW_COMM_SEL == OS_VIEW_UART_2)
+    156              BSP_PeriphEn(BSP_PERIPH_ID_USART2);
+    157          
+    158                                                                          /* ----------------- SETUP USART2 GPIO ---------------- */
+    159              BSP_PeriphEn(BSP_PERIPH_ID_IOPA);
+    160          
+    161                                                                          /* Configure GPIOA.2 as push-pull                       */
+    162              gpio_init.GPIO_Pin   = GPIO_Pin_2;
+    163              gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+    164              gpio_init.GPIO_Mode  = GPIO_Mode_AF_PP;
+    165              GPIO_Init(GPIOA, &gpio_init);
+    166          
+    167                                                                          /* Configure GPIOA.3 as input floating                  */
+    168              gpio_init.GPIO_Pin   = GPIO_Pin_3;
+    169              gpio_init.GPIO_Mode  = GPIO_Mode_IN_FLOATING;
+    170              GPIO_Init(GPIOA, &gpio_init);
+    171          
+    172                                                                          /* ------------------ SETUP USART2 -------------------- */
+    173              USART_Init(USART2, &usart_init);
+    174              USART_ClockInit(USART2, &usart_clk_init);
+    175              USART_Cmd(USART2, ENABLE);
+    176          
+    177              BSP_IntVectSet(BSP_INT_ID_USART2, OSView_RxTxISRHandler);
+    178              BSP_IntEn(BSP_INT_ID_USART2);
+    179          #endif
+    180          
+    181          #if (OS_VIEW_COMM_SEL == OS_VIEW_UART_3)
+    182              BSP_PeriphEn(BSP_PERIPH_ID_USART3);
+    183          
+    184                                                                          /* ----------------- SETUP USART3 GPIO ---------------- */
+    185              BSP_PeriphEn(BSP_PERIPH_ID_IOPB);
+    186          
+    187                                                                          /* Configure GPIOB.10 as push-pull                      */
+    188              gpio_init.GPIO_Pin   = GPIO_Pin_10;
+    189              gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+    190              gpio_init.GPIO_Mode  = GPIO_Mode_AF_PP;
+    191              GPIO_Init(GPIOB, &gpio_init);
+    192          
+    193                                                                          /* Configure GPIOB.11 as input floating                 */
+    194              gpio_init.GPIO_Pin   = GPIO_Pin_11;
+    195              gpio_init.GPIO_Mode  = GPIO_Mode_IN_FLOATING;
+    196              GPIO_Init(GPIOB, &gpio_init);
+    197          
+    198                                                                          /* ------------------ SETUP USART3 -------------------- */
+    199              USART_Init(USART3, &usart_init);
+    200              USART_ClockInit(USART3, &usart_clk_init);
+    201              USART_Cmd(USART3, ENABLE);
+    202          
+    203              BSP_IntVectSet(BSP_INT_ID_USART3, OSView_RxTxISRHandler);
+    204              BSP_IntEn(BSP_INT_ID_USART3);
+    205          #endif
+    206          }
+    207          
+    208          /*$PAGE*/
+    209          /*
+    210          *********************************************************************************************************
+    211          *                                       Disable Rx Interrupts
+    212          *********************************************************************************************************
+    213          */
+    214          
+    215          void  OSView_RxIntDis (void)
+    216          {
+    217          #if (OS_VIEW_COMM_SEL == OS_VIEW_UART_1)
+    218              USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
+    219          #endif
+    220          
+    221          #if (OS_VIEW_COMM_SEL == OS_VIEW_UART_2)
+    222              USART_ITConfig(USART2, USART_IT_RXNE, DISABLE);
+    223          #endif
+    224          
+    225          #if (OS_VIEW_COMM_SEL == OS_VIEW_UART_3)
+    226              USART_ITConfig(USART3, USART_IT_RXNE, DISABLE);
+    227          #endif
+    228          }
+    229          
+    230          /*
+    231          *********************************************************************************************************
+    232          *                                       Enable Rx Interrupts
+    233          *********************************************************************************************************
+    234          */
+    235          
+    236          void  OSView_RxIntEn (void)
+    237          {
+    238          #if (OS_VIEW_COMM_SEL == OS_VIEW_UART_1)
+    239              USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+    240          #endif
+    241          
+    242          #if (OS_VIEW_COMM_SEL == OS_VIEW_UART_2)
+    243              USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+    244          #endif
+    245          
+    246          #if (OS_VIEW_COMM_SEL == OS_VIEW_UART_3)
+    247              USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
+    248          #endif
+    249          }
+    250          
+    251          /*
+    252          *********************************************************************************************************
+    253          *                                 Rx Communication handler for uC/OS-View
+    254          *
+    255          * Description: This function is called by OSView_RxISR (see OS_VIEWa.ASM) to process a received
+    256          *              character interrupt.
+    257          *
+    258          * Note(s)    : This adaptation of uC/OS-View assumes that a 'combined' interrupt is generated by the UART
+    259          *              and thus this function is not needed.
+    260          *********************************************************************************************************
+    261          */
+    262          
+    263          void  OSView_RxISRHandler (void)
+    264          {
+    265          }
+    266          
+    267          /*
+    268          *********************************************************************************************************
+    269          *                                Rx/Tx Communication handler for uC/OS-View
+    270          *
+    271          * Description: This function is NOT called because the M16C has a separate Rx and Tx ISR.
+    272          *********************************************************************************************************
+    273          */
+    274          
+    275          static void  OSView_RxTxISRHandler (void)
+    276          {
+    277          
+    278              USART_TypeDef  *usart;
+    279              CPU_INT08U      rx_data;
+    280              CPU_SR          cpu_sr;
+    281          
+    282          
+    283              CPU_CRITICAL_ENTER();                                       /* Tell uC/OS-II that we are starting an ISR            */
+    284              OSIntNesting++;
+    285              CPU_CRITICAL_EXIT();
+    286          
+    287          
+    288          #if   (OS_VIEW_COMM_SEL == OS_VIEW_UART_1)
+    289              usart = USART1;
+    290          #elif (OS_VIEW_COMM_SEL == OS_VIEW_UART_2)
+    291              usart = USART2;
+    292          #elif (OS_VIEW_COMM_SEL == OS_VIEW_UART_3)
+    293              usart = USART3;
+    294          #else
+    295              OSIntExit();
+    296              return;
+    297          #endif
+    298          
+    299              if (USART_GetITStatus(usart, USART_IT_RXNE) != RESET) {
+    300                  rx_data = USART_ReceiveData(usart) & 0xFF;              /* Read one byte from the receive data register         */
+    301                  OSView_RxHandler(rx_data);
+    302          
+    303                  USART_ClearITPendingBit(usart, USART_IT_RXNE);          /* Clear the USART1 Receive interrupt                   */
+    304              }
+    305          
+    306              if (USART_GetITStatus(usart, USART_IT_TXE) != RESET) {
+    307                  OSView_TxHandler();
+    308          
+    309                  USART_ClearITPendingBit(usart, USART_IT_TXE);           /* Clear the USART1 transmit interrupt                  */
+    310              }
+    311          
+    312              OSIntExit();                                                /* Tell uC/OS-II that we are leaving the ISR            */
+    313          }
+    314          
+    315          /*$PAGE*/
+    316          /*
+    317          *********************************************************************************************************
+    318          *                                      Communication for uC/OS-View
+    319          *
+    320          * Description: Send 1 character to COM Port
+    321          *********************************************************************************************************
+    322          */
+    323          
+    324          void  OSView_Tx1 (INT8U c)
+    325          {
+    326          #if OS_VIEW_COMM_SEL == OS_VIEW_UART_1
+    327          	USART_SendData(USART1, c);
+    328          #endif
+    329          
+    330          #if OS_VIEW_COMM_SEL == OS_VIEW_UART_2
+    331          	USART_SendData(USART2, c);
+    332          #endif
+    333          
+    334          #if OS_VIEW_COMM_SEL == OS_VIEW_UART_3
+    335          	USART_SendData(USART3, c);
+    336          #endif
+    337          }
+    338          
+    339          /*$PAGE*/
+    340          /*
+    341          *********************************************************************************************************
+    342          *                                       Disable Tx Interrupts
+    343          *********************************************************************************************************
+    344          */
+    345          
+    346          void  OSView_TxIntDis (void)
+    347          {
+    348          #if (OS_VIEW_COMM_SEL == OS_VIEW_UART_1)
+    349              USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
+    350          #endif
+    351          
+    352          #if (OS_VIEW_COMM_SEL == OS_VIEW_UART_2)
+    353              USART_ITConfig(USART2, USART_IT_TXE, DISABLE);
+    354          #endif
+    355          
+    356          #if (OS_VIEW_COMM_SEL == OS_VIEW_UART_3)
+    357              USART_ITConfig(USART3, USART_IT_TXE, DISABLE);
+    358          #endif
+    359          }
+    360          
+    361          /*
+    362          *********************************************************************************************************
+    363          *                                       Enable Tx Interrupts
+    364          *********************************************************************************************************
+    365          */
+    366          
+    367          void  OSView_TxIntEn (void)
+    368          {
+    369          #if (OS_VIEW_COMM_SEL == OS_VIEW_UART_1)
+    370              USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
+    371          #endif
+    372          
+    373          #if (OS_VIEW_COMM_SEL == OS_VIEW_UART_2)
+    374              USART_ITConfig(USART2, USART_IT_TXE, ENABLE);
+    375          #endif
+    376          
+    377          #if (OS_VIEW_COMM_SEL == OS_VIEW_UART_3)
+    378              USART_ITConfig(USART3, USART_IT_TXE, ENABLE);
+    379          #endif
+    380          }
+    381          
+    382          #endif
+    383          
+
+
+ 
+
+ 
+
+
+Errors: none
+Warnings: none

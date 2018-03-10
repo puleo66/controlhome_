@@ -1,0 +1,185 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:15:14
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\uc-terminal\src\usb_init.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome -
+#        RF69w\uc-terminal\src\usb_init.c" -lCN "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\usb_init.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\usb_init.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uc-terminal\src\usb_init.c
+      1          /******************** (C) COPYRIGHT 2011 STMicroelectronics ********************
+      2          * File Name          : usb_init.c
+      3          * Author             : MCD Application Team
+      4          * Version            : V3.3.0
+      5          * Date               : 21-March-2011
+      6          * Description        : Initialization routines & global variables
+      7          ********************************************************************************
+      8          * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+      9          * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE TIME.
+     10          * AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY DIRECT,
+     11          * INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING FROM THE
+     12          * CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE CODING
+     13          * INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+     14          *******************************************************************************/
+     15          
+     16          /* Includes ------------------------------------------------------------------*/
+     17          #include "includes.h"
+     18          #if USBD_MODULE == DEF_ENABLED
+     19          
+     20          /* Private typedef -----------------------------------------------------------*/
+     21          /* Private define ------------------------------------------------------------*/
+     22          /* Private macro -------------------------------------------------------------*/
+     23          /* Private variables ---------------------------------------------------------*/
+     24          /*  The number of current endpoint, it will be used to specify an endpoint */
+
+   \                                 In section .bss, align 1
+     25           INT8U	EPindex;
+   \                     EPindex:
+   \   00000000                      DS8 1
+     26          /*  The number of current device, it is an index to the Device_Table */
+     27          /* INT8U	Device_no; */
+     28          /*  Points to the DEVICE_INFO structure of current device */
+     29          /*  The purpose of this register is to speed up the execution */
+
+   \                                 In section .bss, align 4
+     30          DEVICE_INFO *pInformation;
+     31          /*  Points to the DEVICE_PROP structure of current device */
+     32          /*  The purpose of this register is to speed up the execution */
+     33          DEVICE_PROP *pProperty;
+     34          /*  Temporary save the state of Rx & Tx status. */
+     35          /*  Whenever the Rx or Tx state is changed, its value is saved */
+     36          /*  in this variable first and will be set to the EPRB or EPRA */
+     37          /*  at the end of interrupt process */
+     38          INT16U	SaveState ;
+     39          INT16U  wInterrupt_Mask;
+     40          DEVICE_INFO	Device_Info;
+   \                     Device_Info:
+   \   00000000                      DS8 28
+   \                     pInformation:
+   \   0000001C                      DS8 4
+   \                     pProperty:
+   \   00000020                      DS8 4
+     41          USER_STANDARD_REQUESTS  *pUser_Standard_Requests;
+   \                     pUser_Standard_Requests:
+   \   00000024                      DS8 4
+
+   \                                 In section .bss, align 2
+   \                     SaveState:
+   \   00000000                      DS8 2
+
+   \                                 In section .bss, align 2
+   \                     wInterrupt_Mask:
+   \   00000000                      DS8 2
+     42          
+     43          /* Extern variables ----------------------------------------------------------*/
+     44          /* Private function prototypes -----------------------------------------------*/
+     45          /* Private functions ---------------------------------------------------------*/
+     46          
+     47          /*******************************************************************************
+     48          * Function Name  : USB_Init
+     49          * Description    : USB system initialization
+     50          * Input          : None.
+     51          * Output         : None.
+     52          * Return         : None.
+     53          *******************************************************************************/
+
+   \                                 In section .text, align 4, keep-with-next
+     54          void USB_Init(void)
+     55          {
+     56            pInformation = &Device_Info;
+     57            pInformation->ControlState = 2;
+   \                     USB_Init: (+1)
+   \   00000000   0x2102             MOVS     R1,#+2
+   \   00000002   0x4804             LDR.N    R0,??USB_Init_0
+     58            pProperty = &Device_Property;
+     59            pUser_Standard_Requests = &User_Standard_Requests;
+   \   00000004   0x4A04             LDR.N    R2,??USB_Init_0+0x4
+   \   00000006   0x7201             STRB     R1,[R0, #+8]
+   \   00000008   0x61C0             STR      R0,[R0, #+28]
+   \   0000000A   0x6242             STR      R2,[R0, #+36]
+   \   0000000C   0x4903             LDR.N    R1,??USB_Init_0+0x8
+   \   0000000E   0x6201             STR      R1,[R0, #+32]
+     60            /* Initialize devices one by one */
+     61            pProperty->Init();
+   \   00000010   0x6808             LDR      R0,[R1, #+0]
+   \   00000012   0x4700             BX       R0
+   \                     ??USB_Init_0:
+   \   00000014   0x........         DC32     Device_Info
+   \   00000018   0x........         DC32     User_Standard_Requests
+   \   0000001C   0x........         DC32     Device_Property
+     62          }
+     63          
+     64          /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
+     65          #endif
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   USB_Init
+         0   -- Indirect call
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      40  Device_Info
+          pInformation
+          pProperty
+          pUser_Standard_Requests
+       1  EPindex
+       2  SaveState
+      32  USB_Init
+       2  wInterrupt_Mask
+
+ 
+ 45 bytes in section .bss
+ 32 bytes in section .text
+ 
+ 32 bytes of CODE memory
+ 45 bytes of DATA memory
+
+Errors: none
+Warnings: none

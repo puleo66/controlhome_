@@ -1,0 +1,1749 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:14:58
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\uC-LIB\lib_str.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\uC-LIB\lib_str.c" -lCN
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\lib_str.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\lib_str.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uC-LIB\lib_str.c
+      1          /*
+      2          *********************************************************************************************************
+      3          *                                               uC/LIB
+      4          *                                       CUSTOM LIBRARY MODULES
+      5          *
+      6          *                          (c) Copyright 2004-2008; Micrium, Inc.; Weston, FL
+      7          *
+      8          *               All rights reserved.  Protected by international copyright laws.
+      9          *
+     10          *               uC/LIB is provided in source form for FREE evaluation, for educational
+     11          *               use or peaceful research.  If you plan on using uC/LIB in a commercial
+     12          *               product you need to contact Micrium to properly license its use in your
+     13          *               product.  We provide ALL the source code for your convenience and to
+     14          *               help you experience uC/LIB.  The fact that the source code is provided
+     15          *               does NOT mean that you can use it without paying a licensing fee.
+     16          *
+     17          *               Knowledge of the source code may NOT be used to develop a similar product.
+     18          *
+     19          *               Please help us continue to provide the Embedded community with the finest
+     20          *               software available.  Your honesty is greatly appreciated.
+     21          *********************************************************************************************************
+     22          */
+     23          
+     24          /*
+     25          *********************************************************************************************************
+     26          *
+     27          *                                       ASCII STRING MANAGEMENT
+     28          *
+     29          * Filename      : lib_str.c
+     30          * Version       : V1.25
+     31          * Programmer(s) : ITJ
+     32          *                 JDH
+     33          *********************************************************************************************************
+     34          * Note(s)       : (1) NO compiler-supplied standard library functions are used in library or product software.
+     35          *
+     36          *                     (a) ALL standard library functions are implemented in the custom library modules :
+     37          *
+     38          *                         (1) \<Custom Library Directory>\lib*.*
+     39          *
+     40          *                         (2) \<Custom Library Directory>\Ports\<cpu>\<compiler>\lib*_a.*
+     41          *
+     42          *                               where
+     43          *                                       <Custom Library Directory>      directory path for custom library software
+     44          *                                       <cpu>                           directory name for specific processor (CPU)
+     45          *                                       <compiler>                      directory name for specific compiler
+     46          *
+     47          *                     (b) Product-specific library functions are implemented in individual products.
+     48          *********************************************************************************************************
+     49          */
+     50          
+     51          
+     52          /*
+     53          *********************************************************************************************************
+     54          *                                            INCLUDE FILES
+     55          *********************************************************************************************************
+     56          */
+     57          
+     58          #define    LIB_STR_MODULE
+     59          #include  <lib_str.h>
+     60          
+     61          
+     62          /*$PAGE*/
+     63          /*
+     64          *********************************************************************************************************
+     65          *                                            LOCAL DEFINES
+     66          *********************************************************************************************************
+     67          */
+     68          
+     69          
+     70          /*
+     71          *********************************************************************************************************
+     72          *                                           LOCAL CONSTANTS
+     73          *********************************************************************************************************
+     74          */
+     75          
+     76          
+     77          /*
+     78          *********************************************************************************************************
+     79          *                                          LOCAL DATA TYPES
+     80          *********************************************************************************************************
+     81          */
+     82          
+     83          
+     84          /*
+     85          *********************************************************************************************************
+     86          *                                            LOCAL TABLES
+     87          *********************************************************************************************************
+     88          */
+     89          
+     90          
+     91          /*
+     92          *********************************************************************************************************
+     93          *                                       LOCAL GLOBAL VARIABLES
+     94          *********************************************************************************************************
+     95          */
+     96          
+     97          
+     98          /*
+     99          *********************************************************************************************************
+    100          *                                      LOCAL FUNCTION PROTOTYPES
+    101          *********************************************************************************************************
+    102          */
+    103          
+    104          
+    105          /*
+    106          *********************************************************************************************************
+    107          *                                     LOCAL CONFIGURATION ERRORS
+    108          *********************************************************************************************************
+    109          */
+    110          
+    111          
+    112          /*$PAGE*/
+    113          /*
+    114          *********************************************************************************************************
+    115          *                                              Str_Len()
+    116          *
+    117          * Description : Calculate length of a string.
+    118          *
+    119          * Argument(s) : pstr        Pointer to string (see Note #1).
+    120          *
+    121          * Return(s)   : Length of string; number of characters in string before terminating NULL character.
+    122          *
+    123          * Caller(s)   : Application.
+    124          *
+    125          * Note(s)     : (1) String buffer NOT modified.
+    126          *
+    127          *               (2) String length calculation terminates when :
+    128          *
+    129          *                   (a) String pointer points to NULL.
+    130          *                       (1) String buffer overlaps with NULL address.
+    131          *                       (2) String length calculated for string up to but NOT beyond or including
+    132          *                           the NULL address.
+    133          *
+    134          *                   (b) Terminating NULL character found.
+    135          *                       (1) String length calculated for string up to but NOT           including
+    136          *                           the NULL character.
+    137          *********************************************************************************************************
+    138          */
+    139          
+
+   \                                 In section .text, align 2, keep-with-next
+    140          CPU_SIZE_T  Str_Len (CPU_CHAR  *pstr)
+    141          {
+    142              CPU_SIZE_T  len;
+    143          
+    144          
+    145              len = 0;
+   \                     Str_Len: (+1)
+   \   00000000   0x2100             MOVS     R1,#+0
+   \   00000002   0xE000             B.N      ??Str_Len_0
+    146              while (( pstr != (CPU_CHAR *)0) &&                          /* Calc str len until NULL ptr (see Note #2a) ...       */
+    147                     (*pstr != (CPU_CHAR  )0)) {                          /* ... or NULL char found      (see Note #2b).          */
+    148                  len++;
+   \                     ??Str_Len_1: (+1)
+   \   00000004   0x1C49             ADDS     R1,R1,#+1
+    149                  pstr++;
+    150              }
+   \                     ??Str_Len_0: (+1)
+   \   00000006   0x2800             CMP      R0,#+0
+   \   00000008   0xBF1C             ITT      NE 
+   \   0000000A   0xF810 0x2B01      LDRBNE   R2,[R0], #+1
+   \   0000000E   0x2A00             CMPNE    R2,#+0
+   \   00000010   0xD1F8             BNE.N    ??Str_Len_1
+    151          
+    152              return (len);
+   \   00000012   0x4608             MOV      R0,R1
+   \   00000014   0x4770             BX       LR               ;; return
+    153          }
+    154          
+    155          
+    156          /*$PAGE*/
+    157          /*
+    158          *********************************************************************************************************
+    159          *                                             Str_Copy()
+    160          *
+    161          * Description : Copy source string to destination string buffer.
+    162          *
+    163          * Argument(s) : pdest       Pointer to destination string buffer to receive source string copy (see Note #1).
+    164          *
+    165          *               psrc        Pointer to source      string to copy into destination string buffer.
+    166          *
+    167          * Return(s)   : Pointer to destination string, if NO errors (see Note #2).
+    168          *
+    169          *               Pointer to NULL,               otherwise.
+    170          *
+    171          * Caller(s)   : Application.
+    172          *
+    173          * Note(s)     : (1) Destination buffer size NOT validated; buffer overruns MUST be prevented by caller.
+    174          *
+    175          *                   (a) Destination buffer size MUST be large enough to accommodate the entire source 
+    176          *                       string size including the terminating NULL character.
+    177          *
+    178          *               (2) String copy terminates when :
+    179          *
+    180          *                   (a) Destination/Source string pointer(s) are passed NULL pointers.
+    181          *                       (1) No string copy performed; NULL pointer returned.
+    182          *
+    183          *                   (b) Destination/Source string pointer(s) points to NULL.
+    184          *                       (1) String buffer(s) overlap with NULL address.
+    185          *                       (2) Source string copied into destination string buffer up to but NOT beyond or
+    186          *                           including the NULL address; destination string buffer properly terminated
+    187          *                           with NULL character.
+    188          *
+    189          *                   (c) Source string's terminating NULL character found.
+    190          *                       (1) Entire source string copied into destination string buffer.
+    191          *********************************************************************************************************
+    192          */
+    193          
+
+   \                                 In section .text, align 2, keep-with-next
+    194          CPU_CHAR  *Str_Copy (CPU_CHAR  *pdest,
+    195                               CPU_CHAR  *psrc)
+    196          {
+    197              CPU_CHAR  *pstr;
+    198              CPU_CHAR  *pstr_next;
+    199          
+    200                                                                          /* Rtn NULL if str ptr(s) NULL (see Note #2a).          */
+    201              if (pdest == (CPU_CHAR *)0) {
+   \                     Str_Copy: (+1)
+   \   00000000   0x2800             CMP      R0,#+0
+   \   00000002   0xBF18             IT       NE 
+   \   00000004   0x2900             CMPNE    R1,#+0
+    202                  return  ((CPU_CHAR *)0);
+    203              }
+    204              if (psrc  == (CPU_CHAR *)0) {
+   \   00000006   0xD101             BNE.N    ??Str_Copy_0
+    205                  return  ((CPU_CHAR *)0);
+   \   00000008   0x2000             MOVS     R0,#+0
+   \   0000000A   0x4770             BX       LR
+    206              }
+    207          
+    208          
+    209              pstr      = pdest;
+   \                     ??Str_Copy_0: (+1)
+   \   0000000C   0x4602             MOV      R2,R0
+    210              pstr_next = pstr;
+    211              pstr_next++;
+   \   0000000E   0x1C53             ADDS     R3,R2,#+1
+   \   00000010   0xE004             B.N      ??Str_Copy_1
+    212              while (( pstr_next != (CPU_CHAR *)0) &&                     /* Copy str until NULL ptr(s) (see Note #2b) ...        */
+    213                     ( psrc      != (CPU_CHAR *)0) &&
+    214                     (*psrc      != (CPU_CHAR  )0)) {                     /* ... or NULL char found     (see Note #2c).           */
+    215                 *pstr = *psrc;
+   \                     ??Str_Copy_2: (+1)
+   \   00000012   0xF811 0xCB01      LDRB     R12,[R1], #+1
+   \   00000016   0xF802 0xCB01      STRB     R12,[R2], #+1
+    216                  pstr++;
+    217                  pstr_next++;
+   \   0000001A   0x1C5B             ADDS     R3,R3,#+1
+    218                  psrc++;
+    219              }
+   \                     ??Str_Copy_1: (+1)
+   \   0000001C   0xB133             CBZ.N    R3,??Str_Copy_3
+   \   0000001E   0x2900             CMP      R1,#+0
+   \   00000020   0xBF1C             ITT      NE 
+   \   00000022   0xF891 0xC000      LDRBNE   R12,[R1, #+0]
+   \   00000026   0xF1BC 0x0F00      CMPNE    R12,#+0
+   \   0000002A   0xD1F2             BNE.N    ??Str_Copy_2
+    220          
+    221             *pstr = (CPU_CHAR)0;                                         /* Append NULL char (see Note #2b2).                    */
+   \                     ??Str_Copy_3: (+1)
+   \   0000002C   0x....             B.N      ?Subroutine1
+    222          
+    223          
+    224              return (pdest);
+    225          }
+
+   \                                 In section .text, align 2, keep-with-next
+   \                     ?Subroutine1: (+1)
+   \   00000000   0x2100             MOVS     R1,#+0
+   \   00000002   0x7011             STRB     R1,[R2, #+0]
+   \   00000004   0x4770             BX       LR               ;; return
+    226          
+    227          
+    228          /*$PAGE*/
+    229          /*
+    230          *********************************************************************************************************
+    231          *                                            Str_Copy_N()
+    232          *
+    233          * Description : Copy source string to destination string buffer, up to a maximum number of characters.
+    234          *
+    235          * Argument(s) : pdest       Pointer to destination string buffer to receive source string copy (see Note #1).
+    236          *
+    237          *               psrc        Pointer to source      string to copy into destination string buffer.
+    238          *
+    239          *               len_max     Maximum number of characters to copy (see Note #2d).
+    240          *
+    241          * Return(s)   : Pointer to destination string, if NO errors (see Note #2).
+    242          *
+    243          *               Pointer to NULL,               otherwise.
+    244          *
+    245          * Caller(s)   : Application.
+    246          *
+    247          * Note(s)     : (1) Destination buffer size NOT validated; buffer overruns MUST be prevented by caller.
+    248          *
+    249          *                   (a) Destination buffer size MUST be large enough to accommodate the entire source 
+    250          *                       string size including the terminating NULL character.
+    251          *
+    252          *               (2) String copy terminates when :
+    253          *
+    254          *                   (a) Destination/Source string pointer(s) are passed NULL pointers.
+    255          *                       (1) No string copy performed; NULL pointer returned.
+    256          *
+    257          *                   (b) Destination/Source string pointer(s) points to NULL.
+    258          *                       (1) String buffer(s) overlap with NULL address.
+    259          *                       (2) Source string copied into destination string buffer up to but NOT beyond or
+    260          *                           including the NULL address; destination string buffer properly terminated
+    261          *                           with NULL character.
+    262          *
+    263          *                   (c) Source string's terminating NULL character found.
+    264          *                       (1) Entire source string copied into destination string buffer.
+    265          *
+    266          *                   (d) 'len_max' number of characters copied.
+    267          *                       (1) 'len_max' number of characters does NOT include the terminating NULL character.
+    268          *
+    269          *                           See also Note #1a.
+    270          *********************************************************************************************************
+    271          */
+    272          
+
+   \                                 In section .text, align 2, keep-with-next
+    273          CPU_CHAR  *Str_Copy_N (CPU_CHAR    *pdest,
+    274                                 CPU_CHAR    *psrc,
+    275                                 CPU_SIZE_T   len_max)
+    276          {
+   \                     Str_Copy_N: (+1)
+   \   00000000   0xB470             PUSH     {R4-R6}
+    277              CPU_CHAR    *pstr;
+    278              CPU_CHAR    *pstr_next;
+    279              CPU_SIZE_T   len_copy;
+    280          
+    281                                                                          /* Rtn NULL if str ptr(s) NULL      (see Note #2a).     */
+    282              if (pdest == (CPU_CHAR *)0) {
+   \   00000002   0x2800             CMP      R0,#+0
+   \   00000004   0xBF18             IT       NE 
+   \   00000006   0x2900             CMPNE    R1,#+0
+    283                  return  ((CPU_CHAR *)0);
+    284              }
+    285              if (psrc  == (CPU_CHAR *)0) {
+   \   00000008   0xD000             BEQ.N    ??Str_Copy_N_0
+    286                  return  ((CPU_CHAR *)0);
+    287              }
+    288          
+    289              if (len_max == (CPU_SIZE_T)0) {                             /* Rtn NULL if copy len equals zero (see Note #2d).     */
+   \   0000000A   0xB902             CBNZ.N   R2,??Str_Copy_N_1
+    290                  return  ((CPU_CHAR *)0);
+    291              }
+    292          
+    293          
+    294              pstr      = pdest;
+    295              pstr_next = pstr;
+    296              pstr_next++;
+    297              len_copy  = 0;
+    298          
+    299              while (( pstr_next != (CPU_CHAR *)0) &&                     /* Copy str until NULL ptr(s)  (see Note #2b)  ...      */
+    300                     ( psrc      != (CPU_CHAR *)0) &&
+    301                     (*psrc      != (CPU_CHAR  )0) &&                     /* ... or NULL char found      (see Note #2c); ...      */
+    302                     ( len_copy  <  (CPU_SIZE_T)len_max)) {               /* ... or max nbr chars copied (see Note #2d).          */
+    303                 *pstr = *psrc;
+    304                  pstr++;
+    305                  pstr_next++;
+    306                  psrc++;
+    307                  len_copy++;
+    308              }
+    309          
+    310             *pstr = (CPU_CHAR)0;                                         /* Append NULL char (see Note #2b2).                    */
+    311          
+    312          
+    313              return (pdest);
+   \                     ??Str_Copy_N_0: (+1)
+   \   0000000C   0x....             B.N      ?Subroutine2
+   \                     ??Str_Copy_N_1: (+1)
+   \   0000000E   0x4603             MOV      R3,R0
+   \   00000010   0x....             B.N      ?Subroutine0
+    314          }
+
+   \                                 In section .text, align 2, keep-with-next
+   \                     ?Subroutine2: (+1)
+   \   00000000   0xBC70             POP      {R4-R6}
+   \   00000002   0x2000             MOVS     R0,#+0
+   \   00000004   0x4770             BX       LR
+
+   \                                 In section .text, align 2, keep-with-next
+   \                     ?Subroutine0: (+1)
+   \   00000000   0x1C5C             ADDS     R4,R3,#+1
+   \   00000002   0x2500             MOVS     R5,#+0
+   \   00000004   0xE005             B.N      ??Subroutine0_0
+   \                     ??Subroutine0_1: (+1)
+   \   00000006   0xF811 0x6B01      LDRB     R6,[R1], #+1
+   \   0000000A   0xF803 0x6B01      STRB     R6,[R3], #+1
+   \   0000000E   0x1C64             ADDS     R4,R4,#+1
+   \   00000010   0x1C6D             ADDS     R5,R5,#+1
+   \                     ??Subroutine0_0: (+1)
+   \   00000012   0xB124             CBZ.N    R4,??Subroutine0_2
+   \   00000014   0xB119             CBZ.N    R1,??Subroutine0_2
+   \   00000016   0x780E             LDRB     R6,[R1, #+0]
+   \   00000018   0xB10E             CBZ.N    R6,??Subroutine0_2
+   \   0000001A   0x4295             CMP      R5,R2
+   \   0000001C   0xD3F3             BCC.N    ??Subroutine0_1
+   \                     ??Subroutine0_2: (+1)
+   \   0000001E   0x2100             MOVS     R1,#+0
+   \   00000020   0x7019             STRB     R1,[R3, #+0]
+   \   00000022   0xBC70             POP      {R4-R6}
+   \   00000024   0x4770             BX       LR               ;; return
+    315          
+    316          
+    317          /*$PAGE*/
+    318          /*
+    319          *********************************************************************************************************
+    320          *                                              Str_Cat()
+    321          *
+    322          * Description : Append concatenation string to destination string.
+    323          *
+    324          * Argument(s) : pdest       Pointer to destination   string to append concatenation  string (see Note #1).
+    325          *
+    326          *               pstr_cat    Pointer to concatenation string to append to destination string.
+    327          *
+    328          * Return(s)   : Pointer to destination string, if NO errors (see Note #2).
+    329          *
+    330          *               Pointer to NULL,               otherwise.
+    331          *
+    332          * Caller(s)   : Application.
+    333          *
+    334          * Note(s)     : (1) Destination string buffer size NOT validated; buffer overruns MUST be prevented by caller.
+    335          *
+    336          *                   (a) Destination buffer size MUST be large enough to accommodate the entire concatenated
+    337          *                       string size including the terminating NULL character.
+    338          *
+    339          *               (2) String concatenation terminates when :
+    340          *
+    341          *                   (a) Destination/Concatenation string pointer(s) are passed NULL pointers.
+    342          *                       (1) No string concatenation performed; NULL pointer returned.
+    343          *
+    344          *                   (b) Destination string overlaps with NULL address.
+    345          *                       (1) No string concatenation performed; NULL pointer returned.
+    346          *
+    347          *                   (c) Destination/Concatenation string pointer(s) points to NULL.
+    348          *                       (1) String buffer(s) overlap with NULL address.
+    349          *                       (2) Concatenation string appended into destination string buffer up to but NOT
+    350          *                           beyond or including the NULL address; destination string buffer properly
+    351          *                           terminated with NULL character.
+    352          *
+    353          *                   (d) Concatenation string's terminating NULL character found.
+    354          *                       (1) Entire concatenation string appended to destination string.
+    355          *********************************************************************************************************
+    356          */
+    357          
+
+   \                                 In section .text, align 2, keep-with-next
+    358          CPU_CHAR  *Str_Cat (CPU_CHAR  *pdest,
+    359                              CPU_CHAR  *pstr_cat)
+    360          {
+    361              CPU_CHAR  *pstr;
+    362              CPU_CHAR  *pstr_next;
+    363          
+    364                                                                          /* Rtn NULL if str ptr(s) NULL (see Note #2a).          */
+    365              if (pdest == (CPU_CHAR *)0) {
+   \                     Str_Cat: (+1)
+   \   00000000   0x2800             CMP      R0,#+0
+   \   00000002   0xBF18             IT       NE 
+   \   00000004   0x2900             CMPNE    R1,#+0
+    366                  return  ((CPU_CHAR *)0);
+    367              }
+    368              if (pstr_cat == (CPU_CHAR *)0) {
+   \   00000006   0xD004             BEQ.N    ??Str_Cat_0
+    369                  return  ((CPU_CHAR *)0);
+    370              }
+    371          
+    372          
+    373              pstr = pdest;
+   \   00000008   0x4602             MOV      R2,R0
+   \                     ??Str_Cat_1: (+1)
+   \   0000000A   0x7813             LDRB     R3,[R2, #+0]
+   \   0000000C   0xB11B             CBZ.N    R3,??Str_Cat_2
+    374              while (( pstr != (CPU_CHAR *)0) &&                          /* Adv to end of cur dest str until NULL ptr ...        */
+    375                     (*pstr != (CPU_CHAR  )0)) {                          /* ... or NULL char found..                             */
+    376                  pstr++;
+   \   0000000E   0x1C52             ADDS     R2,R2,#+1
+    377              }
+   \   00000010   0xD1FB             BNE.N    ??Str_Cat_1
+    378              if (pstr == (CPU_CHAR *)0) {                                /* If NULL str overrun, rtn NULL (see Note #2b).        */
+    379                  return ((CPU_CHAR *)0);
+   \                     ??Str_Cat_0: (+1)
+   \   00000012   0x2000             MOVS     R0,#+0
+   \   00000014   0x4770             BX       LR
+    380              }
+    381          
+    382              pstr_next = pstr;
+    383              pstr_next++;
+   \                     ??Str_Cat_2: (+1)
+   \   00000016   0x1C53             ADDS     R3,R2,#+1
+   \   00000018   0xE004             B.N      ??Str_Cat_3
+    384              while (( pstr_next != (CPU_CHAR *)0) &&                     /* Cat str until NULL ptr(s) (see Note #2c) ...         */
+    385                     ( pstr_cat  != (CPU_CHAR *)0) &&
+    386                     (*pstr_cat  != (CPU_CHAR  )0)) {                     /* ... or NULL char found    (see Note #2d).            */
+    387                 *pstr = *pstr_cat;
+   \                     ??Str_Cat_4: (+1)
+   \   0000001A   0xF811 0xCB01      LDRB     R12,[R1], #+1
+   \   0000001E   0xF802 0xCB01      STRB     R12,[R2], #+1
+    388                  pstr++;
+    389                  pstr_next++;
+   \   00000022   0x1C5B             ADDS     R3,R3,#+1
+    390                  pstr_cat++;
+    391              }
+   \                     ??Str_Cat_3: (+1)
+   \   00000024   0xB133             CBZ.N    R3,??Str_Cat_5
+   \   00000026   0x2900             CMP      R1,#+0
+   \   00000028   0xBF1C             ITT      NE 
+   \   0000002A   0xF891 0xC000      LDRBNE   R12,[R1, #+0]
+   \   0000002E   0xF1BC 0x0F00      CMPNE    R12,#+0
+   \   00000032   0xD1F2             BNE.N    ??Str_Cat_4
+    392          
+    393             *pstr = (CPU_CHAR)0;                                         /* Append NULL char (see Note #2c2).                    */
+   \                     ??Str_Cat_5: (+1)
+   \   00000034                      REQUIRE ?Subroutine1
+   \   00000034                      ;; // Fall through to label ?Subroutine1
+    394          
+    395          
+    396              return (pdest);
+    397          }
+    398          
+    399          
+    400          /*$PAGE*/
+    401          /*
+    402          *********************************************************************************************************
+    403          *                                             Str_Cat_N()
+    404          *
+    405          * Description : Append concatenation string to destination string, up to a maximum number of characters.
+    406          *
+    407          * Argument(s) : pdest       Pointer to destination   string to append concatenation  string (see Note #1).
+    408          *
+    409          *               pstr_cat    Pointer to concatenation string to append to destination string.
+    410          *
+    411          *               len_max     Maximum number of characters to concatenate (see Note #2e).
+    412          *
+    413          * Return(s)   : Pointer to destination string, if NO errors (see Note #2).
+    414          *
+    415          *               Pointer to NULL,               otherwise.
+    416          *
+    417          * Caller(s)   : Application.
+    418          *
+    419          * Note(s)     : (1) Destination string buffer size NOT validated; buffer overruns MUST be prevented by caller.
+    420          *
+    421          *                   (a) Destination buffer size MUST be large enough to accommodate the entire concatenated
+    422          *                       string size including the terminating NULL character.
+    423          *
+    424          *               (2) String concatenation terminates when :
+    425          *
+    426          *                   (a) Destination/Concatenation string pointer(s) are passed NULL pointers.
+    427          *                       (1) No string concatenation performed; NULL pointer returned.
+    428          *
+    429          *                   (b) Destination string overlaps with NULL address.
+    430          *                       (1) No string concatenation performed; NULL pointer returned.
+    431          *
+    432          *                   (c) Destination/Concatenation string pointer(s) points to NULL.
+    433          *                       (1) String buffer(s) overlap with NULL address.
+    434          *                       (2) Concatenation string appended into destination string buffer up to but NOT
+    435          *                           beyond or including the NULL address; destination string buffer properly
+    436          *                           terminated with NULL character.
+    437          *
+    438          *                   (d) Concatenation string's terminating NULL character found.
+    439          *                       (1) Entire concatenation string appended to destination string.
+    440          *
+    441          *                   (e) 'len_max' number of characters concatenated.
+    442          *                       (1) 'len_max' number of characters does NOT include the terminating NULL character.
+    443          *
+    444          *                           See also Note #1a.
+    445          *********************************************************************************************************
+    446          */
+    447          /*$PAGE*/
+
+   \                                 In section .text, align 2, keep-with-next
+    448          CPU_CHAR  *Str_Cat_N (CPU_CHAR    *pdest,
+    449                                CPU_CHAR    *pstr_cat,
+    450                                CPU_SIZE_T   len_max)
+    451          {
+   \                     Str_Cat_N: (+1)
+   \   00000000   0xB470             PUSH     {R4-R6}
+    452              CPU_CHAR    *pstr;
+    453              CPU_CHAR    *pstr_next;
+    454              CPU_SIZE_T   len_cat;
+    455          
+    456                                                                          /* Rtn NULL if str ptr(s) NULL     (see Note #2a).      */
+    457              if (pdest == (CPU_CHAR *)0) {
+   \   00000002   0x2800             CMP      R0,#+0
+   \   00000004   0xBF18             IT       NE 
+   \   00000006   0x2900             CMPNE    R1,#+0
+    458                  return  ((CPU_CHAR *)0);
+    459              }
+    460              if (pstr_cat == (CPU_CHAR *)0) {
+   \   00000008   0xD005             BEQ.N    ??Str_Cat_N_0
+    461                  return  ((CPU_CHAR *)0);
+    462              }
+    463          
+    464              if (len_max == (CPU_SIZE_T)0) {                             /* Rtn NULL if cat len equals zero (see Note #2e).      */
+   \   0000000A   0xB122             CBZ.N    R2,??Str_Cat_N_0
+    465                  return  ((CPU_CHAR *)0);
+    466              }
+    467          
+    468          
+    469              pstr = pdest;
+   \   0000000C   0x4603             MOV      R3,R0
+   \                     ??Str_Cat_N_1: (+1)
+   \   0000000E   0x781C             LDRB     R4,[R3, #+0]
+   \   00000010   0xB114             CBZ.N    R4,??Str_Cat_N_2
+    470              while (( pstr != (CPU_CHAR *)0) &&                          /* Adv to end of cur dest str until NULL ptr ...        */
+    471                     (*pstr != (CPU_CHAR  )0)) {                          /* ... or NULL char found..                             */
+    472                  pstr++;
+   \   00000012   0x1C5B             ADDS     R3,R3,#+1
+    473              }
+   \   00000014   0xD1FB             BNE.N    ??Str_Cat_N_1
+    474              if (pstr == (CPU_CHAR *)0) {                                /* If NULL str overrun, rtn NULL (see Note #2b).        */
+    475                  return ((CPU_CHAR *)0);
+    476              }
+    477          
+    478              pstr_next = pstr;
+    479              pstr_next++;
+    480              len_cat   = 0;
+    481          
+    482              while (( pstr_next != (CPU_CHAR *)0) &&                     /* Cat str until NULL ptr(s)  (see Note #2c)  ...       */
+    483                     ( pstr_cat  != (CPU_CHAR *)0) &&
+    484                     (*pstr_cat  != (CPU_CHAR  )0) &&                     /* ... or NULL char found     (see Note #2d); ...       */
+    485                     ( len_cat   <  (CPU_SIZE_T)len_max)) {               /* ... or max nbr chars cat'd (see Note #2d).           */
+    486                 *pstr = *pstr_cat;
+    487                  pstr++;
+    488                  pstr_next++;
+    489                  pstr_cat++;
+    490                  len_cat++;
+    491              }
+    492          
+    493             *pstr = (CPU_CHAR)0;                                         /* Append NULL char (see Note #2c2).                    */
+    494          
+    495          
+    496              return (pdest);
+   \                     ??Str_Cat_N_0: (+1)
+   \   00000016   0x....             B.N      ?Subroutine2
+   \                     ??Str_Cat_N_2: (+1)
+   \   00000018   0x....             B.N      ?Subroutine0
+    497          }
+    498          
+    499          
+    500          /*$PAGE*/
+    501          /*
+    502          *********************************************************************************************************
+    503          *                                              Str_Cmp()
+    504          *
+    505          * Description : Determine if two strings are identical.
+    506          *
+    507          * Argument(s) : p1_str      Pointer to first  string (see Note #1).
+    508          *
+    509          *               p2_str      Pointer to second string (see Note #1).
+    510          *
+    511          * Return(s)   : 0,              if strings are identical             (see Notes #2a, #2e, & #2f).
+    512          *
+    513          *               Negative value, if 'p1_str' is less    than 'p2_str' (see Notes #2b, #2g, & #2d).
+    514          *
+    515          *               Positive value, if 'p1_str' is greater than 'p2_str' (see Notes #2c, #2h, & #2d).
+    516          *
+    517          * Caller(s)   : Application.
+    518          *
+    519          * Note(s)     : (1) String buffers NOT modified.
+    520          *
+    521          *               (2) String comparison terminates when :
+    522          *
+    523          *                   (a) BOTH string pointer(s) are passed NULL pointers.
+    524          *                       (1) NULL strings identical; return 0.
+    525          *
+    526          *                   (b) 'p1_str' passed a NULL pointer.
+    527          *                       (1) Return negative value of character pointed to by 'p2_str'.
+    528          *
+    529          *                   (c) 'p2_str' passed a NULL pointer.
+    530          *                       (1) Return positive value of character pointed to by 'p1_str'.
+    531          *
+    532          *                   (d) Non-matching characters found.
+    533          *                       (1) Return signed-integer difference of the character pointed to by 'p2_str'
+    534          *                           from the character pointed to by 'p1_str'.
+    535          *
+    536          *                   (e) Terminating NULL character found in both strings.
+    537          *                       (1) Strings identical; return 0.
+    538          *                       (2) Only one NULL character test required in conditional since previous condition
+    539          *                           tested character equality.
+    540          *
+    541          *                   (f) BOTH strings point to NULL.
+    542          *                       (1) Strings overlap with NULL address.
+    543          *                       (2) Strings identical up to but NOT beyond or including the NULL address; return 0.
+    544          *
+    545          *                   (g) 'p1_str_next' points to NULL.
+    546          *                       (1) 'p1_str' overlaps with NULL address.
+    547          *                       (2) Strings compared up to but NOT beyond or including the NULL address.
+    548          *                       (3) Return  negative value of character pointed to by 'p2_str_next'.
+    549          *
+    550          *                   (h) 'p2_str_next' points to NULL.
+    551          *                       (1) 'p2_str' overlaps with NULL address.
+    552          *                       (2) Strings compared up to but NOT beyond or including the NULL address.
+    553          *                       (3) Return  positive value of character pointed to by 'p1_str_next'.
+    554          *
+    555          *               (3) Since 16-bit signed arithmetic is performed to calculate a non-identical comparison
+    556          *                   return value, 'CPU_CHAR' native data type size MUST be 8-bit.
+    557          *********************************************************************************************************
+    558          */
+    559          /*$PAGE*/
+
+   \                                 In section .text, align 2, keep-with-next
+    560          CPU_INT16S  Str_Cmp (CPU_CHAR  *p1_str,
+    561                               CPU_CHAR  *p2_str)
+    562          {
+   \                     Str_Cmp: (+1)
+   \   00000000   0xB430             PUSH     {R4,R5}
+    563              CPU_CHAR    *p1_str_next;
+    564              CPU_CHAR    *p2_str_next;
+    565              CPU_INT16S   cmp_val;
+    566          
+    567          
+    568              if (p1_str == (CPU_CHAR *)0) {
+   \   00000002   0xB918             CBNZ.N   R0,??Str_Cmp_0
+    569                  if (p2_str == (CPU_CHAR *)0) {
+   \   00000004   0xB329             CBZ.N    R1,??Str_Cmp_1
+    570                      return ((CPU_INT16S)0);                             /* If BOTH str ptrs NULL, rtn 0 (see Note #2a).         */
+    571                  }
+    572                  cmp_val = (CPU_INT16S)0 - (CPU_INT16S)(*p2_str);
+    573                  return (cmp_val);                                       /* If p1_str NULL, rtn neg p2_str val (see Note #2b).   */
+   \   00000006   0x7808             LDRB     R0,[R1, #+0]
+   \   00000008   0x4240             RSBS     R0,R0,#+0
+   \   0000000A   0xE021             B.N      ??Str_Cmp_2
+    574              }
+    575              if (p2_str == (CPU_CHAR *)0) {
+   \                     ??Str_Cmp_0: (+1)
+   \   0000000C   0xB911             CBNZ.N   R1,??Str_Cmp_3
+    576                  cmp_val = (CPU_INT16S)(*p1_str);
+    577                  return (cmp_val);                                       /* If p2_str NULL, rtn pos p1_str val (see Note #2c).   */
+   \   0000000E   0xBC30             POP      {R4,R5}
+   \   00000010   0x7800             LDRB     R0,[R0, #+0]
+   \   00000012   0x4770             BX       LR
+    578              }
+    579          
+    580          
+    581              p1_str_next = p1_str;
+    582              p2_str_next = p2_str;
+    583              p1_str_next++;
+   \                     ??Str_Cmp_3: (+1)
+   \   00000014   0x1C42             ADDS     R2,R0,#+1
+    584              p2_str_next++;
+   \   00000016   0x1C4B             ADDS     R3,R1,#+1
+   \   00000018   0xE003             B.N      ??Str_Cmp_4
+    585              while ((*p1_str      == *p2_str)       &&                   /* Cmp strs until non-matching char (see Note #2d) ..   */
+    586                     (*p1_str      != (CPU_CHAR  )0) &&                   /* .. or NULL char(s)               (see Note #2e) ..   */
+    587                     ( p1_str_next != (CPU_CHAR *)0) &&                   /* .. or NULL ptr(s) found (see Notes #2f, #2g, & #2h). */
+    588                     ( p2_str_next != (CPU_CHAR *)0)) {
+    589                  p1_str_next++;
+   \                     ??Str_Cmp_5: (+1)
+   \   0000001A   0x1C52             ADDS     R2,R2,#+1
+    590                  p2_str_next++;
+   \   0000001C   0x1C5B             ADDS     R3,R3,#+1
+    591                  p1_str++;
+   \   0000001E   0x1C40             ADDS     R0,R0,#+1
+    592                  p2_str++;
+   \   00000020   0x1C49             ADDS     R1,R1,#+1
+    593              }
+   \                     ??Str_Cmp_4: (+1)
+   \   00000022   0x7804             LDRB     R4,[R0, #+0]
+   \   00000024   0x780D             LDRB     R5,[R1, #+0]
+   \   00000026   0x42AC             CMP      R4,R5
+   \   00000028   0xD104             BNE.N    ??Str_Cmp_6
+   \   0000002A   0xB11C             CBZ.N    R4,??Str_Cmp_6
+   \   0000002C   0x2A00             CMP      R2,#+0
+   \   0000002E   0xBF18             IT       NE 
+   \   00000030   0x2B00             CMPNE    R3,#+0
+   \   00000032   0xD1F2             BNE.N    ??Str_Cmp_5
+    594          
+    595          
+    596              if (*p1_str != *p2_str) {                                           /* If strs NOT identical, ...                   */
+   \                     ??Str_Cmp_6: (+1)
+   \   00000034   0x4620             MOV      R0,R4
+   \   00000036   0x42A8             CMP      R0,R5
+   \   00000038   0xBF18             IT       NE 
+   \   0000003A   0x1B40             SUBNE    R0,R0,R5
+    597                   cmp_val = (CPU_INT16S)(*p1_str) - (CPU_INT16S)(*p2_str);       /* ... calc & rtn char diff  (see Note #2d1).   */
+   \   0000003C   0xD108             BNE.N    ??Str_Cmp_2
+    598          
+    599              } else if (*p1_str == (CPU_CHAR)0) {                                /* If NULL char(s) found, ...                   */
+   \   0000003E   0xB138             CBZ.N    R0,??Str_Cmp_2
+    600                   cmp_val = 0;                                                   /* ... strs identical; rtn 0 (see Note #2e).    */
+    601          
+    602              } else {
+    603                  if (p1_str_next == (CPU_CHAR *)0) {
+   \   00000040   0xB92A             CBNZ.N   R2,??Str_Cmp_7
+    604                      if (p2_str_next == (CPU_CHAR *)0) {                         /* If BOTH next str ptrs NULL, ...              */
+   \   00000042   0x2B00             CMP      R3,#+0
+   \   00000044   0xBF1A             ITTE     NE 
+   \   00000046   0x7818             LDRBNE   R0,[R3, #+0]
+   \   00000048   0x4240             RSBNE    R0,R0,#+0
+   \   0000004A   0x2000             MOVEQ    R0,#+0
+    605                          cmp_val = (CPU_INT16S)0;                                /* ... rtn 0                   (see Note #2f).  */
+    606                      } else {                                                    /* If p1_str_next NULL, ...                     */
+    607                          cmp_val = (CPU_INT16S)0 - (CPU_INT16S)(*p2_str_next);   /* ... rtn neg p2_str_next val (see Note #2g).  */
+   \   0000004C   0xE000             B.N      ??Str_Cmp_2
+    608                      }
+    609                  } else {                                                        /* If p2_str_next NULL, ...                     */
+    610                      cmp_val = (CPU_INT16S)(*p1_str_next);                       /* ... rtn pos p1_str_next val (see Note #2h).  */
+   \                     ??Str_Cmp_7: (+1)
+   \   0000004E   0x7810             LDRB     R0,[R2, #+0]
+    611                  }
+    612              }
+    613          
+    614          
+    615              return (cmp_val);
+   \                     ??Str_Cmp_2: (+1)
+   \   00000050   0xB200             SXTH     R0,R0
+   \                     ??Str_Cmp_1: (+1)
+   \   00000052   0xBC30             POP      {R4,R5}
+   \   00000054   0x4770             BX       LR               ;; return
+    616          }
+    617          
+    618          
+    619          /*$PAGE*/
+    620          /*
+    621          *********************************************************************************************************
+    622          *                                             Str_Cmp_N()
+    623          *
+    624          * Description : Determine if two strings are identical for up to a maximum number of characters.
+    625          *
+    626          * Argument(s) : p1_str      Pointer to first  string (see Note #1).
+    627          *
+    628          *               p2_str      Pointer to second string (see Note #1).
+    629          *
+    630          *               len_max     Maximum number of characters to compare  (see Notes #2i & #2j).
+    631          *
+    632          * Return(s)   : 0,              if strings are identical             (see Notes #2a, #2e, #2f, #2i, & #2j).
+    633          *
+    634          *               Negative value, if 'p1_str' is less    than 'p2_str' (see Notes #2b, #2g, & #2d).
+    635          *
+    636          *               Positive value, if 'p1_str' is greater than 'p2_str' (see Notes #2c, #2h, & #2d).
+    637          *
+    638          * Caller(s)   : Application.
+    639          *
+    640          * Note(s)     : (1) String buffers NOT modified.
+    641          *
+    642          *               (2) String comparison terminates when :
+    643          *
+    644          *                   (a) BOTH string pointer(s) are passed NULL pointers.
+    645          *                       (1) NULL strings identical; return 0.
+    646          *
+    647          *                   (b) 'p1_str' passed a NULL pointer.
+    648          *                       (1) Return negative value of character pointed to by 'p2_str'.
+    649          *
+    650          *                   (c) 'p2_str' passed a NULL pointer.
+    651          *                       (1) Return positive value of character pointed to by 'p1_str'.
+    652          *
+    653          *                   (d) Non-matching characters found.
+    654          *                       (1) Return signed-integer difference of the character pointed to by 'p2_str'
+    655          *                           from the character pointed to by 'p1_str'.
+    656          *
+    657          *                   (e) Terminating NULL character found in both strings.
+    658          *                       (1) Strings identical; return 0.
+    659          *                       (2) Only one NULL character test required in conditional since previous condition
+    660          *                           tested character equality.
+    661          *
+    662          *                   (f) BOTH strings point to NULL.
+    663          *                       (1) Strings overlap with NULL address.
+    664          *                       (2) Strings identical up to but NOT beyond or including the NULL address; return 0.
+    665          *
+    666          *                   (g) 'p1_str_next' points to NULL.
+    667          *                       (1) 'p1_str' overlaps with NULL address.
+    668          *                       (2) Strings compared up to but NOT beyond or including the NULL address.
+    669          *                       (3) Return  negative value of character pointed to by 'p2_str_next'.
+    670          *
+    671          *                   (h) 'p2_str_next' points to NULL.
+    672          *                       (1) 'p2_str' overlaps with NULL address.
+    673          *                       (2) Strings compared up to but NOT beyond or including the NULL address.
+    674          *                       (3) Return  positive value of character pointed to by 'p1_str_next'.
+    675          *
+    676          *                   (i) 'len_max' passed a zero length.
+    677          *                       (1) Zero-length strings identical; return 0.
+    678          *
+    679          *                   (j) First 'len_max' number of characters identical.
+    680          *                       (1) Strings identical; return 0.
+    681          *
+    682          *               (3) Since 16-bit signed arithmetic is performed to calculate a non-identical comparison
+    683          *                   return value, 'CPU_CHAR' native data type size MUST be 8-bit.
+    684          *********************************************************************************************************
+    685          */
+    686          /*$PAGE*/
+
+   \                                 In section .text, align 2, keep-with-next
+    687          CPU_INT16S  Str_Cmp_N (CPU_CHAR    *p1_str,
+    688                                 CPU_CHAR    *p2_str,
+    689                                 CPU_SIZE_T   len_max)
+    690          {
+   \                     Str_Cmp_N: (+1)
+   \   00000000   0xB4F0             PUSH     {R4-R7}
+    691              CPU_CHAR    *p1_str_next;
+    692              CPU_CHAR    *p2_str_next;
+    693              CPU_INT16S   cmp_val;
+    694              CPU_SIZE_T   cmp_len;
+    695          
+    696          
+    697              if (len_max == 0) {                                         /* If cmp len equals zero, rtn 0      (see Note #2i).   */
+   \   00000002   0xB1E2             CBZ.N    R2,??Str_Cmp_N_0
+    698                  return ((CPU_INT16S)0);
+    699              }
+    700          
+    701              if (p1_str == (CPU_CHAR *)0) {
+   \   00000004   0xB918             CBNZ.N   R0,??Str_Cmp_N_1
+    702                  if (p2_str == (CPU_CHAR *)0) {
+   \   00000006   0xB361             CBZ.N    R1,??Str_Cmp_N_2
+    703                      return ((CPU_INT16S)0);                             /* If BOTH str ptrs NULL,  rtn 0      (see Note #2a).   */
+    704                  }
+    705                  cmp_val = (CPU_INT16S)0 - (CPU_INT16S)(*p2_str);
+    706                  return (cmp_val);                                       /* If p1_str NULL, rtn neg p2_str val (see Note #2b).   */
+   \   00000008   0x7808             LDRB     R0,[R1, #+0]
+   \   0000000A   0x4240             RSBS     R0,R0,#+0
+   \   0000000C   0xE028             B.N      ??Str_Cmp_N_3
+    707              }
+    708              if (p2_str == (CPU_CHAR *)0) {
+   \                     ??Str_Cmp_N_1: (+1)
+   \   0000000E   0xB911             CBNZ.N   R1,??Str_Cmp_N_4
+    709                  cmp_val = (CPU_INT16S)(*p1_str);
+    710                  return (cmp_val);                                       /* If p2_str NULL, rtn pos p1_str val (see Note #2c).   */
+   \   00000010   0xBCF0             POP      {R4-R7}
+   \   00000012   0x7800             LDRB     R0,[R0, #+0]
+   \   00000014   0x4770             BX       LR
+    711              }
+    712          
+    713          
+    714              p1_str_next = p1_str;
+    715              p2_str_next = p2_str;
+    716              p1_str_next++;
+   \                     ??Str_Cmp_N_4: (+1)
+   \   00000016   0x1C43             ADDS     R3,R0,#+1
+    717              p2_str_next++;
+   \   00000018   0x1C4C             ADDS     R4,R1,#+1
+    718              cmp_len     = 0;
+   \   0000001A   0x2500             MOVS     R5,#+0
+   \   0000001C   0xE004             B.N      ??Str_Cmp_N_5
+    719              while ((*p1_str      == *p2_str)       &&                   /* Cmp strs until non-matching char (see Note #2d) ..   */
+    720                     (*p1_str      != (CPU_CHAR  )0) &&                   /* .. or NULL char(s)               (see Note #2e) ..   */
+    721                     ( p1_str_next != (CPU_CHAR *)0) &&                   /* .. or NULL ptr(s) found (see Notes #2f, #2g, & #2h); */
+    722                     ( p2_str_next != (CPU_CHAR *)0) &&
+    723                     ( cmp_len     <  (CPU_SIZE_T)len_max)) {             /* .. or len nbr chars cmp'd        (see Note #2j).     */
+    724                  p1_str_next++;
+   \                     ??Str_Cmp_N_6: (+1)
+   \   0000001E   0x1C5B             ADDS     R3,R3,#+1
+    725                  p2_str_next++;
+   \   00000020   0x1C64             ADDS     R4,R4,#+1
+    726                  p1_str++;
+   \   00000022   0x1C40             ADDS     R0,R0,#+1
+    727                  p2_str++;
+   \   00000024   0x1C49             ADDS     R1,R1,#+1
+    728                  cmp_len++;
+   \   00000026   0x1C6D             ADDS     R5,R5,#+1
+    729              }
+   \                     ??Str_Cmp_N_5: (+1)
+   \   00000028   0x7806             LDRB     R6,[R0, #+0]
+   \   0000002A   0x780F             LDRB     R7,[R1, #+0]
+   \   0000002C   0x42BE             CMP      R6,R7
+   \   0000002E   0xD104             BNE.N    ??Str_Cmp_N_7
+   \   00000030   0xB11E             CBZ.N    R6,??Str_Cmp_N_7
+   \   00000032   0xB113             CBZ.N    R3,??Str_Cmp_N_7
+   \   00000034   0xB10C             CBZ.N    R4,??Str_Cmp_N_7
+   \   00000036   0x4295             CMP      R5,R2
+   \   00000038   0xD3F1             BCC.N    ??Str_Cmp_N_6
+    730          
+    731          
+    732              if (cmp_len == len_max) {                                           /* If strs     identical for len nbr of chars,  */
+   \                     ??Str_Cmp_N_7: (+1)
+   \   0000003A   0x4295             CMP      R5,R2
+   \   0000003C   0xD102             BNE.N    ??Str_Cmp_N_8
+    733                  return ((CPU_INT16S)0);                                         /* ... rtn 0 (see Note #2j).                    */
+   \                     ??Str_Cmp_N_0: (+1)
+   \   0000003E   0xBCF0             POP      {R4-R7}
+   \   00000040   0x2000             MOVS     R0,#+0
+   \   00000042   0x4770             BX       LR
+    734              }
+    735          
+    736              if (*p1_str != *p2_str) {                                           /* If strs NOT identical, ...                   */
+   \                     ??Str_Cmp_N_8: (+1)
+   \   00000044   0x4630             MOV      R0,R6
+   \   00000046   0x42B8             CMP      R0,R7
+   \   00000048   0xBF18             IT       NE 
+   \   0000004A   0x1BC0             SUBNE    R0,R0,R7
+    737                   cmp_val = (CPU_INT16S)(*p1_str) - (CPU_INT16S)(*p2_str);       /* ... calc & rtn char diff  (see Note #2d1).   */
+   \   0000004C   0xD108             BNE.N    ??Str_Cmp_N_3
+    738          
+    739              } else if (*p1_str == (CPU_CHAR)0) {                                /* If NULL char(s) found, ...                   */
+   \   0000004E   0xB138             CBZ.N    R0,??Str_Cmp_N_3
+    740                   cmp_val = 0;                                                   /* ... strs identical; rtn 0 (see Note #2e).    */
+    741          
+    742              } else {
+    743                  if (p1_str_next == (CPU_CHAR *)0) {
+   \   00000050   0xB92B             CBNZ.N   R3,??Str_Cmp_N_9
+    744                      if (p2_str_next == (CPU_CHAR *)0) {                         /* If BOTH next str ptrs NULL, ...              */
+   \   00000052   0x2C00             CMP      R4,#+0
+   \   00000054   0xBF1A             ITTE     NE 
+   \   00000056   0x7820             LDRBNE   R0,[R4, #+0]
+   \   00000058   0x4240             RSBNE    R0,R0,#+0
+   \   0000005A   0x2000             MOVEQ    R0,#+0
+    745                          cmp_val = (CPU_INT16S)0;                                /* ... rtn 0                   (see Note #2f).  */
+    746                      } else {                                                    /* If p1_str_next NULL, ...                     */
+    747                          cmp_val = (CPU_INT16S)0 - (CPU_INT16S)(*p2_str_next);   /* ... rtn neg p2_str_next val (see Note #2g).  */
+   \   0000005C   0xE000             B.N      ??Str_Cmp_N_3
+    748                      }
+    749                  } else {                                                        /* If p2_str_next NULL, ...                     */
+    750                      cmp_val = (CPU_INT16S)(*p1_str_next);                       /* ... rtn pos p1_str_next val (see Note #2h).  */
+   \                     ??Str_Cmp_N_9: (+1)
+   \   0000005E   0x7818             LDRB     R0,[R3, #+0]
+    751                  }
+    752              }
+    753          
+    754          
+    755              return (cmp_val);
+   \                     ??Str_Cmp_N_3: (+1)
+   \   00000060   0xB200             SXTH     R0,R0
+   \                     ??Str_Cmp_N_2: (+1)
+   \   00000062   0xBCF0             POP      {R4-R7}
+   \   00000064   0x4770             BX       LR               ;; return
+    756          }
+    757          
+    758          
+    759          /*$PAGE*/
+    760          /*
+    761          *********************************************************************************************************
+    762          *                                             Str_Char()
+    763          *
+    764          * Description : Search string for first occurrence of specific character.
+    765          *
+    766          * Argument(s) : pstr            Pointer to string (see Note #1).
+    767          *
+    768          *               srch_char       Search character.
+    769          *
+    770          * Return(s)   : Pointer to first occurrence of search character in string, if any.
+    771          *
+    772          *               Pointer to NULL,                                           otherwise.
+    773          *
+    774          * Caller(s)   : Application.
+    775          *
+    776          * Note(s)     : (1) String buffer NOT modified.
+    777          *
+    778          *               (2) String search terminates when :
+    779          *
+    780          *                   (a) String pointer passed a NULL pointer.
+    781          *                       (1) No string search performed; NULL pointer returned.
+    782          *
+    783          *                   (b) String pointer points to NULL.
+    784          *                       (1) String overlaps with NULL address.
+    785          *                       (2) String searched up to but NOT beyond or including the NULL address.
+    786          *
+    787          *                   (c) String's terminating NULL character found.
+    788          *                       (1) Search character NOT found in search string; NULL pointer returned.
+    789          *                       (2) Applicable ONLY IF search character is NOT the terminating NULL character.
+    790          *
+    791          *                   (d) Search character found.
+    792          *                       (1) Return pointer to first occurrence of search character in search string.
+    793          *********************************************************************************************************
+    794          */
+    795          
+
+   \                                 In section .text, align 2, keep-with-next
+    796          CPU_CHAR  *Str_Char (CPU_CHAR  *pstr,
+    797                               CPU_CHAR   srch_char)
+    798          {
+    799              CPU_CHAR  *pstr_next;
+    800          
+    801          
+    802              if (pstr == (CPU_CHAR *)0) {                                /* Rtn NULL if srch str ptr NULL (see Note #2a).        */
+   \                     Str_Char: (+1)
+   \   00000000   0xB168             CBZ.N    R0,??Str_Char_0
+    803                  return ((CPU_CHAR *)0);
+    804              }
+    805          
+    806          
+    807              pstr_next = pstr;
+    808              pstr_next++;
+   \   00000002   0x1C42             ADDS     R2,R0,#+1
+   \   00000004   0xE001             B.N      ??Str_Char_1
+    809              while (( pstr_next != (CPU_CHAR *)0) &&                     /* Srch str until NULL ptr(s) (see Note #2b) ...        */
+    810                     (*pstr      != (CPU_CHAR  )0) &&                     /* ... or NULL char           (see Note #2c) ...        */
+    811                     (*pstr      != (CPU_CHAR  )srch_char)) {             /* ... or srch char found     (see Note #2d).           */
+    812                  pstr++;
+   \                     ??Str_Char_2: (+1)
+   \   00000006   0x1C40             ADDS     R0,R0,#+1
+    813                  pstr_next++;
+   \   00000008   0x1C52             ADDS     R2,R2,#+1
+    814              }
+   \                     ??Str_Char_1: (+1)
+   \   0000000A   0xB122             CBZ.N    R2,??Str_Char_3
+   \   0000000C   0x7803             LDRB     R3,[R0, #+0]
+   \   0000000E   0x2B00             CMP      R3,#+0
+   \   00000010   0xBF18             IT       NE 
+   \   00000012   0x428B             CMPNE    R3,R1
+   \   00000014   0xD1F7             BNE.N    ??Str_Char_2
+    815          
+    816          
+    817              if (*pstr != srch_char) {                                   /* If srch char NOT found, str points to NULL; ...      */
+   \                     ??Str_Char_3: (+1)
+   \   00000016   0x7802             LDRB     R2,[R0, #+0]
+   \   00000018   0x428A             CMP      R2,R1
+   \   0000001A   0xBF18             IT       NE 
+   \   0000001C   0x2000             MOVNE    R0,#+0
+    818                  return ((CPU_CHAR *)0);                                 /* ... rtn NULL (see Notes #2b & #2c).                  */
+    819              }
+    820          
+    821              return (pstr);                                              /* Else rtn ptr to found srch char (see Note #2d).      */
+   \                     ??Str_Char_0: (+1)
+   \   0000001E   0x4770             BX       LR               ;; return
+    822          }
+    823          
+    824          
+    825          /*$PAGE*/
+    826          /*
+    827          *********************************************************************************************************
+    828          *                                            Str_Char_N()
+    829          *
+    830          * Description : Search string for first occurrence of specific character, up to a maximum number of characters.
+    831          *
+    832          * Argument(s) : pstr            Pointer to string (see Note #1).
+    833          *
+    834          *               len_max         Maximum number of characters to search (see Notes #2e & #3).
+    835          *
+    836          *               srch_char       Search character.
+    837          *
+    838          * Return(s)   : Pointer to first occurrence of search character in string, if any.
+    839          *
+    840          *               Pointer to NULL,                                           otherwise.
+    841          *
+    842          * Caller(s)   : Application.
+    843          *
+    844          * Note(s)     : (1) String buffer NOT modified.
+    845          *
+    846          *               (2) String search terminates when :
+    847          *
+    848          *                   (a) String pointer passed a NULL pointer.
+    849          *                       (1) No string search performed; NULL pointer returned.
+    850          *
+    851          *                   (b) String pointer points to NULL.
+    852          *                       (1) String overlaps with NULL address.
+    853          *                       (2) String searched up to but NOT beyond or including the NULL address.
+    854          *
+    855          *                   (c) String's terminating NULL character found.
+    856          *                       (1) Search character NOT found in search string; NULL pointer returned.
+    857          *                       (2) Applicable ONLY IF search character is NOT the terminating NULL character.
+    858          *
+    859          *                   (d) Search character found.
+    860          *                       (1) Return pointer to first occurrence of search character in search string.
+    861          *
+    862          *                   (e) 'len_max' number of characters searched.
+    863          *                       (1) 'len_max' number of characters does NOT include terminating NULL character.
+    864          *
+    865          *               (3) Ideally, the 'len_max' parameter would be the last parameter in this function's
+    866          *                   paramter list for consistency with all other custom string library functions.
+    867          *                   However, the 'len_max' parameter is ordered to comply with the standard library
+    868          *                   function's parameter list.
+    869          *********************************************************************************************************
+    870          */
+    871          
+
+   \                                 In section .text, align 2, keep-with-next
+    872          CPU_CHAR  *Str_Char_N (CPU_CHAR    *pstr,
+    873                                 CPU_SIZE_T   len_max,
+    874                                 CPU_CHAR     srch_char)
+    875          {
+    876              CPU_CHAR    *pstr_next;
+    877              CPU_SIZE_T   len_srch;
+    878          
+    879          
+    880              if (pstr == (CPU_CHAR *)0) {                                /* Rtn NULL if srch str ptr NULL    (see Note #2a).     */
+   \                     Str_Char_N: (+1)
+   \   00000000   0xB900             CBNZ.N   R0,??Str_Char_N_0
+   \   00000002   0x4770             BX       LR
+    881                  return ((CPU_CHAR *)0);
+    882              }
+    883          
+    884              if (len_max == (CPU_SIZE_T)0) {                             /* Rtn NULL if srch len equals zero (see Note #2e).     */
+   \                     ??Str_Char_N_0: (+1)
+   \   00000004   0xB430             PUSH     {R4,R5}
+   \   00000006   0xB179             CBZ.N    R1,??Str_Char_N_1
+    885                  return ((CPU_CHAR *)0);
+    886              }
+    887          
+    888          
+    889              pstr_next = pstr;
+    890              pstr_next++;
+   \   00000008   0x1C43             ADDS     R3,R0,#+1
+    891              len_srch  = 0;
+   \   0000000A   0x2400             MOVS     R4,#+0
+   \   0000000C   0xE002             B.N      ??Str_Char_N_2
+    892              while (( pstr_next != (CPU_CHAR *)0)         &&             /* Srch str until NULL ptr(s)  (see Note #2b)  ...      */
+    893                     (*pstr      != (CPU_CHAR  )0)         &&             /* ... or NULL char            (see Note #2c)  ...      */
+    894                     (*pstr      != (CPU_CHAR  )srch_char) &&             /* ... or srch char found      (see Note #2d); ...      */
+    895                     ( len_srch  <  (CPU_SIZE_T)len_max)) {               /* ... or max nbr chars srch'd (see Note #2e).          */
+    896                  pstr++;
+   \                     ??Str_Char_N_3: (+1)
+   \   0000000E   0x1C40             ADDS     R0,R0,#+1
+    897                  pstr_next++;
+   \   00000010   0x1C5B             ADDS     R3,R3,#+1
+    898                  len_srch++;
+   \   00000012   0x1C64             ADDS     R4,R4,#+1
+    899              }
+   \                     ??Str_Char_N_2: (+1)
+   \   00000014   0xB12B             CBZ.N    R3,??Str_Char_N_4
+   \   00000016   0x7805             LDRB     R5,[R0, #+0]
+   \   00000018   0xB11D             CBZ.N    R5,??Str_Char_N_4
+   \   0000001A   0x4295             CMP      R5,R2
+   \   0000001C   0xD001             BEQ.N    ??Str_Char_N_4
+   \   0000001E   0x428C             CMP      R4,R1
+   \   00000020   0xD3F5             BCC.N    ??Str_Char_N_3
+    900          
+    901          
+    902              if (*pstr != srch_char) {                                   /* If srch char NOT found, str points to NULL; ...      */
+   \                     ??Str_Char_N_4: (+1)
+   \   00000022   0x7801             LDRB     R1,[R0, #+0]
+   \   00000024   0x4291             CMP      R1,R2
+   \   00000026   0xD000             BEQ.N    ??Str_Char_N_5
+    903                  return ((CPU_CHAR *)0);                                 /* ... rtn NULL (see Notes #2b & #2c).                  */
+   \                     ??Str_Char_N_1: (+1)
+   \   00000028   0x2000             MOVS     R0,#+0
+    904              }
+    905          
+    906              return (pstr);                                              /* Else rtn ptr to found srch char (see Note #2d).      */
+   \                     ??Str_Char_N_5: (+1)
+   \   0000002A   0xBC30             POP      {R4,R5}
+   \   0000002C   0x4770             BX       LR               ;; return
+    907          }
+    908          
+    909          
+    910          /*$PAGE*/
+    911          /*
+    912          *********************************************************************************************************
+    913          *                                           Str_Char_Last()
+    914          *
+    915          * Description : Search string for last occurrence of specific character.
+    916          *
+    917          * Argument(s) : pstr            Pointer to string (see Note #1).
+    918          *
+    919          *               srch_char       Search character.
+    920          *
+    921          * Return(s)   : Pointer to last occurrence of search character in string, if any.
+    922          *
+    923          *               Pointer to NULL,                                          otherwise.
+    924          *
+    925          * Caller(s)   : Application.
+    926          *
+    927          * Note(s)     : (1) String buffer NOT modified.
+    928          *
+    929          *               (2) String search terminates when :
+    930          *
+    931          *                   (a) String pointer passed a NULL pointer.
+    932          *                       (1) No string search performed; NULL pointer returned.
+    933          *
+    934          *                   (b) String pointer points to NULL.
+    935          *                       (1) String overlaps with NULL address.
+    936          *                       (2) String searched up to but NOT beyond or including the NULL address.
+    937          *                       (3) NULL address boundary handled in Str_Len().
+    938          *
+    939          *                   (c) String searched from end to beginning.
+    940          *                       (1) Search character NOT found in search string; NULL pointer returned.
+    941          *                       (2) Applicable ONLY IF search character is NOT the terminating NULL character.
+    942          *
+    943          *                   (d) Search character found.
+    944          *                       (1) Return pointer to first occurrence of search character in search string.
+    945          *********************************************************************************************************
+    946          */
+    947          
+
+   \                                 In section .text, align 2, keep-with-next
+    948          CPU_CHAR  *Str_Char_Last (CPU_CHAR  *pstr,
+    949                                    CPU_CHAR   srch_char)
+    950          {
+    951              CPU_CHAR    *pstr_next;
+    952              CPU_SIZE_T   str_len;
+    953          
+    954          
+    955              if (pstr == (CPU_CHAR *)0) {                                /* Rtn NULL if srch str ptr NULL (see Note #2a).        */
+   \                     Str_Char_Last: (+1)
+   \   00000000   0xB1B0             CBZ.N    R0,??Str_Char_Last_0
+    956                  return ((CPU_CHAR *)0);
+    957              }
+    958          
+    959          
+    960              pstr_next  = pstr;
+    961              str_len    = Str_Len(pstr);
+   \   00000002   0x4602             MOV      R2,R0
+   \   00000004   0x2300             MOVS     R3,#+0
+   \                     ??Str_Char_Last_1: (+1)
+   \   00000006   0xF812 0xCB01      LDRB     R12,[R2], #+1
+   \   0000000A   0xF1BC 0x0F00      CMP      R12,#+0
+   \   0000000E   0xBF1C             ITT      NE 
+   \   00000010   0x1C5B             ADDNE    R3,R3,#+1
+   \   00000012   0x2A00             CMPNE    R2,#+0
+   \   00000014   0xD1F7             BNE.N    ??Str_Char_Last_1
+    962              pstr_next += str_len;
+   \   00000016   0x181A             ADDS     R2,R3,R0
+   \   00000018   0xE000             B.N      ??Str_Char_Last_2
+    963              while (( pstr_next != pstr) &&                              /* Srch str from end until beg (see Note #2c) ...       */
+    964                     (*pstr_next != srch_char)) {                         /* ... until srch char found   (see Note #2d).          */
+    965                  pstr_next--;
+   \                     ??Str_Char_Last_3: (+1)
+   \   0000001A   0x1E52             SUBS     R2,R2,#+1
+    966              }
+   \                     ??Str_Char_Last_2: (+1)
+   \   0000001C   0x7813             LDRB     R3,[R2, #+0]
+   \   0000001E   0x4282             CMP      R2,R0
+   \   00000020   0xBF18             IT       NE 
+   \   00000022   0x428B             CMPNE    R3,R1
+   \   00000024   0xD1F9             BNE.N    ??Str_Char_Last_3
+    967          
+    968          
+    969              if (*pstr_next != srch_char) {                              /* If srch char NOT found, str points to NULL; ...      */
+   \   00000026   0x428B             CMP      R3,R1
+   \   00000028   0xD001             BEQ.N    ??Str_Char_Last_4
+    970                  return ((CPU_CHAR *)0);                                 /* ... rtn NULL (see Notes #2b & #2c).                  */
+   \   0000002A   0x2000             MOVS     R0,#+0
+   \   0000002C   0x4770             BX       LR
+    971              }
+    972          
+    973              return (pstr_next);                                         /* Else rtn ptr to found srch char (see Note #2d).      */
+   \                     ??Str_Char_Last_4: (+1)
+   \   0000002E   0x4610             MOV      R0,R2
+   \                     ??Str_Char_Last_0: (+1)
+   \   00000030   0x4770             BX       LR               ;; return
+    974          }
+    975          
+    976          
+    977          /*$PAGE*/
+    978          /*
+    979          *********************************************************************************************************
+    980          *                                             Str_Str()
+    981          *
+    982          * Description : Search string for first occurence of a specific search string.
+    983          *
+    984          * Argument(s) : pstr            Pointer to        string (see Note #1).
+    985          *
+    986          *               psrch_str       Pointer to search string (see Note #1).
+    987          *
+    988          * Return(s)   : Pointer to first occurrence of search string in string, if any.
+    989          *
+    990          *               Pointer to NULL,                                        otherwise.
+    991          *
+    992          * Caller(s)   : Application.
+    993          *
+    994          * Note(s)     : (1) String buffers NOT modified.
+    995          *
+    996          *               (2) String search terminates when :
+    997          *
+    998          *                   (a) String pointer passed a NULL pointer.
+    999          *                       (1) No string search performed; NULL pointer returned.
+   1000          *
+   1001          *                   (b) Search string length greater than string length.
+   1002          *                       (1) No string search performed; NULL pointer returned.
+   1003          *
+   1004          *                   (c) Search string length equal to zero.
+   1005          *                       (1) NULL search string at end of string returned.
+   1006          *
+   1007          *                   (d) Entire string has been searched.
+   1008          *                       (1) Maximum size of the search is defined as the subtraction of the
+   1009          *                           search string length from the string length.
+   1010          *                       (2) Search string not found; NULL pointer returned.
+   1011          *
+   1012          *                   (e) Search string found.
+   1013          *                       (1) Search string found according to Str_Cmp_N() return value.
+   1014          *                       (2) Return pointer to first occurrence of search string in string.
+   1015          *********************************************************************************************************
+   1016          */
+   1017          
+
+   \                                 In section .text, align 2, keep-with-next
+   1018          CPU_CHAR  *Str_Str (CPU_CHAR  *pstr,
+   1019                              CPU_CHAR  *psrch_str)
+   1020          {
+   \                     Str_Str: (+1)
+   \   00000000   0xE92D 0x47F0      PUSH     {R4-R10,LR}
+   \   00000004   0x0006             MOVS     R6,R0
+   \   00000006   0x4689             MOV      R9,R1
+   1021              CPU_SIZE_T    str_len;
+   1022              CPU_SIZE_T    srch_str_len;
+   1023              CPU_SIZE_T    srch_len;
+   1024              CPU_SIZE_T    srch_ix;
+   1025              CPU_BOOLEAN   srch_done;
+   1026              CPU_INT16S    srch_cmp;
+   1027              CPU_CHAR     *pstr_srch_ix;
+   1028          
+   1029                                                                          /* Rtn NULL if str ptr(s) NULL (see Note #2a).          */
+   1030              if (pstr == (CPU_CHAR *)0) {
+   \   00000008   0xD032             BEQ.N    ??Str_Str_0
+   1031                  return ((CPU_CHAR *)0);
+   1032              }
+   1033              if (psrch_str == (CPU_CHAR *)0) {
+   \   0000000A   0xF1B9 0x0F00      CMP      R9,#+0
+   \   0000000E   0xD02B             BEQ.N    ??Str_Str_1
+   1034                  return ((CPU_CHAR *)0);
+   1035              }
+   1036          
+   1037          
+   1038              str_len      = Str_Len(pstr);
+   \   00000010   0x4631             MOV      R1,R6
+   \   00000012   0x2200             MOVS     R2,#+0
+   \                     ??Str_Str_2: (+1)
+   \   00000014   0xF811 0x3B01      LDRB     R3,[R1], #+1
+   \   00000018   0x2B00             CMP      R3,#+0
+   \   0000001A   0xBF1C             ITT      NE 
+   \   0000001C   0x1C52             ADDNE    R2,R2,#+1
+   \   0000001E   0x2900             CMPNE    R1,#+0
+   \   00000020   0xD1F8             BNE.N    ??Str_Str_2
+   1039              srch_str_len = Str_Len(psrch_str);
+   \   00000022   0x4649             MOV      R1,R9
+   \   00000024   0x2700             MOVS     R7,#+0
+   \                     ??Str_Str_3: (+1)
+   \   00000026   0xF811 0x3B01      LDRB     R3,[R1], #+1
+   \   0000002A   0x2B00             CMP      R3,#+0
+   \   0000002C   0xBF1C             ITT      NE 
+   \   0000002E   0x1C7F             ADDNE    R7,R7,#+1
+   \   00000030   0x2900             CMPNE    R1,#+0
+   \   00000032   0xD1F8             BNE.N    ??Str_Str_3
+   1040              if (srch_str_len > str_len) {                               /* If srch str len > str len, rtn NULL  (see Note #2b). */
+   \   00000034   0x42BA             CMP      R2,R7
+   \   00000036   0xD317             BCC.N    ??Str_Str_1
+   1041                  return ((CPU_CHAR *)0);
+   1042              }
+   1043              if (srch_str_len == 0) {                                    /* If srch str len = 0, srch str equal NULL str; ...    */
+   \   00000038   0xB917             CBNZ.N   R7,??Str_Str_4
+   1044                  pstr_srch_ix = (CPU_CHAR *)(pstr + str_len);            /* ... rtn ptr to NULL str found in str (see Note #2c). */
+   1045                  return (pstr_srch_ix);
+   \   0000003A   0x1990             ADDS     R0,R2,R6
+   \   0000003C   0xE8BD 0x87F0      POP      {R4-R10,PC}
+   1046              }
+   1047          
+   1048              srch_len  = str_len - srch_str_len;                         /* Determine srch len (see Note #2d1).                  */
+   \                     ??Str_Str_4: (+1)
+   \   00000040   0xEBA2 0x0807      SUB      R8,R2,R7
+   1049              srch_ix   = 0;
+   \   00000044   0x2400             MOVS     R4,#+0
+   1050              srch_done = DEF_NO;
+   \   00000046   0x2500             MOVS     R5,#+0
+   \                     ??Str_Str_5: (+1)
+   \   00000048   0x45A0             CMP      R8,R4
+   \   0000004A   0xD30B             BCC.N    ??Str_Str_6
+   1051              while ((srch_done == DEF_NO) && (srch_ix <= srch_len)) {
+   1052                  pstr_srch_ix = (CPU_CHAR *)(pstr + srch_ix);
+   \   0000004C   0x46B2             MOV      R10,R6
+   1053                  srch_cmp     =  Str_Cmp_N(pstr_srch_ix, psrch_str, srch_str_len);
+   \   0000004E   0x463A             MOV      R2,R7
+   \   00000050   0x4649             MOV      R1,R9
+   \   00000052   0x4650             MOV      R0,R10
+   \   00000054   0x.... 0x....      BL       Str_Cmp_N
+   1054                  srch_done    = (srch_cmp == 0) ? DEF_YES : DEF_NO;
+   \   00000058   0xB900             CBNZ.N   R0,??Str_Str_7
+   \   0000005A   0x2501             MOVS     R5,#+1
+   1055                  srch_ix++;
+   \                     ??Str_Str_7: (+1)
+   \   0000005C   0x1C64             ADDS     R4,R4,#+1
+   \   0000005E   0x1C76             ADDS     R6,R6,#+1
+   1056              }
+   \   00000060   0x2D00             CMP      R5,#+0
+   \   00000062   0xD0F1             BEQ.N    ??Str_Str_5
+   1057          
+   1058          
+   1059              if (srch_cmp != 0) {                                        /* If srch str NOT found, rtn NULL  (see Note #2d).     */
+   \                     ??Str_Str_6: (+1)
+   \   00000064   0xB200             SXTH     R0,R0
+   \   00000066   0xB110             CBZ.N    R0,??Str_Str_8
+   1060                  return ((CPU_CHAR *)0);
+   \                     ??Str_Str_1: (+1)
+   \   00000068   0x2000             MOVS     R0,#+0
+   \   0000006A   0xE8BD 0x87F0      POP      {R4-R10,PC}
+   1061              }
+   1062          
+   1063              return (pstr_srch_ix);                                      /* Rtn ptr to srch str found in str (see Note #2e).     */
+   \                     ??Str_Str_8: (+1)
+   \   0000006E   0x4650             MOV      R0,R10
+   \                     ??Str_Str_0: (+1)
+   \   00000070   0xE8BD 0x87F0      POP      {R4-R10,PC}      ;; return
+   1064          }
+   1065          
+   1066          
+   1067          /*$PAGE*/
+   1068          /*
+   1069          *********************************************************************************************************
+   1070          *                                           Str_FmtNbr_32()
+   1071          *
+   1072          * Description : Format number into a multi-digit character string.
+   1073          *
+   1074          * Argument(s) : nbr             Number                          to format (see Note #1).
+   1075          *
+   1076          *               nbr_dig         Number of integer        digits to format (see Note #2).
+   1077          *
+   1078          *               nbr_dp          Number of decimal point  digits to format.
+   1079          *
+   1080          *               lead_zeros      Prepend leading zeros    option (DEF_YES/DEF_NO) [see Note #3].
+   1081          *
+   1082          *               nul             NULL-character terminate option (DEF_YES/DEF_NO) [see Note #4].
+   1083          *
+   1084          *               pstr_fmt        Pointer to character array to return formatted number string (see Note #5).
+   1085          *
+   1086          * Return(s)   : Pointer to formatted string, if NO errors (see Note #6).
+   1087          *
+   1088          *               Pointer to NULL,             otherwise.
+   1089          *
+   1090          * Caller(s)   : Application.
+   1091          *
+   1092          * Note(s)     : (1) (a) The maximum accuracy for 32-bit floating-point numbers :
+   1093          *
+   1094          *
+   1095          *                                 Maximum Accuracy            log [Internal-Base ^ (Number-Internal-Base-Digits)]
+   1096          *                           32-bit Floating-point Number  =  -----------------------------------------------------
+   1097          *                                                                             log [External-Base]
+   1098          *
+   1099          *                                                             log [2 ^ 24]
+   1100          *                                                         =  --------------
+   1101          *                                                               log [10]
+   1102          *
+   1103          *                                                         <  7.225  Base-10 Digits
+   1104          *
+   1105          *                               where
+   1106          *                                       Internal-Base                   Internal number base of floating-
+   1107          *                                                                           point numbers (i.e.  2)
+   1108          *                                       External-Base                   External number base of floating-
+   1109          *                                                                           point numbers (i.e. 10)
+   1110          *                                       Number-Internal-Base-Digits     Number of internal number base
+   1111          *                                                                           significant digits (i.e. 24)
+   1112          *
+   1113          *                   (b) Some compilers' floating-point routines MAY further reduce the maximum accuracy.
+   1114          *
+   1115          *                   (c) If the total number of digits to format ('nbr_dig + nbr_dp') is greater than the 
+   1116          *                       maximum accuracy; digits following the first, significantly-accurate digits will
+   1117          *                       be inaccurate.
+   1118          *
+   1119          *               (2) (a) If the number of digits to format ('nbr_dig') is less than the number of significant
+   1120          *                       integer digits of the number to format ('nbr'); then the most-significant digits of
+   1121          *                       the formatted number will be truncated.
+   1122          *
+   1123          *                           Example :
+   1124          *
+   1125          *                               nbr      = 23456.789
+   1126          *                               nbr_dig  = 3
+   1127          *                               nbr_dp   = 2
+   1128          *
+   1129          *                               pstr_fmt = "456.78"
+   1130          *
+   1131          *                   (b) If number to format ('nbr') is negative but the most-significant digits of the
+   1132          *                       formatted number are truncated (see Note #2a); the negative sign still prefixes
+   1133          *                       the truncated formatted number.
+   1134          *
+   1135          *                           Example :
+   1136          *
+   1137          *                               nbr      = -23456.789
+   1138          *                               nbr_dig  =  3
+   1139          *                               nbr_dp   =  2
+   1140          *
+   1141          *                               pstr_fmt = "-456.78"
+   1142          *
+   1143          *               (3) (a) Leading zeros option prepends leading '0's prior to the first non-zero digit.
+   1144          *                       The number of leading zeros is such that the total number integer digits is
+   1145          *                       equal to the requested number of integer digits to format ('nbr_dig').
+   1146          *
+   1147          *                   (b) (1) If leading zeros option DISABLED,                        ...
+   1148          *                       (2) ... number of digits to format is non-zero,              ...
+   1149          *                       (3) ... & the integer value of the number to format is zero; ...
+   1150          *                       (4) ... then one digit of '0' value is formatted.
+   1151          *
+   1152          *                           This is NOT a leading zero; but a single integer digit of '0' value.
+   1153          *
+   1154          *               (4) (a) NULL-character terminate option DISABLED prevents overwriting previous character
+   1155          *                       array formatting.
+   1156          *
+   1157          *                   (b) WARNING: Unless 'pstr_fmt' character array is pre-/post-terminated, NULL-character
+   1158          *                       terminate option DISABLED will cause character string run-on.
+   1159          *$PAGE*
+   1160          *               (5) (a) Format buffer size NOT validated; buffer overruns MUST be prevented by caller.
+   1161          *
+   1162          *                   (b) To prevent character buffer overrun :
+   1163          *
+   1164          *                           Character array size MUST be  >=  ('nbr_dig'         +
+   1165          *                                                              'nbr_dp'          +
+   1166          *                                                              1 negative sign   +
+   1167          *                                                              1 decimal point   +
+   1168          *                                                              1 'NUL' terminator)  characters
+   1169          *
+   1170          *               (6) String format terminates when :
+   1171          *
+   1172          *                   (a) Format string pointer is passed a NULL pointer.
+   1173          *                       (1) No string format performed; NULL pointer returned.
+   1174          *
+   1175          *                   (b) Number successfully formatted into character string array.
+   1176          *********************************************************************************************************
+   1177          */
+   1178          
+   1179          #if (LIB_STR_CFG_FP_EN == DEF_ENABLED)
+   1180          CPU_CHAR  *Str_FmtNbr_32 (CPU_FP32      nbr,
+   1181                                    CPU_INT08U    nbr_dig,
+   1182                                    CPU_INT08U    nbr_dp,
+   1183                                    CPU_BOOLEAN   lead_zeros,
+   1184                                    CPU_BOOLEAN   nul,
+   1185                                    CPU_CHAR     *pstr_fmt)
+   1186          {
+   1187              CPU_CHAR    *pstr;
+   1188              CPU_INT08U   i;
+   1189              CPU_INT32U   dig_nbr;
+   1190              CPU_INT32U   dig_val;
+   1191              CPU_FP32     dig_exp;
+   1192              CPU_FP32     dp_exp;
+   1193          
+   1194                                                                          /* Rtn NULL if str ptr NULL (see Note #6a).             */
+   1195              if (pstr_fmt == (CPU_CHAR *)0) {
+   1196                  return ((CPU_CHAR *)0);
+   1197              }
+   1198          
+   1199          
+   1200              pstr = pstr_fmt;
+   1201          
+   1202              if (nbr < 0.0) {                                            /* If nbr neg,             ...                          */
+   1203                  if ((nbr_dig > 0) ||                                    /* ... &  at least one dig ...                          */
+   1204                      (nbr_dp  > 0)) {                                    /* ... or at least one dp; ...                          */
+   1205                       nbr     = -nbr;                                    /* ... negate nbr &        ...                          */
+   1206                      *pstr++  = '-';                                     /* ... prefix with neg sign (see Note #2b).             */
+   1207                  }
+   1208              }
+   1209          
+   1210              if (nbr_dig > 0) {
+   1211                  dig_exp = 1.0;
+   1212                  for (i = 1; i < nbr_dig; i++) {
+   1213                      dig_exp *= 10.0;
+   1214                  }
+   1215                  for (i = nbr_dig; i > 0; i--) {                         /* Fmt str for desired nbr digs.                        */
+   1216                      dig_nbr = (CPU_INT32U)(nbr / dig_exp);
+   1217                      if ((dig_nbr >  0) ||                               /* If dig nbr > 0,                              ...     */
+   1218                          (nbr_dig == 1) ||                               /* ... OR exactly 1 dig to fmt,                 ...     */
+   1219                          (i       == 1) ||                               /* ... OR on one's  dig to fmt,                 ...     */
+   1220                          (lead_zeros == DEF_YES)) {                      /* ... OR lead zeros opt ENABLED (see Note #3), ...     */
+   1221                                                                          /* ... calc & fmt dig val.                              */
+   1222                           dig_val = (CPU_INT32U)(dig_nbr % 10 );
+   1223                          *pstr++  = (CPU_CHAR  )(dig_val + '0');
+   1224                      }
+   1225                      dig_exp /= 10.0;                                    /* Shift to next least-significant dig.                 */
+   1226                  }
+   1227              }
+   1228          
+   1229              if (nbr_dp > 0) {
+   1230                 *pstr++ = '.';                                           /* Append dp prior to dp conversion.                    */
+   1231                  dp_exp = 10.0;
+   1232                  for (i = 0; i < nbr_dp; i++) {                          /* Fmt str for desired nbr dp.                          */
+   1233                      dig_nbr  = (CPU_INT32U)(nbr * dp_exp );
+   1234                      dig_val  = (CPU_INT32U)(dig_nbr % 10 );
+   1235                     *pstr++   = (CPU_CHAR  )(dig_val + '0');
+   1236                      dp_exp  *=  10.0;                                   /* Shift to next least-significant dp.                  */
+   1237                  }
+   1238              }
+   1239          
+   1240              if (nul != DEF_NO) {                                        /* If NOT DISABLED, append NULL char (see Note #4).     */
+   1241                 *pstr = (CPU_CHAR)0;
+   1242              }
+   1243          
+   1244          
+   1245              return (pstr_fmt);
+   1246          }
+   1247          #endif
+   1248          
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   Str_Cat
+      12   Str_Cat_N
+       0   Str_Char
+       0   Str_Char_Last
+       8   Str_Char_N
+       8   Str_Cmp
+      16   Str_Cmp_N
+       0   Str_Copy
+      12   Str_Copy_N
+       0   Str_Len
+      32   Str_Str
+        32   -> Str_Cmp_N
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      38  ?Subroutine0
+       6  ?Subroutine1
+       6  ?Subroutine2
+      52  Str_Cat
+      26  Str_Cat_N
+      32  Str_Char
+      50  Str_Char_Last
+      46  Str_Char_N
+      86  Str_Cmp
+     102  Str_Cmp_N
+      46  Str_Copy
+      18  Str_Copy_N
+      22  Str_Len
+     116  Str_Str
+
+ 
+ 646 bytes in section .text
+ 
+ 646 bytes of CODE memory
+
+Errors: none
+Warnings: none

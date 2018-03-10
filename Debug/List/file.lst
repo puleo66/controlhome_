@@ -1,0 +1,226 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       08/Oct/2017  18:00:52
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\file.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\file.c"
+#        -lCN "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List" -o
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\file.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\file.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\file.c
+      1          /*
+      2          *********************************************************************************************************
+      3          *                                        FILE MODULE SOURCE FILE
+      4          *
+      5          * Filename      : file.c
+      6          * Version       : V0.1
+      7          * Programmer(s) : Puleo
+      8          *********************************************************************************************************
+      9          */
+     10          
+     11          /*
+     12          *********************************************************************************************************
+     13          *                                              INCLUDE FILES
+     14          *********************************************************************************************************
+     15          */
+     16          
+     17          #include "includes.h"
+     18          
+     19          /*
+     20          *********************************************************************************************************
+     21          *                                            LOCAL CONSTANTS
+     22          *********************************************************************************************************
+     23          */
+     24          
+     25          
+     26          /*
+     27          *********************************************************************************************************
+     28          *                                            LOCAL VARIABLES
+     29          *********************************************************************************************************
+     30          */
+     31          
+     32          /*
+     33          *********************************************************************************************************
+     34          *                                        LOCAL FUNCTION PROTOTYPES
+     35          *********************************************************************************************************
+     36          */
+     37          
+     38          
+     39          
+     40          
+     41          /*
+     42          *********************************************************************************************************
+     43          *
+     44          *                                        write_file
+     45          *
+     46          *                   This routine demonstrates, how to create and write to a file
+     47          *                   using the file system.
+     48          *********************************************************************************************************
+     49          */
+     50          
+     51          void Write_File(INT8U *name, INT8U *txt) {
+     52            INT8u x;
+     53            
+     54            /* create file */
+     55            myfile = FS_FOpen(name,"w");
+     56            if (myfile) {
+     57              /* write to file */
+     58              x = FS_FWrite(txt,1,strlen(txt),myfile);
+     59              /* all data written ? */
+     60              if (x!=(int)strlen(txt)) {
+     61                /* check, why not all data was written */
+     62                x = FS_FError(myfile);
+     63                sprintf(mybuffer,"Not all bytes written because of error %d.\n",x);
+     64                _error(mybuffer);
+     65              }
+     66              /* close file */
+     67              FS_FClose(myfile);
+     68            }
+     69            else {
+     70              sprintf(mybuffer,"Unable to create file %s\n",name);
+     71              _error(mybuffer);
+     72            }
+     73          }
+     74          
+     75          
+     76          /*
+     77          *********************************************************************************************************
+     78          *
+     79          *                                        Dump_File
+     80          *
+     81          *                    This routine demonstrates, how to open and read from a file using 
+     82          *                    the file system.
+     83          *********************************************************************************************************
+     84          */
+     85          
+     86          void Dump_File(INT8U *name) {
+     87            INT8U x;
+     88          
+     89            /* open file */
+     90            myfile = FS_FOpen(name,"r");
+     91            if (myfile) {
+     92              /* read until EOF has been reached */
+     93              do {
+     94                x = FS_FRead(mybuffer,1,sizeof(mybuffer)-1,myfile);
+     95                mybuffer[x]=0;
+     96                if (x) {
+     97                  _log(mybuffer);
+     98                }
+     99              } while (x);
+    100              /* check, if there is no more data, because of EOF */
+    101              x = FS_FError(myfile);
+    102              if (x!=FS_ERR_EOF) {
+    103                /* there was a problem during read operation */
+    104                sprintf(mybuffer,"Error %d during read operation.\n",x);
+    105                _error(mybuffer);
+    106              }
+    107              /* close file */
+    108              FS_FClose(myfile);
+    109            }
+    110            else {
+    111              sprintf(mybuffer,"Unable to open file %s.\n",name);
+    112              _error(mybuffer);
+    113            }
+    114          }
+    115          
+    116          
+    117          /*
+    118          *********************************************************************************************************
+    119          *
+    120          *                                           Show_Directory
+    121          *
+    122          *                       This routine demonstrates, how to read a directory.
+    123          *********************************************************************************************************
+    124          */
+    125          
+    126          #if FS_POSIX_DIR_SUPPORT
+    127          
+    128          void Show_Directory(INT8U *name) {
+    129            FS_DIR *dirp;
+    130            struct FS_DIRENT *direntp;
+    131          
+    132            _log("Directory of ");
+    133            _log(name);
+    134            _log("\n");
+    135            dirp = FS_OpenDir(name);
+    136            if (dirp) {
+    137              do {
+    138                direntp = FS_ReadDir(dirp);
+    139                if (direntp) {
+    140                  sprintf(mybuffer,"%s\n",direntp->d_name);
+    141                  _log(mybuffer);
+    142                }
+    143              } while (direntp);
+    144              FS_CloseDir(dirp);
+    145            }
+    146            else {
+    147              _error("Unable to open directory\n");
+    148            }
+    149          }
+    150          #endif /* FS_POSIX_DIR_SUPPORT */
+    151          
+    152          
+    153          /*
+    154          *********************************************************************************************************
+    155          *
+    156          *                                             Show_Free
+    157          *
+    158          *                     This routine demonstrates, how to read disk space information.
+    159          *********************************************************************************************************
+    160          */
+    161          
+    162          void Show_Free(INT8U *device) {
+    163            FS_DISKFREE_T disk_data;
+    164            INT8U x;
+    165          
+    166            x = FS_IoCtl(device,FS_CMD_GET_DISKFREE,0,(void*) &disk_data);
+    167            if (x==0) {
+    168              sprintf(FileBuffer,"total clusters     : %lu\navailable clusters : %lu\nsectors/cluster    : %u\nbytes per sector   : %u\n",
+    169                    disk_data.total_clusters, disk_data.avail_clusters, disk_data.sectors_per_cluster, disk_data.bytes_per_sector);
+    170          //    _log(mybuffer);
+    171            } 
+    172            else {
+    173          //    _error("Invalid drive specified\n");
+    174            }
+    175          }
+    176          
+
+Errors: 10
+Warnings: 15

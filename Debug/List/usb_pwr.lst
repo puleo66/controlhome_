@@ -1,0 +1,484 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:15:16
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\uc-terminal\src\usb_pwr.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome -
+#        RF69w\uc-terminal\src\usb_pwr.c" -lCN "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\usb_pwr.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\usb_pwr.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uc-terminal\src\usb_pwr.c
+      1          /*
+      2          *********************************************************************************************************
+      3          *	                                  
+      4          *	模块名称 : STM32 USB设备电源管理模块    
+      5          *	文件名称 : usb_hw.c
+      6          *	版    本 : V2.0
+      7          *	USB固件库驱动 : V3.3.0
+      8          *	说    明 : USB设备的电源管理模块
+      9          *	修改记录 :
+     10          *		版本号  日期       作者    说明
+     11          *		v0.1    2009-12-27 armfly  创建该文件，ST固件库版本为V3.1.2
+     12          *		v1.0    2011-01-11 armfly  ST固件库升级到V3.4.0版本。
+     13          *		v2.0    2011-10-16 armfly  ST固件库升级到V3.5.0版本。优化工程结构。
+     14          *
+     15          *	Copyright (C), 2010-2011, 安富莱电子 www.armfly.com
+     16          *
+     17          *********************************************************************************************************
+     18          */
+     19          
+     20          #include "includes.h"
+     21          #if USBD_MODULE == DEF_ENABLED
+     22          
+
+   \                                 In section .bss, align 4
+     23           INT32U bDeviceState = UNCONNECTED; 	/* USB 设备状态 */
+   \                     bDeviceState:
+   \   00000000                      DS8 4
+
+   \                                 In section .data, align 1
+     24           BOOLEAN fSuspendEnabled = TRUE;  			/* true when suspend is possible */
+   \                     fSuspendEnabled:
+   \   00000000   0x01               DC8 1
+     25          
+     26          struct
+     27          {
+     28          	RESUME_STATE eState;				/* RESUME状态自，表示USB由挂机到恢复的状态 */
+     29          	INT8U bESOFcnt;
+
+   \                                 In section .bss, align 4
+     30          }ResumeS;
+   \                     ResumeS:
+   \   00000000                      DS8 4
+     31          
+     32          /*
+     33          *********************************************************************************************************
+     34          *	函 数 名: usb_PowerOn
+     35          *	功能说明: USB设备上电复位
+     36          *	形    参: 无
+     37          *	返 回 值: USB_SUCCESS
+     38          *********************************************************************************************************
+     39          */
+
+   \                                 In section .text, align 2, keep-with-next
+     40          RESULT usb_PowerOn(void)
+     41          {
+   \                     usb_PowerOn: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+     42          	INT16U wRegVal;
+     43          	
+     44          	/* 这个函数实质上将USB连接控制线设置为高电平，然后USB集线器就可以检测到设备了 */
+     45          	usb_CableConfig(ENABLE);
+   \   00000002   0x2001             MOVS     R0,#+1
+   \   00000004   0x.... 0x....      BL       usb_CableConfig
+     46          	
+     47          	/* 当集线器报告设备连接状态，并收到主机指令后，会复位USB总线，这需要一定的时间.
+     48          	这段时间内设备应该准备好处理复位指令） */
+     49          	
+     50          	/* 使能USB模块的电源。因为上电复位时，CNTR寄存器的断电控制为PDWN位是1，模块是断电的  */
+     51          	wRegVal = CNTR_FRES;
+     52          	_SetCNTR(wRegVal);	/* 这是一个宏，wRegVal赋值给CNTR寄存器，此时所有的中断被屏蔽 */
+   \   00000008   0x....             LDR.N    R0,??DataTable4  ;; 0x40005c40
+     53          	
+     54          	wInterrupt_Mask = 0;		/* 全局变量在 wInterrupt_Maskusb_init.c 中定义。表示中断屏蔽配置 */
+     55          	_SetCNTR(wInterrupt_Mask);	/* wInterrupt_Mask = 0， 屏蔽所有的USB中断 */
+     56          	
+     57          	_SetISTR(0);			/* 清除可能存在的USB中断请求标志 */
+     58          	
+     59          	/* 
+     60          		使能需要的USB中断
+     61          		CNTR_RESETM 表示使能复位中断，此时集线器多半还未开始复位端口，或者或稍等片刻就会复位USB设备
+     62          		CNTR_SUSPM 表示使能USB设备挂起中断
+     63          		CNTR_SUSPM 表示使能USB设备唤醒中断
+     64          	*/
+     65          	wInterrupt_Mask = CNTR_RESETM | CNTR_SUSPM | CNTR_WKUPM;
+   \   0000000A   0x....             LDR.N    R2,??DataTable4_1
+   \   0000000C   0x2101             MOVS     R1,#+1
+   \   0000000E   0x6001             STR      R1,[R0, #+0]
+   \   00000010   0x2100             MOVS     R1,#+0
+   \   00000012   0x6001             STR      R1,[R0, #+0]
+   \   00000014   0x6041             STR      R1,[R0, #+4]
+   \   00000016   0xF44F 0x51E0      MOV      R1,#+7168
+   \   0000001A   0x8011             STRH     R1,[R2, #+0]
+     66          	_SetCNTR(wInterrupt_Mask);
+   \   0000001C   0x6001             STR      R1,[R0, #+0]
+     67          	
+     68          	return USB_SUCCESS;	/* 固定返回 USB_SUCCESS */
+   \   0000001E   0x2000             MOVS     R0,#+0
+   \   00000020   0xBD02             POP      {R1,PC}          ;; return
+     69          }
+     70          
+     71          /*
+     72          *********************************************************************************************************
+     73          *	函 数 名: usb_PowerOff
+     74          *	功能说明: USB设备断电
+     75          *	形    参: 无
+     76          *	返 回 值: USB_SUCCESS
+     77          *********************************************************************************************************
+     78          */
+
+   \                                 In section .text, align 2, keep-with-next
+     79          RESULT usb_PowerOff()
+     80          {
+   \                     usb_PowerOff: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+     81          	/* 禁止所有的中断，并且强制USB复位 */
+     82          	_SetCNTR(CNTR_FRES);
+   \   00000002   0x....             LDR.N    R4,??DataTable4  ;; 0x40005c40
+   \   00000004   0x2001             MOVS     R0,#+1
+   \   00000006   0x6020             STR      R0,[R4, #+0]
+     83          	
+     84          	/* 清零中断状态寄存器 */
+     85          	_SetISTR(0);
+   \   00000008   0x2000             MOVS     R0,#+0
+   \   0000000A   0x6060             STR      R0,[R4, #+4]
+     86          	
+     87          	/* 断开USB D+线的上拉电阻，此时USB集线器会认为设备已拔除 */
+     88          	usb_CableConfig(DISABLE);
+   \   0000000C   0x.... 0x....      BL       usb_CableConfig
+     89          	
+     90          	/* 关闭USB设备电源 */
+     91          	_SetCNTR(CNTR_FRES + CNTR_PDWN);
+   \   00000010   0x2003             MOVS     R0,#+3
+   \   00000012   0x6020             STR      R0,[R4, #+0]
+     92          	
+     93          	/* 可以在此处添加语句，复位一些变量 */
+     94          	
+     95          	return USB_SUCCESS;
+   \   00000014   0x2000             MOVS     R0,#+0
+   \   00000016   0xBD10             POP      {R4,PC}          ;; return
+     96          }
+     97          
+     98          /*
+     99          *********************************************************************************************************
+    100          *	函 数 名: usb_Suspend
+    101          *	功能说明: 强制USB设备挂起，进入省电模式
+    102          *	形    参: 无
+    103          *	返 回 值: USB_SUCCESS
+    104          *********************************************************************************************************
+    105          */
+
+   \                                 In section .text, align 2, keep-with-next
+    106          void usb_Suspend(void)
+    107          {
+    108          	INT16U wCNTR;
+    109          	
+    110          	/* 可以在此处添加USB挂起的准备工作 */
+    111          	/* ... */
+    112          	
+    113          	/* 强制USB设备进入挂起状态 */
+    114          	wCNTR = _GetCNTR();
+   \                     usb_Suspend: (+1)
+   \   00000000   0x....             LDR.N    R0,??DataTable4  ;; 0x40005c40
+   \   00000002   0x6801             LDR      R1,[R0, #+0]
+    115          	wCNTR |= CNTR_FSUSP;
+    116          	_SetCNTR(wCNTR);
+   \   00000004   0xF041 0x0108      ORR      R1,R1,#0x8
+   \   00000008   0xB289             UXTH     R1,R1
+   \   0000000A   0x6001             STR      R1,[R0, #+0]
+    117          
+    118          	/* ------------------ 下面的部分仅用于USB总线供电的设备 ---------------------- */
+    119          	
+    120          	/* 强制进入低功耗模式 */
+    121          	wCNTR = _GetCNTR();
+   \   0000000C   0x6801             LDR      R1,[R0, #+0]
+    122          	wCNTR |= CNTR_LPMODE;
+    123          	_SetCNTR(wCNTR);
+   \   0000000E   0xF041 0x0104      ORR      R1,R1,#0x4
+   \   00000012   0xB289             UXTH     R1,R1
+   \   00000014   0x6001             STR      R1,[R0, #+0]
+    124          	
+    125          	/* 为降低功耗，可以在此处切换CPU主时钟 */
+    126          	
+    127          	/* 
+    128          		设置表示USB状态的全局变量，并且根据需要关闭一些中断和电源模式。 
+    129          		这个函数多数由用户自己添加相关的代码。在 usb_hw.c 文件 
+    130          	*/
+    131          	usb_EnterLowPowerMode();	
+   \   00000016   0x.... 0x....      B.W      usb_EnterLowPowerMode
+    132          }
+    133          
+    134          /*
+    135          *********************************************************************************************************
+    136          *	函 数 名: usb_ResumeInit
+    137          *	功能说明: USB设备唤醒时的回调函数。 在USB中断服务程序中被掉用。完成唤醒后的初始化工作。
+    138          *	形    参: 无
+    139          *	返 回 值: USB_SUCCESS
+    140          *********************************************************************************************************
+    141          */
+
+   \                                 In section .text, align 2, keep-with-next
+    142          void usb_ResumeInit(void)
+    143          {
+   \                     usb_ResumeInit: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    144          	INT16U wCNTR;
+    145          	
+    146          	/* ------------------ 仅用于USB总线供电的设备 ---------------------- */
+    147          	
+    148          	/* 此处可添加恢复时钟的代码 */
+    149          	
+    150          	/* CNTR_LPMODE = 0， 退出低功耗模式 */
+    151          	wCNTR = _GetCNTR();
+   \   00000002   0x....             LDR.N    R4,??DataTable4  ;; 0x40005c40
+   \   00000004   0x6820             LDR      R0,[R4, #+0]
+    152          	wCNTR &= (~CNTR_LPMODE);
+    153          	_SetCNTR(wCNTR);
+   \   00000006   0xF64F 0x71FB      MOVW     R1,#+65531
+   \   0000000A   0x4008             ANDS     R0,R1,R0
+   \   0000000C   0x6020             STR      R0,[R4, #+0]
+    154          	
+    155          	/* 退出低功耗模式，恢复系统时钟。设置必要的全局变量 */
+    156          	usb_LeaveLowPowerMode();
+   \   0000000E   0x.... 0x....      BL       usb_LeaveLowPowerMode
+    157          	
+    158          	/* 复位 FSUSP 位 */
+    159          	_SetCNTR(IMR_MSK);	/* IMR_MSK宏在usb_conf.h中定义。*/
+   \   00000012   0xF44F 0x4006      MOV      R0,#+34304
+   \   00000016   0x6020             STR      R0,[R4, #+0]
+    160          	/* #define IMR_MSK (CNTR_CTRM  | CNTR_SOFM  | CNTR_RESETM ) */
+    161          	
+    162          	/* 此处可添加挂起准备的反操作代码 */
+    163          }
+   \   00000018   0xBD10             POP      {R4,PC}          ;; return
+    164          
+    165          /*
+    166          *********************************************************************************************************
+    167          *	函 数 名: usb_Resume
+    168          *	功能说明: USB退出挂模式时，会调用该函数。这个是一个状态机，处理
+    169          *	形    参: eResumeSetVal  结构体变量
+    170          *	返 回 值: USB_SUCCESS
+    171          *********************************************************************************************************
+    172          */
+
+   \                                 In section .text, align 4, keep-with-next
+    173          void usb_Resume(RESUME_STATE eResumeSetVal)
+    174          {
+   \                     usb_Resume: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+    175          	INT16U wCNTR;
+    176          	
+    177          	if (eResumeSetVal != RESUME_ESOF)
+   \   00000002   0x....             LDR.N    R4,??DataTable4_2
+   \   00000004   0x2807             CMP      R0,#+7
+   \   00000006   0xBF18             IT       NE 
+   \   00000008   0x7020             STRBNE   R0,[R4, #+0]
+    178          	{
+    179          		ResumeS.eState = eResumeSetVal;
+    180          	}
+    181          	
+    182          	switch (ResumeS.eState)
+   \   0000000A   0x7820             LDRB     R0,[R4, #+0]
+   \   0000000C   0x2805             CMP      R0,#+5
+   \   0000000E   0xD83E             BHI.N    ??usb_Resume_1
+   \   00000010   0xE8DF 0xF000      TBB      [PC, R0]
+   \                     ??usb_Resume_0:
+   \   00000014   0x03 0x0F          DC8      0x3,0xF,0x1C,0x20
+   \              0x1C 0x20    
+   \   00000018   0x27 0x32          DC8      0x27,0x32
+    183          	{
+    184          		case RESUME_EXTERNAL:
+    185          			usb_ResumeInit();
+   \                     ??usb_Resume_2: (+1)
+   \   0000001A   0x....             LDR.N    R5,??DataTable4  ;; 0x40005c40
+   \   0000001C   0x6828             LDR      R0,[R5, #+0]
+   \   0000001E   0xF64F 0x71FB      MOVW     R1,#+65531
+   \   00000022   0x4008             ANDS     R0,R1,R0
+   \   00000024   0x6028             STR      R0,[R5, #+0]
+   \   00000026   0x.... 0x....      BL       usb_LeaveLowPowerMode
+   \   0000002A   0xF44F 0x4006      MOV      R0,#+34304
+   \   0000002E   0x6028             STR      R0,[R5, #+0]
+    186          			ResumeS.eState = RESUME_OFF;
+   \   00000030   0xE02D             B.N      ??usb_Resume_1
+    187          			break;
+    188          			
+    189          		case RESUME_INTERNAL:
+    190          			usb_ResumeInit();
+   \                     ??usb_Resume_3: (+1)
+   \   00000032   0x....             LDR.N    R5,??DataTable4  ;; 0x40005c40
+   \   00000034   0x6828             LDR      R0,[R5, #+0]
+   \   00000036   0xF64F 0x71FB      MOVW     R1,#+65531
+   \   0000003A   0x4008             ANDS     R0,R1,R0
+   \   0000003C   0x6028             STR      R0,[R5, #+0]
+   \   0000003E   0x.... 0x....      BL       usb_LeaveLowPowerMode
+   \   00000042   0xF44F 0x4006      MOV      R0,#+34304
+   \   00000046   0x6028             STR      R0,[R5, #+0]
+    191          			ResumeS.eState = RESUME_START;
+   \   00000048   0x2004             MOVS     R0,#+4
+   \   0000004A   0xE021             B.N      ??usb_Resume_4
+    192          			break;
+    193          			
+    194          		case RESUME_LATER:
+    195          			ResumeS.bESOFcnt = 2;
+   \                     ??usb_Resume_5: (+1)
+   \   0000004C   0x2002             MOVS     R0,#+2
+   \   0000004E   0x7060             STRB     R0,[R4, #+1]
+    196          			ResumeS.eState = RESUME_WAIT;
+   \   00000050   0x2003             MOVS     R0,#+3
+   \   00000052   0xE01D             B.N      ??usb_Resume_4
+    197          			break;
+    198          			
+    199          		case RESUME_WAIT:
+    200          			ResumeS.bESOFcnt--;
+   \                     ??usb_Resume_6: (+1)
+   \   00000054   0x7860             LDRB     R0,[R4, #+1]
+   \   00000056   0x1E40             SUBS     R0,R0,#+1
+   \   00000058   0x7060             STRB     R0,[R4, #+1]
+    201          			if (ResumeS.bESOFcnt == 0)
+   \   0000005A   0xB2C0             UXTB     R0,R0
+   \   0000005C   0xB9C8             CBNZ.N   R0,??usb_Resume_7
+    202          			ResumeS.eState = RESUME_START;
+   \   0000005E   0x2004             MOVS     R0,#+4
+   \   00000060   0xE016             B.N      ??usb_Resume_4
+    203          			break;
+    204          			
+    205          		case RESUME_START:
+    206          			wCNTR = _GetCNTR();
+   \                     ??usb_Resume_8: (+1)
+   \   00000062   0x....             LDR.N    R5,??DataTable4  ;; 0x40005c40
+   \   00000064   0x6828             LDR      R0,[R5, #+0]
+    207          			wCNTR |= CNTR_RESUME;
+    208          			_SetCNTR(wCNTR);
+   \   00000066   0xF040 0x0010      ORR      R0,R0,#0x10
+   \   0000006A   0xB280             UXTH     R0,R0
+   \   0000006C   0x6028             STR      R0,[R5, #+0]
+    209          			ResumeS.eState = RESUME_ON;
+   \   0000006E   0x2005             MOVS     R0,#+5
+   \   00000070   0x7020             STRB     R0,[R4, #+0]
+    210          			ResumeS.bESOFcnt = 10;
+   \   00000072   0x200A             MOVS     R0,#+10
+   \   00000074   0x7060             STRB     R0,[R4, #+1]
+    211          			break;
+   \   00000076   0xBD31             POP      {R0,R4,R5,PC}
+    212          			
+    213          		case RESUME_ON:
+    214          			ResumeS.bESOFcnt--;
+   \                     ??usb_Resume_9: (+1)
+   \   00000078   0x7860             LDRB     R0,[R4, #+1]
+   \   0000007A   0x1E40             SUBS     R0,R0,#+1
+   \   0000007C   0x7060             STRB     R0,[R4, #+1]
+    215          			if (ResumeS.bESOFcnt == 0)
+   \   0000007E   0xB2C0             UXTB     R0,R0
+   \   00000080   0xB938             CBNZ.N   R0,??usb_Resume_7
+    216          			{
+    217          				wCNTR = _GetCNTR();
+   \   00000082   0x....             LDR.N    R5,??DataTable4  ;; 0x40005c40
+   \   00000084   0x6828             LDR      R0,[R5, #+0]
+    218          				wCNTR &= (~CNTR_RESUME);
+    219          				_SetCNTR(wCNTR);
+   \   00000086   0xF64F 0x71EF      MOVW     R1,#+65519
+   \   0000008A   0x4008             ANDS     R0,R1,R0
+   \   0000008C   0x6028             STR      R0,[R5, #+0]
+    220          				ResumeS.eState = RESUME_OFF;
+    221          			}
+    222          			break;
+    223          			
+    224          		case RESUME_OFF:
+    225          		case RESUME_ESOF:
+    226          		default:
+    227          			ResumeS.eState = RESUME_OFF;
+   \                     ??usb_Resume_1: (+1)
+   \   0000008E   0x2006             MOVS     R0,#+6
+   \                     ??usb_Resume_4: (+1)
+   \   00000090   0x7020             STRB     R0,[R4, #+0]
+    228          			break;
+    229          	}
+    230          }
+   \                     ??usb_Resume_7: (+1)
+   \   00000092   0xBD31             POP      {R0,R4,R5,PC}    ;; return
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4:
+   \   00000000   0x40005C40         DC32     0x40005c40
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_1:
+   \   00000000   0x........         DC32     wInterrupt_Mask
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_2:
+   \   00000000   0x........         DC32     ResumeS
+    231          #endif
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       8   usb_PowerOff
+         8   -> usb_CableConfig
+       8   usb_PowerOn
+         8   -> usb_CableConfig
+      16   usb_Resume
+        16   -> usb_LeaveLowPowerMode
+       8   usb_ResumeInit
+         8   -> usb_LeaveLowPowerMode
+       0   usb_Suspend
+         0   -> usb_EnterLowPowerMode
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable4
+       4  ??DataTable4_1
+       4  ??DataTable4_2
+       4  ResumeS
+       4  bDeviceState
+       1  fSuspendEnabled
+      24  usb_PowerOff
+      34  usb_PowerOn
+     148  usb_Resume
+      26  usb_ResumeInit
+      26  usb_Suspend
+
+ 
+   8 bytes in section .bss
+   1 byte  in section .data
+ 270 bytes in section .text
+ 
+ 270 bytes of CODE memory
+   9 bytes of DATA memory
+
+Errors: none
+Warnings: none

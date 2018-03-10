@@ -1,0 +1,221 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:15:15
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\uc-terminal\src\usb_mem.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome -
+#        RF69w\uc-terminal\src\usb_mem.c" -lCN "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\usb_mem.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\usb_mem.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uc-terminal\src\usb_mem.c
+      1          /******************** (C) COPYRIGHT 2011 STMicroelectronics ********************
+      2          * File Name          : usb_mem.c
+      3          * Author             : MCD Application Team
+      4          * Version            : V3.3.0
+      5          * Date               : 21-March-2011
+      6          * Description        : Utility functions for memory transfers to/from PMA
+      7          ********************************************************************************
+      8          * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+      9          * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE TIME.
+     10          * AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY DIRECT,
+     11          * INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING FROM THE
+     12          * CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE CODING
+     13          * INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+     14          *******************************************************************************/
+     15          #ifndef STM32F10X_CL
+     16          
+     17          /* Includes ------------------------------------------------------------------*/
+     18          #include "includes.h"
+     19          #if USBD_MODULE == DEF_ENABLED
+     20          
+
+   \                                 In section .bss, align 4
+     21          INT32U i, temp1, temp2;
+   \                     i:
+   \   00000000                      DS8 4
+   \                     temp1:
+   \   00000004                      DS8 4
+   \                     temp2:
+   \   00000008                      DS8 4
+     22          INT16U *pdwVal;
+   \                     pdwVal:
+   \   0000000C                      DS8 4
+     23          INT32U *pdwVal1;
+   \                     pdwVal1:
+   \   00000010                      DS8 4
+     24          
+     25          /* Private typedef -----------------------------------------------------------*/
+     26          /* Private define ------------------------------------------------------------*/
+     27          /* Private macro -------------------------------------------------------------*/
+     28          /* Private variables ---------------------------------------------------------*/
+     29          /* Extern variables ----------------------------------------------------------*/
+     30          /* Private function prototypes -----------------------------------------------*/
+     31          /* Private functions ---------------------------------------------------------*/
+     32          /*******************************************************************************
+     33          * Function Name  : UserToPMABufferCopy
+     34          * Description    : Copy a buffer from user memory area to packet memory area (PMA)
+     35          * Input          : - pbUsrBuf: pointer to user memory area.
+     36          *                  - wPMABufAddr: address into PMA.
+     37          *                  - wNBytes: no. of bytes to be copied.
+     38          * Output         : None.
+     39          * Return         : None	.
+     40          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+     41          void UserToPMABufferCopy(INT8U *pbUsrBuf, INT16U wPMABufAddr, INT16U wNBytes)
+     42          { 
+     43            pdwVal = (INT16U *)(wPMABufAddr * 2 + PMAAddr);
+   \                     UserToPMABufferCopy: (+1)
+   \   00000000   0x0049             LSLS     R1,R1,#+1
+   \   00000002   0x....             LDR.N    R3,??DataTable1
+   \   00000004   0xF101 0x4180      ADD      R1,R1,#+1073741824
+   \   00000008   0xF501 0x41C0      ADD      R1,R1,#+24576
+   \   0000000C   0x60D9             STR      R1,[R3, #+12]
+     44            for (i = (wNBytes + 1) >> 1; i != 0; i--)
+   \   0000000E   0x1C51             ADDS     R1,R2,#+1
+   \   00000010   0x1049             ASRS     R1,R1,#+1
+   \   00000012   0x6019             STR      R1,[R3, #+0]
+   \   00000014   0xD010             BEQ.N    ??UserToPMABufferCopy_0
+     45            {
+     46              temp1 = (INT16U) * pbUsrBuf;
+   \                     ??UserToPMABufferCopy_1: (+1)
+   \   00000016   0xF810 0x1B01      LDRB     R1,[R0], #+1
+   \   0000001A   0x6059             STR      R1,[R3, #+4]
+     47              pbUsrBuf++;
+     48              temp2 = temp1 | (INT16U) * pbUsrBuf << 8;
+   \   0000001C   0xF810 0x2B01      LDRB     R2,[R0], #+1
+   \   00000020   0xEA41 0x2102      ORR      R1,R1,R2, LSL #+8
+     49              *pdwVal++ = temp2;
+   \   00000024   0x68DA             LDR      R2,[R3, #+12]
+   \   00000026   0x6099             STR      R1,[R3, #+8]
+   \   00000028   0x1D12             ADDS     R2,R2,#+4
+   \   0000002A   0x60DA             STR      R2,[R3, #+12]
+   \   0000002C   0xF822 0x1D04      STRH     R1,[R2, #-4]!
+     50              pdwVal++;
+     51              pbUsrBuf++;
+     52            }
+   \   00000030   0x6819             LDR      R1,[R3, #+0]
+   \   00000032   0x1E49             SUBS     R1,R1,#+1
+   \   00000034   0x6019             STR      R1,[R3, #+0]
+   \   00000036   0xD1EE             BNE.N    ??UserToPMABufferCopy_1
+     53          }
+   \                     ??UserToPMABufferCopy_0: (+1)
+   \   00000038   0x4770             BX       LR               ;; return
+     54          /*******************************************************************************
+     55          * Function Name  : PMAToUserBufferCopy
+     56          * Description    : Copy a buffer from user memory area to packet memory area (PMA)
+     57          * Input          : - pbUsrBuf    = pointer to user memory area.
+     58          *                  - wPMABufAddr = address into PMA.
+     59          *                  - wNBytes     = no. of bytes to be copied.
+     60          * Output         : None.
+     61          * Return         : None.
+     62          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+     63          void PMAToUserBufferCopy(INT8U *pbUsrBuf, INT16U wPMABufAddr, INT16U wNBytes)
+     64          {
+     65            pdwVal1 = (INT32U *)(wPMABufAddr * 2 + PMAAddr);
+   \                     PMAToUserBufferCopy: (+1)
+   \   00000000   0x0049             LSLS     R1,R1,#+1
+     66            for (i = (wNBytes + 1) >> 1; i != 0; i--)
+   \   00000002   0x1C52             ADDS     R2,R2,#+1
+   \   00000004   0x....             LDR.N    R3,??DataTable1
+   \   00000006   0xF101 0x4180      ADD      R1,R1,#+1073741824
+   \   0000000A   0x1052             ASRS     R2,R2,#+1
+   \   0000000C   0xF501 0x41C0      ADD      R1,R1,#+24576
+   \   00000010   0x601A             STR      R2,[R3, #+0]
+   \   00000012   0xD007             BEQ.N    ??PMAToUserBufferCopy_0
+     67            {
+     68              *(INT16U*)pbUsrBuf++ = *pdwVal1++;
+   \                     ??PMAToUserBufferCopy_1: (+1)
+   \   00000014   0xF851 0x2B04      LDR      R2,[R1], #+4
+   \   00000018   0xF820 0x2B02      STRH     R2,[R0], #+2
+     69              pbUsrBuf++;
+     70            }
+   \   0000001C   0x681A             LDR      R2,[R3, #+0]
+   \   0000001E   0x1E52             SUBS     R2,R2,#+1
+   \   00000020   0x601A             STR      R2,[R3, #+0]
+   \   00000022   0xD1F7             BNE.N    ??PMAToUserBufferCopy_1
+   \                     ??PMAToUserBufferCopy_0: (+1)
+   \   00000024   0x6119             STR      R1,[R3, #+16]
+     71          }
+   \   00000026   0x4770             BX       LR               ;; return
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable1:
+   \   00000000   0x........         DC32     i
+     72          
+     73          #endif /* STM32F10X_CL */
+     74          /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
+     75          #endif
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   PMAToUserBufferCopy
+       0   UserToPMABufferCopy
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable1
+      40  PMAToUserBufferCopy
+      58  UserToPMABufferCopy
+      20  i
+          temp1
+          temp2
+          pdwVal
+          pdwVal1
+
+ 
+  20 bytes in section .bss
+ 102 bytes in section .text
+ 
+ 102 bytes of CODE memory
+  20 bytes of DATA memory
+
+Errors: none
+Warnings: none

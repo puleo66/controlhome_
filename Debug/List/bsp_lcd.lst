@@ -1,0 +1,540 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:14:46
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp_lcd.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp_lcd.c" -lCN
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\bsp_lcd.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\bsp_lcd.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp_lcd.c
+      1          /*
+      2          *********************************************************************************************************
+      3          *
+      4          *                                       LCD INTERFACE
+      5          *
+      6          * Filename      : bsp_lcd.c
+      7          * Version       : V1.00
+      8          * Programmer(s) : Puleo
+      9          *********************************************************************************************************
+     10          */
+     11          
+     12          
+     13          /*
+     14          *********************************************************************************************************
+     15          *                                             INCLUDE FILES
+     16          *********************************************************************************************************
+     17          */
+     18          
+     19          #define  BSP_LCD_MODULE
+     20          #include <bsp.h>
+     21          #include <bsp_lcd.h>
+     22          #include <lcd.h>
+     23          
+     24          
+     25          /*
+     26          *********************************************************************************************************
+     27          *                                            LOCAL DEFINES
+     28          *********************************************************************************************************
+     29          */
+     30          
+     31          
+     32          /*
+     33          *********************************************************************************************************
+     34          *                                           LOCAL CONSTANTS
+     35          *********************************************************************************************************
+     36          */
+     37          
+     38          
+     39          /*
+     40          *********************************************************************************************************
+     41          *                                          LOCAL DATA TYPES
+     42          *********************************************************************************************************
+     43          */
+     44          
+     45          
+     46          /*
+     47          *********************************************************************************************************
+     48          *                                            LOCAL TABLES
+     49          *********************************************************************************************************
+     50          */
+     51          
+     52          
+     53          /*
+     54          *********************************************************************************************************
+     55          *                                       LOCAL GLOBAL VARIABLES
+     56          *********************************************************************************************************
+     57          */
+     58          
+     59          
+     60          
+     61          /*
+     62          *********************************************************************************************************
+     63          *                                      LOCAL FUNCTION PROTOTYPES
+     64          *********************************************************************************************************
+     65          */
+     66          
+     67          static  void  Lcd_SCE(CPU_BOOLEAN Conn);  // 0: Reset; 1: Set;
+     68          static  void  Lcd_DC(CPU_BOOLEAN Conn);
+     69          static  void  Lcd_RST(CPU_BOOLEAN Conn);
+     70          static  void  Lcd_SCLK(CPU_BOOLEAN Conn);
+     71          static  void  Lcd_SDIN(CPU_BOOLEAN Conn);
+     72          
+     73          static  void  DispDly_uS (CPU_INT32U us);
+     74          
+     75          
+     76          /*
+     77          *********************************************************************************************************
+     78          *                                     LOCAL CONFIGURATION ERRORS
+     79          *********************************************************************************************************
+     80          */
+     81          
+     82          
+     83          /*
+     84          *********************************************************************************************************
+     85          *********************************************************************************************************
+     86          **                                         GLOBAL FUNCTIONS
+     87          *********************************************************************************************************
+     88          *********************************************************************************************************
+     89          */
+     90          
+     91          /*
+     92          *********************************************************************************************************
+     93          *                                           BSP_LCD_Init()
+     94          *
+     95          * Description : Initialize the LCD.
+     96          *
+     97          * Argument(s) : none.
+     98          *
+     99          * Return(s)   : none.
+    100          *
+    101          * Caller(s)   : BSP_Init().
+    102          *
+    103          * Note(s)     : none.
+    104          *********************************************************************************************************
+    105          */
+    106          
+
+   \                                 In section .text, align 2, keep-with-next
+    107          void  BSP_LCD_Init(void)
+    108          {
+   \                     BSP_LCD_Init: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0xB082             SUB      SP,SP,#+8
+    109              GPIO_InitTypeDef  gpio_init;
+    110             
+    111              RCC_APB2PeriphClockCmd( LCD_CTL | LCD_RESET_CTL, ENABLE );
+   \   00000004   0x2101             MOVS     R1,#+1
+   \   00000006   0x200C             MOVS     R0,#+12
+   \   00000008   0x.... 0x....      BL       RCC_APB2PeriphClockCmd
+    112          	  
+    113              gpio_init.GPIO_Pin = LCD_SDIN | LCD_SCLK  ;
+   \   0000000C   0x20A0             MOVS     R0,#+160
+   \   0000000E   0xF8AD 0x0000      STRH     R0,[SP, #+0]
+    114              gpio_init.GPIO_Mode =  GPIO_Mode_Out_PP ; 	
+   \   00000012   0x2010             MOVS     R0,#+16
+   \   00000014   0xF88D 0x0003      STRB     R0,[SP, #+3]
+    115              gpio_init.GPIO_Speed = LCD_Speed ;
+   \   00000018   0x2003             MOVS     R0,#+3
+   \   0000001A   0xF88D 0x0002      STRB     R0,[SP, #+2]
+    116              GPIO_Init( LCD_CTL_Pins , &gpio_init );
+   \   0000001E   0x4669             MOV      R1,SP
+   \   00000020   0x....             LDR.N    R4,??DataTable1  ;; 0x40010800
+   \   00000022   0x4620             MOV      R0,R4
+   \   00000024   0x.... 0x....      BL       GPIO_Init
+    117              GPIO_SetBits( LCD_CTL_Pins ,  LCD_SCLK | LCD_SDIN  );
+   \   00000028   0x21A0             MOVS     R1,#+160
+   \   0000002A   0x4620             MOV      R0,R4
+   \   0000002C   0x.... 0x....      BL       GPIO_SetBits
+    118          
+    119              gpio_init.GPIO_Pin = LCD_RST | LCD_DC | LCD_SCE ;
+   \   00000030   0xF44F 0x6042      MOV      R0,#+3104
+   \   00000034   0xF8AD 0x0000      STRH     R0,[SP, #+0]
+    120              gpio_init.GPIO_Mode =  GPIO_Mode_Out_PP ; 	
+   \   00000038   0x2010             MOVS     R0,#+16
+   \   0000003A   0xF88D 0x0003      STRB     R0,[SP, #+3]
+    121              gpio_init.GPIO_Speed = LCD_Speed ;
+   \   0000003E   0x2003             MOVS     R0,#+3
+   \   00000040   0xF88D 0x0002      STRB     R0,[SP, #+2]
+    122              GPIO_Init( LCD_RESET_CTL_Pins , &gpio_init );
+   \   00000044   0x4669             MOV      R1,SP
+   \   00000046   0x....             LDR.N    R4,??DataTable1_1  ;; 0x40010c00
+   \   00000048   0x4620             MOV      R0,R4
+   \   0000004A   0x.... 0x....      BL       GPIO_Init
+    123              GPIO_SetBits( LCD_RESET_CTL_Pins ,   LCD_RST | LCD_DC | LCD_SCE );
+   \   0000004E   0xF44F 0x6142      MOV      R1,#+3104
+   \   00000052   0x4620             MOV      R0,R4
+   \   00000054   0x.... 0x....      BL       GPIO_SetBits
+    124              
+    125              Lcd_RST(1);
+   \   00000058   0x2200             MOVS     R2,#+0
+   \   0000005A   0xF44F 0x6180      MOV      R1,#+1024
+   \   0000005E   0x4620             MOV      R0,R4
+   \   00000060   0x.... 0x....      BL       GPIO_WriteBit
+    126              DispDly_uS(1000);
+   \   00000064   0xF44F 0x707A      MOV      R0,#+1000
+   \   00000068   0x.... 0x....      BL       DispDly_uS
+    127              Lcd_RST(0);
+   \   0000006C   0x2201             MOVS     R2,#+1
+   \   0000006E   0xF44F 0x6180      MOV      R1,#+1024
+   \   00000072   0x4620             MOV      R0,R4
+   \   00000074   0x.... 0x....      BL       GPIO_WriteBit
+    128              
+    129              Lcd_SCE(0);
+   \   00000078   0x2201             MOVS     R2,#+1
+   \   0000007A   0x2120             MOVS     R1,#+32
+   \   0000007C   0x4620             MOV      R0,R4
+   \   0000007E   0x.... 0x....      BL       GPIO_WriteBit
+    130              
+    131              DispInitOS();                      /* Initialize the RTOS services                                 */
+   \   00000082   0x.... 0x....      BL       DispInitOS
+    132          }
+   \   00000086   0xBD13             POP      {R0,R1,R4,PC}    ;; return
+    133          
+    134          /*
+    135          *********************************************************************************************************
+    136          *                                            Lcd_SCE(Boolean Conn)
+    137          *
+    138          * Description : LCD port enabled/Disabled.
+    139          *
+    140          * Argument(s) : 0: Reset; 1: Set;
+    141          *
+    142          * Return(s)   : none.
+    143          *
+    144          * Caller(s)   : Application.
+    145          *
+    146          * Note(s)     : none.
+    147          *********************************************************************************************************
+    148          */
+    149          static void Lcd_SCE(CPU_BOOLEAN Conn) 
+    150          {
+    151              GPIO_WriteBit(LCD_RESET_CTL_Pins,LCD_SCE,((Conn)?Bit_RESET:Bit_SET));
+    152          }
+    153          
+    154          /*
+    155          *********************************************************************************************************
+    156          *                                           Lcd_DC(Boolean Conn)
+    157          *
+    158          * Description : LCD DC port reset/set.
+    159          *
+    160          * Argument(s) : 0: Reset; 1: Set;
+    161          *
+    162          * Return(s)   : none.
+    163          *
+    164          * Caller(s)   : Application.
+    165          *
+    166          * Note(s)     : none.
+    167          *********************************************************************************************************
+    168          */
+    169          static void Lcd_DC(CPU_BOOLEAN Conn)
+    170          {
+    171              GPIO_WriteBit(LCD_RESET_CTL_Pins,LCD_DC,((Conn)?Bit_RESET:Bit_SET));
+    172          }
+    173          
+    174          /*
+    175          *********************************************************************************************************
+    176          *                                           Lcd_Rst(Boolean Conn)
+    177          *
+    178          * Description : LCD reset port reset/set.
+    179          *
+    180          * Argument(s) : 0: Reset; 1: Set;
+    181          *
+    182          * Return(s)   : none.
+    183          *
+    184          * Caller(s)   : Application.
+    185          *
+    186          * Note(s)     : none.
+    187          *********************************************************************************************************
+    188          */
+    189          
+    190          static void Lcd_RST(CPU_BOOLEAN Conn)
+    191          {
+    192              GPIO_WriteBit(LCD_RESET_CTL_Pins,LCD_RST,((Conn)?Bit_RESET:Bit_SET));
+    193          }
+    194          
+    195          /*
+    196          *********************************************************************************************************
+    197          *                                           Lcd_SCLK(Boolean Conn)
+    198          *
+    199          * Description : LCD Clk port reset/set.
+    200          *
+    201          * Argument(s) : 0: Reset; 1: Set;
+    202          *
+    203          * Return(s)   : none.
+    204          *
+    205          * Caller(s)   : Application.
+    206          *
+    207          * Note(s)     : none.
+    208          *********************************************************************************************************
+    209          */
+    210          
+    211          static void Lcd_SCLK(CPU_BOOLEAN Conn)
+    212          {
+    213              GPIO_WriteBit(LCD_CTL_Pins,LCD_SCLK,((Conn)?Bit_RESET:Bit_SET));
+    214          }
+    215          
+    216          /*
+    217          *********************************************************************************************************
+    218          *                                           Lcd_SDIN(Boolean Conn)
+    219          *
+    220          * Description : LCD Data port reset/set.
+    221          *
+    222          * Argument(s) : 0: Reset; 1: Set;
+    223          *
+    224          * Return(s)   : none.
+    225          *
+    226          * Caller(s)   : Application.
+    227          *
+    228          * Note(s)     : none.
+    229          *********************************************************************************************************
+    230          */
+    231          
+    232          static void Lcd_SDIN(CPU_BOOLEAN Conn)
+    233          {
+    234              GPIO_WriteBit(LCD_CTL_Pins,LCD_SDIN,((Conn)?Bit_RESET:Bit_SET));
+    235          }
+    236          
+    237          /*
+    238          *********************************************************************************************************
+    239          *                                           LcdSend(byte data, LcdCmdData cd)
+    240          *
+    241          * Description : Sends data to display controller.
+    242          *
+    243          * Argument(s) : data -> Data to be sent
+    244          *               cd   -> Command or data (see enum in pcd8544.h)
+    245          *
+    246          * Return(s)   : none.
+    247          *
+    248          * Caller(s)   : Application.
+    249          *
+    250          * Note(s)     : none.
+    251          *********************************************************************************************************
+    252          */
+
+   \                                 In section .text, align 2, keep-with-next
+    253          void LcdSend ( INT8U data, LcdCmdData cd )
+    254          {
+   \                     LcdSend: (+1)
+   \   00000000   0xB5F8             PUSH     {R3-R7,LR}
+   \   00000002   0x4604             MOV      R4,R0
+   \   00000004   0x460E             MOV      R6,R1
+    255              /*  Enable display controller (active low). */
+    256          
+    257              Lcd_SCE(1);
+   \   00000006   0x....             LDR.N    R5,??DataTable1_1  ;; 0x40010c00
+   \   00000008   0x2200             MOVS     R2,#+0
+   \   0000000A   0x2120             MOVS     R1,#+32
+   \   0000000C   0x4628             MOV      R0,R5
+   \   0000000E   0x.... 0x....      BL       GPIO_WriteBit
+    258          
+    259              if ( cd == LCD_DATA )
+   \   00000012   0x2E01             CMP      R6,#+1
+   \   00000014   0xBF0C             ITE      EQ 
+   \   00000016   0x2201             MOVEQ    R2,#+1
+   \   00000018   0x2200             MOVNE    R2,#+0
+    260               Lcd_DC(0);
+    261              else
+    262               Lcd_DC(1);
+   \   0000001A   0xF44F 0x6100      MOV      R1,#+2048
+   \   0000001E   0x4628             MOV      R0,R5
+   \   00000020   0x.... 0x....      BL       GPIO_WriteBit
+    263          
+    264              /*  Send data to display controller. */
+    265              Lcd_SCLK(1); 
+   \   00000024   0x....             LDR.N    R6,??DataTable1  ;; 0x40010800
+   \   00000026   0x2200             MOVS     R2,#+0
+   \   00000028   0x2120             MOVS     R1,#+32
+   \   0000002A   0x4630             MOV      R0,R6
+   \   0000002C   0x.... 0x....      BL       GPIO_WriteBit
+    266              DispDly_uS(10);
+   \   00000030   0x.... 0x....      BL       BSP_CPU_ClkFreq
+   \   00000034   0xF44F 0x717A      MOV      R1,#+1000
+   \   00000038   0xFBB0 0xF0F1      UDIV     R0,R0,R1
+   \   0000003C   0x210A             MOVS     R1,#+10
+   \   0000003E   0xFBB1 0xF0F0      UDIV     R0,R1,R0
+   \   00000042   0x1C80             ADDS     R0,R0,#+2
+   \   00000044   0xB280             UXTH     R0,R0
+   \   00000046   0x.... 0x....      BL       OSTimeDly
+    267              for(int i=0;i<8;i++){ 
+   \   0000004A   0x2708             MOVS     R7,#+8
+    268                if((data&0x80)==0x80)
+   \                     ??LcdSend_0: (+1)
+   \   0000004C   0x0620             LSLS     R0,R4,#+24
+   \   0000004E   0xBF4C             ITE      MI 
+   \   00000050   0x2201             MOVMI    R2,#+1
+   \   00000052   0x2200             MOVPL    R2,#+0
+    269                  Lcd_SDIN(0);
+    270                else 
+    271                   Lcd_SDIN(1);
+   \   00000054   0x2180             MOVS     R1,#+128
+   \   00000056   0x4630             MOV      R0,R6
+   \   00000058   0x.... 0x....      BL       GPIO_WriteBit
+    272                
+    273                DispDly_uS(10);
+   \   0000005C   0x.... 0x....      BL       BSP_CPU_ClkFreq
+   \   00000060   0xF44F 0x717A      MOV      R1,#+1000
+   \   00000064   0xFBB0 0xF0F1      UDIV     R0,R0,R1
+   \   00000068   0x210A             MOVS     R1,#+10
+   \   0000006A   0xFBB1 0xF0F0      UDIV     R0,R1,R0
+   \   0000006E   0x1C80             ADDS     R0,R0,#+2
+   \   00000070   0xB280             UXTH     R0,R0
+   \   00000072   0x.... 0x....      BL       OSTimeDly
+    274                Lcd_SCLK(0);
+   \   00000076   0x2201             MOVS     R2,#+1
+   \   00000078   0x2120             MOVS     R1,#+32
+   \   0000007A   0x4630             MOV      R0,R6
+   \   0000007C   0x.... 0x....      BL       GPIO_WriteBit
+    275                DispDly_uS(10);
+   \   00000080   0x.... 0x....      BL       BSP_CPU_ClkFreq
+   \   00000084   0xF44F 0x717A      MOV      R1,#+1000
+   \   00000088   0xFBB0 0xF0F1      UDIV     R0,R0,R1
+   \   0000008C   0x210A             MOVS     R1,#+10
+   \   0000008E   0xFBB1 0xF0F0      UDIV     R0,R1,R0
+   \   00000092   0x1C80             ADDS     R0,R0,#+2
+   \   00000094   0xB280             UXTH     R0,R0
+   \   00000096   0x.... 0x....      BL       OSTimeDly
+    276                Lcd_SCLK(1); 
+   \   0000009A   0x2200             MOVS     R2,#+0
+   \   0000009C   0x2120             MOVS     R1,#+32
+   \   0000009E   0x4630             MOV      R0,R6
+   \   000000A0   0x.... 0x....      BL       GPIO_WriteBit
+    277                data<<=1; 
+   \   000000A4   0x0064             LSLS     R4,R4,#+1
+    278             } 
+   \   000000A6   0x1E7F             SUBS     R7,R7,#+1
+   \   000000A8   0xD1D0             BNE.N    ??LcdSend_0
+    279          
+    280              /* Disable display controller. */
+    281             Lcd_SCE(1);
+   \   000000AA   0x4628             MOV      R0,R5
+   \   000000AC   0xE8BD 0x40F8      POP      {R3-R7,LR}
+   \   000000B0   0x2200             MOVS     R2,#+0
+   \   000000B2   0x2120             MOVS     R1,#+32
+   \   000000B4   0x.... 0x....      B.W      GPIO_WriteBit
+    282             
+    283          }
+    284          
+    285          /*
+    286          *********************************************************************************************************
+    287          *                                              DispDly_uS()
+    288          *
+    289          * Description : Delay for the specified number of microseconds.
+    290          *
+    291          * Argument(s) : us          Number of microseconds
+    292          *
+    293          * Return(s)   : none.
+    294          *
+    295          * Caller(s)   : uC/LCD
+    296          *
+    297          * Notes       : none.
+    298          *********************************************************************************************************
+    299          */
+    300          
+
+   \                                 In section .text, align 2, keep-with-next
+    301          static void  DispDly_uS (CPU_INT32U us)
+    302          {
+   \                     DispDly_uS: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0x4604             MOV      R4,R0
+    303              CPU_INT32U  us_per_tick;
+    304              CPU_INT32U  ticks;
+    305          
+    306          
+    307              us_per_tick = BSP_CPU_ClkFreq() / OS_TICKS_PER_SEC;
+   \   00000004   0x.... 0x....      BL       BSP_CPU_ClkFreq
+    308              ticks       = us / us_per_tick + 2;
+    309              OSTimeDly(ticks);
+   \   00000008   0xF44F 0x717A      MOV      R1,#+1000
+   \   0000000C   0xFBB0 0xF0F1      UDIV     R0,R0,R1
+   \   00000010   0xFBB4 0xF0F0      UDIV     R0,R4,R0
+   \   00000014   0xE8BD 0x4010      POP      {R4,LR}
+   \   00000018   0x1C80             ADDS     R0,R0,#+2
+   \   0000001A   0xB280             UXTH     R0,R0
+   \   0000001C   0x.... 0x....      B.W      OSTimeDly
+    310          }
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable1:
+   \   00000000   0x40010800         DC32     0x40010800
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable1_1:
+   \   00000000   0x40010C00         DC32     0x40010c00
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      16   BSP_LCD_Init
+        16   -> DispDly_uS
+        16   -> DispInitOS
+        16   -> GPIO_Init
+        16   -> GPIO_SetBits
+        16   -> GPIO_WriteBit
+        16   -> RCC_APB2PeriphClockCmd
+       8   DispDly_uS
+         8   -> BSP_CPU_ClkFreq
+         0   -> OSTimeDly
+      24   LcdSend
+        24   -> BSP_CPU_ClkFreq
+         0   -> GPIO_WriteBit
+        24   -> GPIO_WriteBit
+        24   -> OSTimeDly
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable1
+       4  ??DataTable1_1
+     136  BSP_LCD_Init
+      32  DispDly_uS
+     184  LcdSend
+
+ 
+ 360 bytes in section .text
+ 
+ 360 bytes of CODE memory
+
+Errors: none
+Warnings: none

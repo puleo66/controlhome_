@@ -1,0 +1,1094 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:15:04
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\uC-RF\rfm69cw.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\uC-RF\rfm69cw.c" -lCN
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\rfm69cw.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\rfm69cw.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uC-RF\rfm69cw.c
+      1          /*
+      2          *********************************************************************************************************
+      3          *                                           RFM69CW Interface
+      4          *
+      5          *
+      6          *
+      7          * Filename   : rfm69cw.c
+      8          * Version    : V1.00
+      9          * Programmer : Puleo
+     10          *********************************************************************************************************
+     11          */
+     12          
+     13          #define  RFM69CW_GLOBALS
+     14          #include <includes.h>
+
+   \                                 In section .bss, align 4
+   \   __absolute INT8U regVal[111]
+   \                     regVal:
+   \   00000000                      DS8 112
+     15          #include <RFM69OOKregisters.h>
+     16          
+     17          #if RFM69CW_MODULE == DEF_ENABLED
+     18          
+     19          /*
+     20          *********************************************************************************************************
+     21          *                                               CONSTANTS
+     22          *********************************************************************************************************
+     23          */
+     24          #define EXTI_BIT                GPIO_Pin_6
+     25          #define EXTI_PORT               GPIOC
+     26          
+     27          #define EXTI_GET_IN()           GPIO_ReadInputDataBit(EXTI_PORT, EXTI_BIT)
+     28          
+     29          /*
+     30          *********************************************************************************************************
+     31          *                                           LOCAL VARIABLES
+     32          *********************************************************************************************************
+     33          */
+
+   \                                 In section .data, align 1
+     34          static CPU_BOOLEAN _isRFM69HW =        false;
+   \                     _isRFM69HW:
+   \   00000000   0x00               DC8 0
+   \   00000001   0x1F               DC8 31
+     35          static INT8U _powerLevel =      31;
+     36          
+     37          //INT8U regVal[0x6F];
+     38          
+     39          /*
+     40          *********************************************************************************************************
+     41          *                                      LOCAL FUNCTION PROTOTYPES
+     42          *********************************************************************************************************
+     43          */
+     44          
+
+   \                                 In section .text, align 2, keep-with-next
+     45          void RFM69CW_ExtiEnabled(void)
+     46          {
+   \                     RFM69CW_ExtiEnabled: (+1)
+   \   00000000   0xB500             PUSH     {LR}
+   \   00000002   0xB083             SUB      SP,SP,#+12
+     47            GPIO_InitTypeDef  GPIO_InitStructure;
+     48            EXTI_InitTypeDef  EXTI_InitStructure;
+     49            
+     50            /* GPIOB and GPIOD Periph clock enable */
+     51            RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC  |  RCC_APB2Periph_AFIO , ENABLE);
+   \   00000004   0x2101             MOVS     R1,#+1
+   \   00000006   0x2011             MOVS     R0,#+17
+   \   00000008   0x.... 0x....      BL       RCC_APB2PeriphClockCmd
+     52          
+     53            // Configure PC6 pin as input floating 
+     54            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
+   \   0000000C   0x2040             MOVS     R0,#+64
+   \   0000000E   0xF8AD 0x0000      STRH     R0,[SP, #+0]
+     55            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+     56            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+     57            GPIO_Init(GPIOC, &GPIO_InitStructure);
+   \   00000012   0x4669             MOV      R1,SP
+   \   00000014   0x2004             MOVS     R0,#+4
+   \   00000016   0xF88D 0x0003      STRB     R0,[SP, #+3]
+   \   0000001A   0x2003             MOVS     R0,#+3
+   \   0000001C   0xF88D 0x0002      STRB     R0,[SP, #+2]
+   \   00000020   0x....             LDR.N    R0,??DataTable6  ;; 0x40011000
+   \   00000022   0x.... 0x....      BL       GPIO_Init
+     58            
+     59            // Connect EXTI Line6 to PC6 pin 
+     60            GPIO_EXTILineConfig( GPIO_PortSourceGPIOC, GPIO_PinSource6 );
+   \   00000026   0x2106             MOVS     R1,#+6
+   \   00000028   0x2002             MOVS     R0,#+2
+   \   0000002A   0x.... 0x....      BL       GPIO_EXTILineConfig
+     61            
+     62            EXTI_InitStructure.EXTI_Line    = EXTI_Line6;
+   \   0000002E   0x2040             MOVS     R0,#+64
+   \   00000030   0x9001             STR      R0,[SP, #+4]
+     63            EXTI_InitStructure.EXTI_Mode    = EXTI_Mode_Interrupt;
+   \   00000032   0x2000             MOVS     R0,#+0
+   \   00000034   0xF88D 0x0008      STRB     R0,[SP, #+8]
+     64            EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+   \   00000038   0x2010             MOVS     R0,#+16
+   \   0000003A   0xF88D 0x0009      STRB     R0,[SP, #+9]
+     65            EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+   \   0000003E   0x2001             MOVS     R0,#+1
+   \   00000040   0xF88D 0x000A      STRB     R0,[SP, #+10]
+     66            EXTI_GenerateSWInterrupt( EXTI_Line6 );
+   \   00000044   0x2040             MOVS     R0,#+64
+   \   00000046   0x.... 0x....      BL       EXTI_GenerateSWInterrupt
+     67            EXTI_Init(&EXTI_InitStructure);
+   \   0000004A   0xA801             ADD      R0,SP,#+4
+   \   0000004C   0x.... 0x....      BL       EXTI_Init
+     68            
+     69            BSP_IntVectSet(BSP_INT_ID_EXTI9_5, RF_ISRHandler);
+   \   00000050   0x....             LDR.N    R1,??DataTable6_1
+   \   00000052   0x2017             MOVS     R0,#+23
+   \   00000054   0x.... 0x....      BL       BSP_IntVectSet
+     70          
+     71          }
+   \   00000058   0xB003             ADD      SP,SP,#+12
+   \   0000005A   0xBD00             POP      {PC}             ;; return
+     72          
+     73          /*
+     74          *********************************************************************************************************
+     75          */
+     76          
+     77          static INT8U Write_Byte (INT8U out) 
+     78          {
+     79              return SPI2_SendByte(out);
+     80          }
+     81          
+     82          /*
+     83          *********************************************************************************************************
+     84          */
+     85          
+
+   \                                 In section .text, align 2, keep-with-next
+     86          static INT8U Read_Reg(INT8U addr)
+     87          {
+   \                     Read_Reg: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0x4604             MOV      R4,R0
+     88              RF_CS_Assert();
+   \   00000004   0x.... 0x....      BL       RF_CS_Assert
+     89              Write_Byte(addr & 0x7F);
+   \   00000008   0xF004 0x007F      AND      R0,R4,#0x7F
+   \   0000000C   0x.... 0x....      BL       SPI2_SendByte
+     90              INT8U regval = Write_Byte( 0x00 );
+   \   00000010   0x2000             MOVS     R0,#+0
+   \   00000012   0x.... 0x....      BL       SPI2_SendByte
+   \   00000016   0x4604             MOV      R4,R0
+     91              RF_CS_Deassert();
+   \   00000018   0x.... 0x....      BL       RF_CS_Deassert
+     92              return regval;
+   \   0000001C   0x4620             MOV      R0,R4
+   \   0000001E   0xBD10             POP      {R4,PC}          ;; return
+     93          }
+     94          
+     95          /*
+     96          *********************************************************************************************************
+     97          */
+     98          
+
+   \                                 In section .text, align 2, keep-with-next
+     99          static void Write_Reg(INT8U addr, INT8U value)
+    100          {
+   \                     Write_Reg: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+   \   00000002   0x4604             MOV      R4,R0
+   \   00000004   0x460D             MOV      R5,R1
+    101              RF_CS_Assert();
+   \   00000006   0x.... 0x....      BL       RF_CS_Assert
+    102              Write_Byte(( addr & 0x7F ) | 0x80);
+   \   0000000A   0xF044 0x0080      ORR      R0,R4,#0x80
+   \   0000000E   0x.... 0x....      BL       SPI2_SendByte
+    103              Write_Byte(value & 0xFF);
+   \   00000012   0x4628             MOV      R0,R5
+   \   00000014   0x.... 0x....      BL       SPI2_SendByte
+    104              RF_CS_Deassert();
+   \   00000018   0xE8BD 0x4031      POP      {R0,R4,R5,LR}
+   \   0000001C   0x.... 0x....      B.W      RF_CS_Deassert
+    105          } 
+    106          
+    107          /*
+    108          *********************************************************************************************************
+    109          */
+    110          
+
+   \                                 In section .text, align 2, keep-with-next
+    111          void SetHighPowerRegs(CPU_BOOLEAN onOff) {
+   \                     SetHighPowerRegs: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0x0004             MOVS     R4,R0
+    112            Write_Reg(REG_TESTPA1, onOff ? 0x5D : 0x55);
+   \   00000004   0xBF14             ITE      NE 
+   \   00000006   0x215D             MOVNE    R1,#+93
+   \   00000008   0x2155             MOVEQ    R1,#+85
+   \   0000000A   0x205A             MOVS     R0,#+90
+   \   0000000C   0x.... 0x....      BL       Write_Reg
+    113            Write_Reg(REG_TESTPA2, onOff ? 0x7C : 0x70);
+   \   00000010   0x2C00             CMP      R4,#+0
+   \   00000012   0xBF14             ITE      NE 
+   \   00000014   0x217C             MOVNE    R1,#+124
+   \   00000016   0x2170             MOVEQ    R1,#+112
+   \   00000018   0xE8BD 0x4010      POP      {R4,LR}
+   \   0000001C   0x205C             MOVS     R0,#+92
+   \   0000001E   0x....             B.N      Write_Reg
+    114          }
+    115          
+    116          /*
+    117          *********************************************************************************************************
+    118          */
+    119          
+
+   \                                 In section .text, align 2, keep-with-next
+    120          static void SetMode(INT8U newMode)
+    121          {
+   \                     SetMode: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0x4604             MOV      R4,R0
+    122            Write_Reg(REG_OPMODE, (Read_Reg(REG_OPMODE) & 0xE3) | newMode);
+   \   00000004   0x2001             MOVS     R0,#+1
+   \   00000006   0x.... 0x....      BL       Read_Reg
+   \   0000000A   0xF000 0x00E3      AND      R0,R0,#0xE3
+   \   0000000E   0xEA44 0x0100      ORR      R1,R4,R0
+   \   00000012   0x2001             MOVS     R0,#+1
+   \   00000014   0x.... 0x....      BL       Write_Reg
+    123            while ((Read_Reg(REG_IRQFLAGS1) & RF_IRQFLAGS1_MODEREADY) == 0x00);                                                                                   // Wait for ModeReady
+   \                     ??SetMode_0: (+1)
+   \   00000018   0x.... 0x....      BL       RF_CS_Assert
+   \   0000001C   0x2027             MOVS     R0,#+39
+   \   0000001E   0x.... 0x....      BL       SPI2_SendByte
+   \   00000022   0x2000             MOVS     R0,#+0
+   \   00000024   0x.... 0x....      BL       SPI2_SendByte
+   \   00000028   0x4604             MOV      R4,R0
+   \   0000002A   0x.... 0x....      BL       RF_CS_Deassert
+   \   0000002E   0x0620             LSLS     R0,R4,#+24
+   \   00000030   0xD5F2             BPL.N    ??SetMode_0
+    124          }
+   \   00000032   0xBD10             POP      {R4,PC}          ;; return
+    125          
+    126          /*
+    127          *********************************************************************************************************
+    128          *
+    129          * return the frequency (in Hz)
+    130          *
+    131          *********************************************************************************************************
+    132          */
+    133          
+
+   \                                 In section .text, align 2, keep-with-next
+    134          INT64U RFM69CW_GetFrequency()
+    135          {
+   \                     RFM69CW_GetFrequency: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    136            return ((((((INT32U)Read_Reg(REG_FRFMSB) << 16) + ((INT16U)Read_Reg(REG_FRFMID) << 8) + Read_Reg(REG_FRFLSB)) >> 8) * (32000000L >> 11)) / 1000);
+   \   00000002   0x2007             MOVS     R0,#+7
+   \   00000004   0x.... 0x....      BL       Read_Reg
+   \   00000008   0x4604             MOV      R4,R0
+   \   0000000A   0x2008             MOVS     R0,#+8
+   \   0000000C   0x.... 0x....      BL       Read_Reg
+   \   00000010   0x0200             LSLS     R0,R0,#+8
+   \   00000012   0xEB00 0x4404      ADD      R4,R0,R4, LSL #+16
+   \   00000016   0x2009             MOVS     R0,#+9
+   \   00000018   0x.... 0x....      BL       Read_Reg
+   \   0000001C   0x1900             ADDS     R0,R0,R4
+   \   0000001E   0x0A00             LSRS     R0,R0,#+8
+   \   00000020   0xF643 0x5109      MOVW     R1,#+15625
+   \   00000024   0x4348             MULS     R0,R1,R0
+   \   00000026   0xF44F 0x717A      MOV      R1,#+1000
+   \   0000002A   0xFBB0 0xF0F1      UDIV     R0,R0,R1
+   \   0000002E   0x2100             MOVS     R1,#+0
+   \   00000030   0xBD10             POP      {R4,PC}          ;; return
+    137          }
+    138          
+    139          /*
+    140          *********************************************************************************************************
+    141          *
+    142          * Set literal frequency using decimal point KHz value
+    143          *
+    144          *********************************************************************************************************
+    145          */
+    146          
+
+   \                                 In section .text, align 2, keep-with-next
+    147          void RF69CW_SetFrequencyKHz(INT32U frq) {
+   \                     RF69CW_SetFrequencyKHz: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0x4604             MOV      R4,R0
+    148            Write_Reg(REG_AFCFEI, (1 << 1));
+   \   00000004   0x2102             MOVS     R1,#+2
+   \   00000006   0x201E             MOVS     R0,#+30
+   \   00000008   0x.... 0x....      BL       Write_Reg
+   \   0000000C   0x....             LDR.N    R0,??DataTable6_2  ;; 0x5f5e100
+   \   0000000E   0xE002             B.N      ??RF69CW_SetFrequencyKHz_0
+    149            
+    150            // accept any frequency scale as input, including KHz and MHz
+    151            while (frq < 100000000)
+    152              frq *= 10; 
+   \                     ??RF69CW_SetFrequencyKHz_1: (+1)
+   \   00000010   0xEB04 0x0184      ADD      R1,R4,R4, LSL #+2
+   \   00000014   0x004C             LSLS     R4,R1,#+1
+   \                     ??RF69CW_SetFrequencyKHz_0: (+1)
+   \   00000016   0x4284             CMP      R4,R0
+   \   00000018   0xD3FA             BCC.N    ??RF69CW_SetFrequencyKHz_1
+    153            
+    154            INT64U frf = ((INT64U)frq << 8) / (32000000L >> 11);
+   \   0000001A   0x0E21             LSRS     R1,R4,#+24
+   \   0000001C   0x0220             LSLS     R0,R4,#+8
+   \   0000001E   0xF643 0x5209      MOVW     R2,#+15625
+   \   00000022   0x2300             MOVS     R3,#+0
+   \   00000024   0x.... 0x....      BL       __aeabi_uldivmod
+   \   00000028   0x4604             MOV      R4,R0
+    155            Write_Reg(REG_FRFMSB, frf >> 16);
+   \   0000002A   0x0221             LSLS     R1,R4,#+8
+   \   0000002C   0x0E09             LSRS     R1,R1,#+24
+   \   0000002E   0x2007             MOVS     R0,#+7
+   \   00000030   0x.... 0x....      BL       Write_Reg
+    156            Write_Reg(REG_FRFMID, frf >> 8);
+   \   00000034   0x0420             LSLS     R0,R4,#+16
+   \   00000036   0x0E01             LSRS     R1,R0,#+24
+   \   00000038   0x2008             MOVS     R0,#+8
+   \   0000003A   0x.... 0x....      BL       Write_Reg
+    157            Write_Reg(REG_FRFLSB, frf);
+   \   0000003E   0xB2E1             UXTB     R1,R4
+   \   00000040   0xE8BD 0x4010      POP      {R4,LR}
+   \   00000044   0x2009             MOVS     R0,#+9
+   \   00000046   0x....             B.N      Write_Reg
+    158          
+    159          } 
+    160          /*
+    161          *********************************************************************************************************
+    162          *
+    163          * Set bitrate
+    164          *
+    165          *********************************************************************************************************
+    166          */
+    167          
+
+   \                                 In section .text, align 2, keep-with-next
+    168          void RFM69CW_SetBitrate(INT32U bitrate)
+    169          {
+   \                     RFM69CW_SetBitrate: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    170            
+    171            if (bitrate < 489) {
+   \   00000002   0xF5B0 0x7FF4      CMP      R0,#+488
+   \   00000006   0xBF92             ITEE     LS 
+   \   00000008   0xF64F 0x74FF      MOVWLS   R4,#+65535
+   \   0000000C   0x....             LDRHI.N  R1,??DataTable6_3  ;; 0x1e84800
+   \   0000000E   0xFBB1 0xF4F0      UDIVHI   R4,R1,R0
+    172              bitrate = 0xFFFF;
+    173            } else {
+    174              bitrate = 32000000L / bitrate;
+    175            }
+    176            Write_Reg(REG_BITRATEMSB, bitrate >> 8);
+   \   00000012   0x0421             LSLS     R1,R4,#+16
+   \   00000014   0x0E09             LSRS     R1,R1,#+24
+   \   00000016   0x2003             MOVS     R0,#+3
+   \   00000018   0x.... 0x....      BL       Write_Reg
+    177            Write_Reg(REG_BITRATELSB + 1, bitrate);
+   \   0000001C   0xB2E1             UXTB     R1,R4
+   \   0000001E   0xE8BD 0x4010      POP      {R4,LR}
+   \   00000022   0x2005             MOVS     R0,#+5
+   \   00000024   0x....             B.N      Write_Reg
+    178            
+    179          }
+    180          
+    181          /*
+    182          *********************************************************************************************************
+    183          *
+    184          * Set OOK bandwidth
+    185          *
+    186          *********************************************************************************************************
+    187          */
+    188          
+
+   \                                 In section .text, align 2, keep-with-next
+    189          void RFM69CW_SetBandwidth(INT8U bw)
+    190          {
+   \                     RFM69CW_SetBandwidth: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0x4604             MOV      R4,R0
+    191            Write_Reg(REG_RXBW, Read_Reg(REG_RXBW) & 0xE0 | bw);
+   \   00000004   0x2019             MOVS     R0,#+25
+   \   00000006   0x.... 0x....      BL       Read_Reg
+   \   0000000A   0xF000 0x00E0      AND      R0,R0,#0xE0
+   \   0000000E   0xEA44 0x0100      ORR      R1,R4,R0
+   \   00000012   0xE8BD 0x4010      POP      {R4,LR}
+   \   00000016   0x2019             MOVS     R0,#+25
+   \   00000018   0x....             B.N      Write_Reg
+    192          }
+    193          
+    194          /*
+    195          *********************************************************************************************************
+    196          *
+    197          * Set RSSI threshold
+    198          *
+    199          *********************************************************************************************************
+    200          */
+    201          
+
+   \                                 In section .text, align 2, keep-with-next
+    202          void RFM69CW_SetRSSIThreshold(INT8U rssi)
+    203          {
+   \                     RFM69CW_SetRSSIThreshold: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0x4604             MOV      R4,R0
+    204            Write_Reg(REG_RSSITHRESH, (-rssi << 1));
+   \   00000004   0x.... 0x....      BL       RF_CS_Assert
+   \   00000008   0x20A9             MOVS     R0,#+169
+   \   0000000A   0x.... 0x....      BL       SPI2_SendByte
+   \   0000000E   0x4260             RSBS     R0,R4,#+0
+   \   00000010   0x0640             LSLS     R0,R0,#+25
+   \   00000012   0x0E00             LSRS     R0,R0,#+24
+   \   00000014   0x....             B.N      ??Subroutine3_0
+    205          }
+    206          
+    207          /*
+    208          *********************************************************************************************************
+    209          *
+    210          * Set OOK fixed threshold
+    211          *
+    212          *********************************************************************************************************
+    213          */
+    214          
+
+   \                                 In section .text, align 2, keep-with-next
+    215          void RFM69CW_SetFixedThreshold(INT8U threshold)
+   \                     RFM69CW_SetFixedThreshold: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0x....             B.N      ?Subroutine0
+
+   \                                 In section .text, align 2, keep-with-next
+    216          {
+   \                     ?Subroutine0: (+1)
+   \   00000000   0x4604             MOV      R4,R0
+    217            Write_Reg(REG_OOKFIX, threshold);
+   \   00000002   0x.... 0x....      BL       RF_CS_Assert
+   \   00000006   0x209D             MOVS     R0,#+157
+   \   00000008                      REQUIRE ??Subroutine2_0
+   \   00000008                      ;; // Fall through to label ??Subroutine2_0
+    218          }
+    219          
+    220          /*
+    221          *********************************************************************************************************
+    222          *
+    223          * Set sensitivity boost in REG_TESTLNA
+    224          * see: http://www.sevenwatt.com/main/rfm69-ook-dagc-sensitivity-boost-and-modulation-index
+    225          *
+    226          *********************************************************************************************************
+    227          */
+    228          
+
+   \                                 In section .text, align 2, keep-with-next
+    229          void RFM69CW_SetSensitivityBoost(INT8U value)
+    230          {
+   \                     RFM69CW_SetSensitivityBoost: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0x4604             MOV      R4,R0
+    231            Write_Reg(REG_TESTLNA, value);
+   \   00000004   0x.... 0x....      BL       RF_CS_Assert
+   \   00000008   0x20D8             MOVS     R0,#+216
+   \   0000000A   0x....             B.N      ??Subroutine2_0
+    232          }
+    233          
+    234          /*
+    235          *********************************************************************************************************
+    236          */
+    237          
+
+   \                                 In section .text, align 2, keep-with-next
+    238          void RFM69CW_Sleep() {
+    239            SetMode(RF69OOK_MODE_SLEEP);
+   \                     RFM69CW_Sleep: (+1)
+   \   00000000   0x2000             MOVS     R0,#+0
+   \   00000002   0x....             B.N      SetMode
+    240          }
+    241          
+    242          /*
+    243          *********************************************************************************************************
+    244          *
+    245          * Set output power: 0=min, 31=max
+    246          * this results in a "weaker" transmitted signal, and directly results in a lower RSSI at the receiver
+    247          *
+    248          *********************************************************************************************************
+    249          */
+    250          
+
+   \                                 In section .text, align 2, keep-with-next
+    251          void RFM69CW_SetPowerLevel(INT8U powerLevel)
+    252          {
+   \                     RFM69CW_SetPowerLevel: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    253            _powerLevel = powerLevel;
+   \   00000002   0x....             LDR.N    R4,??DataTable6_4
+   \   00000004   0x7060             STRB     R0,[R4, #+1]
+    254            Write_Reg(REG_PALEVEL, (Read_Reg(REG_PALEVEL) & 0xE0) | (_powerLevel > 31 ? 31 : _powerLevel));
+   \   00000006   0x2011             MOVS     R0,#+17
+   \   00000008   0x.... 0x....      BL       Read_Reg
+   \   0000000C   0x7861             LDRB     R1,[R4, #+1]
+   \   0000000E   0x2920             CMP      R1,#+32
+   \   00000010   0xBFA8             IT       GE 
+   \   00000012   0x211F             MOVGE    R1,#+31
+   \   00000014   0xF000 0x00E0      AND      R0,R0,#0xE0
+   \   00000018   0xE8BD 0x4010      POP      {R4,LR}
+   \   0000001C   0x4301             ORRS     R1,R1,R0
+   \   0000001E   0x....             B.N      ?Subroutine1
+    255          }
+
+   \                                 In section .text, align 2, keep-with-next
+   \                     ?Subroutine1: (+1)
+   \   00000000   0x2011             MOVS     R0,#+17
+   \   00000002   0x....             B.N      Write_Reg
+    256          
+    257          /*
+    258          *********************************************************************************************************
+    259          */
+    260          
+
+   \                                 In section .text, align 2, keep-with-next
+    261          INT8U RFM69CW_ReadRSSI(CPU_BOOLEAN forceTrigger) {
+   \                     RFM69CW_ReadRSSI: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    262            if (forceTrigger)
+   \   00000002   0xB180             CBZ.N    R0,??RFM69CW_ReadRSSI_0
+    263            {
+    264              // RSSI trigger not needed if DAGC is in continuous mode
+    265              Write_Reg(REG_RSSICONFIG, RF_RSSI_START);
+   \   00000004   0x2101             MOVS     R1,#+1
+   \   00000006   0x2023             MOVS     R0,#+35
+   \   00000008   0x.... 0x....      BL       Write_Reg
+    266              while ((Read_Reg(REG_RSSICONFIG) & RF_RSSI_DONE) == 0x00); // Wait for RSSI_Ready
+   \                     ??RFM69CW_ReadRSSI_1: (+1)
+   \   0000000C   0x.... 0x....      BL       RF_CS_Assert
+   \   00000010   0x2023             MOVS     R0,#+35
+   \   00000012   0x.... 0x....      BL       SPI2_SendByte
+   \   00000016   0x2000             MOVS     R0,#+0
+   \   00000018   0x.... 0x....      BL       SPI2_SendByte
+   \   0000001C   0x4604             MOV      R4,R0
+   \   0000001E   0x.... 0x....      BL       RF_CS_Deassert
+    267            }
+   \   00000022   0x07A0             LSLS     R0,R4,#+30
+   \   00000024   0xD5F2             BPL.N    ??RFM69CW_ReadRSSI_1
+    268            return -(Read_Reg(REG_RSSIVALUE) >> 1);
+   \                     ??RFM69CW_ReadRSSI_0: (+1)
+   \   00000026   0x2024             MOVS     R0,#+36
+   \   00000028   0x.... 0x....      BL       Read_Reg
+   \   0000002C   0x0840             LSRS     R0,R0,#+1
+   \   0000002E   0x4240             RSBS     R0,R0,#+0
+   \   00000030   0xB2C0             UXTB     R0,R0
+   \   00000032   0xBD10             POP      {R4,PC}          ;; return
+    269          }
+    270          
+    271          /*
+    272          *********************************************************************************************************
+    273          */
+    274          
+
+   \                                 In section .text, align 2, keep-with-next
+    275          void RFM69CW_SetHighPower(CPU_BOOLEAN onOff) {
+   \                     RFM69CW_SetHighPower: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    276            _isRFM69HW = onOff;
+   \   00000002   0x....             LDR.N    R4,??DataTable6_4
+   \   00000004   0x7020             STRB     R0,[R4, #+0]
+    277            Write_Reg(REG_OCP, _isRFM69HW ? RF_OCP_OFF : RF_OCP_ON);
+   \   00000006   0x2800             CMP      R0,#+0
+   \   00000008   0xBF14             ITE      NE 
+   \   0000000A   0x210F             MOVNE    R1,#+15
+   \   0000000C   0x211A             MOVEQ    R1,#+26
+   \   0000000E   0x2013             MOVS     R0,#+19
+   \   00000010   0x.... 0x....      BL       Write_Reg
+    278            if (_isRFM69HW) // turning ON
+   \   00000014   0x7820             LDRB     R0,[R4, #+0]
+   \   00000016   0xB138             CBZ.N    R0,??RFM69CW_SetHighPower_0
+    279              Write_Reg(REG_PALEVEL, (Read_Reg(REG_PALEVEL) & 0x1F) | RF_PALEVEL_PA1_ON | RF_PALEVEL_PA2_ON); // enable P1 & P2 amplifier stages
+   \   00000018   0x2011             MOVS     R0,#+17
+   \   0000001A   0x.... 0x....      BL       Read_Reg
+   \   0000001E   0xF000 0x001F      AND      R0,R0,#0x1F
+   \   00000022   0xF040 0x0160      ORR      R1,R0,#0x60
+   \   00000026   0xE002             B.N      ??RFM69CW_SetHighPower_1
+    280            else
+    281              Write_Reg(REG_PALEVEL, RF_PALEVEL_PA0_ON | RF_PALEVEL_PA1_OFF | RF_PALEVEL_PA2_OFF | _powerLevel); // enable P0 only
+   \                     ??RFM69CW_SetHighPower_0: (+1)
+   \   00000028   0x7860             LDRB     R0,[R4, #+1]
+   \   0000002A   0xF040 0x0180      ORR      R1,R0,#0x80
+   \                     ??RFM69CW_SetHighPower_1: (+1)
+   \   0000002E   0xE8BD 0x4010      POP      {R4,LR}
+   \   00000032                      REQUIRE ?Subroutine1
+   \   00000032                      ;; // Fall through to label ?Subroutine1
+    282          }
+    283          /*
+    284          *********************************************************************************************************
+    285          */
+    286          
+
+   \                                 In section .text, align 2, keep-with-next
+    287          void RF69CW_SetThd (INT8U thd) {
+   \                     RF69CW_SetThd: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002                      REQUIRE ?Subroutine0
+   \   00000002                      ;; // Fall through to label ?Subroutine0
+    288            Write_Reg(REG_OOKFIX, thd);
+    289          }
+    290          /*
+    291          *********************************************************************************************************
+    292          */
+    293          
+
+   \                                 In section .text, align 2, keep-with-next
+    294          void RF69CW_SetBW (INT8U bw) {
+   \                     RF69CW_SetBW: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0x4604             MOV      R4,R0
+    295            Write_Reg(REG_RXBW, 0x40 | bw);
+   \   00000004   0x.... 0x....      BL       RF_CS_Assert
+   \   00000008   0x2099             MOVS     R0,#+153
+   \   0000000A   0x.... 0x....      BL       SPI2_SendByte
+   \   0000000E   0xF044 0x0040      ORR      R0,R4,#0x40
+   \   00000012   0x....             B.N      ??Subroutine3_0
+    296          } 
+    297          
+    298          /*
+    299          *********************************************************************************************************
+    300          */
+    301          
+
+   \                                 In section .text, align 2, keep-with-next
+    302          void RF69CW_OOKthdMode(INT8U thdmode) {
+    303            Write_Reg(REG_OOKPEAK, thdmode);
+   \                     RF69CW_OOKthdMode: (+1)
+   \   00000000   0x4601             MOV      R1,R0
+   \   00000002   0x201B             MOVS     R0,#+27
+   \   00000004   0x....             B.N      Write_Reg
+    304          }
+    305          
+    306          /*
+    307          *********************************************************************************************************
+    308          *
+    309          * for debugging
+    310          *
+    311          *********************************************************************************************************
+    312          */
+    313          
+
+   \                                 In section .text, align 2, keep-with-next
+    314          void RFM69CW_ReadAllRegs(void)
+    315          {
+   \                     RFM69CW_ReadAllRegs: (+1)
+   \   00000000   0xB570             PUSH     {R4-R6,LR}
+    316            
+    317            for (INT8U regAddr = 0; regAddr <= 0x6F; regAddr++) {
+   \   00000002   0x2400             MOVS     R4,#+0
+   \   00000004   0x....             LDR.N    R5,??DataTable6_5
+    318              regVal[regAddr] = Read_Reg(regAddr);
+   \                     ??RFM69CW_ReadAllRegs_0: (+1)
+   \   00000006   0x.... 0x....      BL       RF_CS_Assert
+   \   0000000A   0xF004 0x007F      AND      R0,R4,#0x7F
+   \   0000000E   0x.... 0x....      BL       SPI2_SendByte
+   \   00000012   0x2000             MOVS     R0,#+0
+   \   00000014   0x.... 0x....      BL       SPI2_SendByte
+   \   00000018   0x4606             MOV      R6,R0
+   \   0000001A   0x.... 0x....      BL       RF_CS_Deassert
+    319            }
+   \   0000001E   0x1C64             ADDS     R4,R4,#+1
+   \   00000020   0x2C70             CMP      R4,#+112
+   \   00000022   0xF805 0x6B01      STRB     R6,[R5], #+1
+   \   00000026   0xDBEE             BLT.N    ??RFM69CW_ReadAllRegs_0
+    320          }
+   \   00000028   0xBD70             POP      {R4-R6,PC}       ;; return
+    321          
+
+   \                                 In section .text, align 2, keep-with-next
+    322          INT8U RFM69CW_ReadTemperature(INT8U calFactor)  // returns centigrade
+    323          {
+   \                     RFM69CW_ReadTemperature: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+   \   00000002   0x4604             MOV      R4,R0
+    324            SetMode(RF69OOK_MODE_STANDBY);
+   \   00000004   0x2001             MOVS     R0,#+1
+   \   00000006   0x.... 0x....      BL       SetMode
+    325            Write_Reg(REG_TEMP1, RF_TEMP1_MEAS_START);
+   \   0000000A   0x2108             MOVS     R1,#+8
+   \   0000000C   0x204E             MOVS     R0,#+78
+   \   0000000E   0x.... 0x....      BL       Write_Reg
+    326            while ((Read_Reg(REG_TEMP1) & RF_TEMP1_MEAS_RUNNING));
+   \                     ??RFM69CW_ReadTemperature_0: (+1)
+   \   00000012   0x.... 0x....      BL       RF_CS_Assert
+   \   00000016   0x204E             MOVS     R0,#+78
+   \   00000018   0x.... 0x....      BL       SPI2_SendByte
+   \   0000001C   0x2000             MOVS     R0,#+0
+   \   0000001E   0x.... 0x....      BL       SPI2_SendByte
+   \   00000022   0x4605             MOV      R5,R0
+   \   00000024   0x.... 0x....      BL       RF_CS_Deassert
+   \   00000028   0x0768             LSLS     R0,R5,#+29
+   \   0000002A   0xD4F2             BMI.N    ??RFM69CW_ReadTemperature_0
+    327            return Read_Reg(REG_TEMP2) + COURSE_TEMP_COEF + calFactor; // 'complement' corrects the slope, rising temp = rising val
+   \   0000002C   0x204F             MOVS     R0,#+79
+   \   0000002E   0x.... 0x....      BL       Read_Reg
+   \   00000032   0x1820             ADDS     R0,R4,R0
+   \   00000034   0x385A             SUBS     R0,R0,#+90
+   \   00000036   0xB2C0             UXTB     R0,R0
+   \   00000038   0xBD32             POP      {R1,R4,R5,PC}    ;; return
+    328          }                                                            // COURSE_TEMP_COEF puts reading in the ballpark, user can add additional correction
+    329          
+
+   \                                 In section .text, align 2, keep-with-next
+    330          void RFM69CW_RcCalibitrateation(void)
+    331          {
+   \                     RFM69CW_RcCalibitrateation: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    332            Write_Reg(REG_OSC1, RF_OSC1_RCCAL_START);
+   \   00000002   0x2180             MOVS     R1,#+128
+   \   00000004   0x200A             MOVS     R0,#+10
+   \   00000006   0x.... 0x....      BL       Write_Reg
+    333            while ((Read_Reg(REG_OSC1) & RF_OSC1_RCCAL_DONE) == 0x00);
+   \                     ??RFM69CW_RcCalibitrateation_0: (+1)
+   \   0000000A   0x.... 0x....      BL       RF_CS_Assert
+   \   0000000E   0x200A             MOVS     R0,#+10
+   \   00000010   0x.... 0x....      BL       SPI2_SendByte
+   \   00000014   0x2000             MOVS     R0,#+0
+   \   00000016   0x.... 0x....      BL       SPI2_SendByte
+   \   0000001A   0x4604             MOV      R4,R0
+   \   0000001C   0x.... 0x....      BL       RF_CS_Deassert
+   \   00000020   0x0660             LSLS     R0,R4,#+25
+   \   00000022   0xD5F2             BPL.N    ??RFM69CW_RcCalibitrateation_0
+    334          } 
+   \   00000024   0xBD10             POP      {R4,PC}          ;; return
+    335          
+    336          /*
+    337          *********************************************************************************************************
+    338          */
+    339          
+
+   \                                 In section .text, align 2, keep-with-next
+    340          CPU_BOOLEAN RFM69CW_InitializeOOK(void)
+    341          {
+   \                     RFM69CW_InitializeOOK: (+1)
+   \   00000000   0xB550             PUSH     {R4,R6,LR}
+   \   00000002   0xB089             SUB      SP,SP,#+36
+    342            const INT8U CONFIG[][2] =
+    343            {
+    344              /* 0x01 */ { REG_OPMODE, RF_OPMODE_STANDBY },
+    345              /* 0x02 */ { REG_DATAMODUL, RF_DATAMODUL_DATAMODE_CONTINUOUSNOBSYNC | RF_DATAMODUL_MODULATIONTYPE_OOK | RF_DATAMODUL_MODULATIONSHAPING_00 },         // no shaping
+    346              /* 0x03 */ { REG_BITRATEMSB, 0x03 },                                                                                                                 // bitrate: 32768 Hz
+    347              /* 0x04 */ { REG_BITRATELSB, 0xD1 },
+    348              /* 0x0B */ { REG_AFCCTRL, RF_AFCCTRL_LOWBETA_ON },
+    349          //    /* 0x18 */ { REG_LNA, RF_LNA_ZIN_200 | RF_LNA_GAINSELECT_MAX },             // default
+    350          //    /* 0x18 */ { REG_LNA, RF_LNA_ZIN_50 | RF_LNA_GAINSELECT_AUTO },
+    351              /* 0x18 */ { REG_LNA, RF_LNA_ZIN_50 | RF_LNA_GAINSELECT_MAX },
+    352              /* 0x19 */ { REG_RXBW, RF_RXBW_DCCFREQ_010 },
+    353              /* 0x1B */ { REG_OOKPEAK, RF_OOKPEAK_THRESHTYPE_PEAK | RF_OOKPEAK_PEAKTHRESHDEC_011 },
+    354              /* 0x1C */ { REG_OOKAVG, RF_OOKAVG_AVERAGETHRESHFILT_10 },
+    355              /* 0x1D */ { REG_OOKFIX, 0x38 },     
+    356              /* 0x1E */ { REG_AFCFEI, RF_AFCFEI_AFCAUTO_OFF },
+    357              /* 0x25 */ { REG_DIOMAPPING1, RF_DIOMAPPING1_DIO0_10 },
+    358              /* 0x26 */ { REG_DIOMAPPING2, RF_DIOMAPPING2_CLKOUT_OFF },
+    359              /* 0x29 */ { REG_RSSITHRESH, 0xFF },
+    360              /* 0x2E */ { REG_SYNCCONFIG, RF_SYNC_OFF },
+    361          //    /* 0x58 */ { REG_TESTLNA, RF_TESTLNA_HIGH_SENSITIVITY },                      // default false
+    362              /* 0x6F */ { REG_TESTDAGC, RF_DAGC_IMPROVED_LOWBETA1 },
+    363              {255, 0}
+    364            };
+   \   00000004   0x4668             MOV      R0,SP
+   \   00000006   0x.... 0x....      ADR.W    R1,?_0
+   \   0000000A   0x2224             MOVS     R2,#+36
+   \   0000000C   0x.... 0x....      BL       __aeabi_memcpy4
+    365          
+    366            for (INT8U i = 0; CONFIG[i][0] != 255; i++)
+   \   00000010   0x2400             MOVS     R4,#+0
+   \   00000012   0xE00F             B.N      ??RFM69CW_InitializeOOK_0
+    367              Write_Reg(CONFIG[i][0], CONFIG[i][1]);
+   \                     ??RFM69CW_InitializeOOK_1: (+1)
+   \   00000014   0x.... 0x....      BL       RF_CS_Assert
+   \   00000018   0xF046 0x0080      ORR      R0,R6,#0x80
+   \   0000001C   0x.... 0x....      BL       SPI2_SendByte
+   \   00000020   0x4668             MOV      R0,SP
+   \   00000022   0xEB00 0x0044      ADD      R0,R0,R4, LSL #+1
+   \   00000026   0x1C64             ADDS     R4,R4,#+1
+   \   00000028   0x7840             LDRB     R0,[R0, #+1]
+   \   0000002A   0x.... 0x....      BL       SPI2_SendByte
+   \   0000002E   0x.... 0x....      BL       RF_CS_Deassert
+   \   00000032   0xB2E4             UXTB     R4,R4
+   \                     ??RFM69CW_InitializeOOK_0: (+1)
+   \   00000034   0xF81D 0x6014      LDRB     R6,[SP, R4, LSL #+1]
+   \   00000038   0x2EFF             CMP      R6,#+255
+   \   0000003A   0xD1EB             BNE.N    ??RFM69CW_InitializeOOK_1
+    368          
+    369            RF69CW_OOKthdMode(0x40);
+   \   0000003C   0x2140             MOVS     R1,#+64
+   \   0000003E   0x201B             MOVS     R0,#+27
+   \   00000040   0x.... 0x....      BL       Write_Reg
+    370            RFM69CW_SetBitrate(32768);
+   \   00000044   0xF44F 0x4000      MOV      R0,#+32768
+   \   00000048   0x.... 0x....      BL       RFM69CW_SetBitrate
+    371            RF69CW_SetFrequencyKHz(868400);
+   \   0000004C   0x....             LDR.N    R0,??DataTable6_6  ;; 0xd4030
+   \   0000004E   0x.... 0x....      BL       RF69CW_SetFrequencyKHz
+    372            RF69CW_SetBW( 16 );
+   \   00000052   0x2150             MOVS     R1,#+80
+   \   00000054   0x2019             MOVS     R0,#+25
+   \   00000056   0x.... 0x....      BL       Write_Reg
+    373            RF69CW_SetThd(55);
+   \   0000005A   0x2137             MOVS     R1,#+55
+   \   0000005C   0x201D             MOVS     R0,#+29
+   \   0000005E   0x.... 0x....      BL       Write_Reg
+    374            RFM69CW_SetPowerLevel(20); //31 max
+   \   00000062   0x2014             MOVS     R0,#+20
+   \   00000064   0x.... 0x....      BL       RFM69CW_SetPowerLevel
+    375          
+    376            Write_Reg(REG_AFCFEI, (1 << 1));
+   \   00000068   0x2102             MOVS     R1,#+2
+   \   0000006A   0x201E             MOVS     R0,#+30
+   \   0000006C   0x.... 0x....      BL       Write_Reg
+    377          
+    378            SetMode(RF_OPMODE_RECEIVER);
+   \   00000070   0x2010             MOVS     R0,#+16
+   \   00000072   0x.... 0x....      BL       SetMode
+    379            
+    380            return true;
+   \   00000076   0x2001             MOVS     R0,#+1
+   \   00000078   0xB009             ADD      SP,SP,#+36
+   \   0000007A   0xBD50             POP      {R4,R6,PC}       ;; return
+    381          }
+
+   \                                 In section .text, align 2, keep-with-next
+   \                     ??Subroutine2_0: (+1)
+   \   00000000   0x.... 0x....      BL       SPI2_SendByte
+   \   00000004   0x4620             MOV      R0,R4
+   \   00000006                      REQUIRE ??Subroutine3_0
+   \   00000006                      ;; // Fall through to label ??Subroutine3_0
+
+   \                                 In section .text, align 2, keep-with-next
+   \                     ??Subroutine3_0: (+1)
+   \   00000000   0x.... 0x....      BL       SPI2_SendByte
+   \   00000004   0xE8BD 0x4010      POP      {R4,LR}
+   \   00000008   0x.... 0x....      B.W      RF_CS_Deassert
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6:
+   \   00000000   0x40011000         DC32     0x40011000
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_1:
+   \   00000000   0x........         DC32     RF_ISRHandler
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_2:
+   \   00000000   0x05F5E100         DC32     0x5f5e100
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_3:
+   \   00000000   0x01E84800         DC32     0x1e84800
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_4:
+   \   00000000   0x........         DC32     _isRFM69HW
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_5:
+   \   00000000   0x........         DC32     regVal
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_6:
+   \   00000000   0x000D4030         DC32     0xd4030
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ?_0:
+   \   00000000   0x01 0x04          DC8 1, 4, 2, 104, 3, 3, 4, 209, 11, 32, 24, 1, 25, 64, 27, 67, 28, 128
+   \              0x02 0x68    
+   \              0x03 0x03    
+   \              0x04 0xD1    
+   \              0x0B 0x20    
+   \              0x18 0x01    
+   \              0x19 0x40    
+   \              0x1B 0x43    
+   \              0x1C 0x80    
+   \   00000012   0x1D 0x38          DC8 29, 56, 30, 0, 37, 128, 38, 7, 41, 255, 46, 0, 111, 32, 255, 0
+   \              0x1E 0x00    
+   \              0x25 0x80    
+   \              0x26 0x07    
+   \              0x29 0xFF    
+   \              0x2E 0x00    
+   \              0x6F 0x20    
+   \              0xFF 0x00    
+   \   00000022   0x00 0x00          DC8 0, 0
+    382          
+    383          #endif
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   RF69CW_OOKthdMode
+         0   -> Write_Reg
+       8   RF69CW_SetBW
+         8   -> RF_CS_Assert
+         0   -> RF_CS_Deassert
+         8   -> SPI2_SendByte
+       8   RF69CW_SetFrequencyKHz
+         0   -> Write_Reg
+         8   -> Write_Reg
+         8 __aeabi_uldivmod
+       0   RF69CW_SetThd
+         8   -> RF_CS_Assert
+         0   -> RF_CS_Deassert
+         8   -> SPI2_SendByte
+      16   RFM69CW_ExtiEnabled
+        16   -> BSP_IntVectSet
+        16   -> EXTI_GenerateSWInterrupt
+        16   -> EXTI_Init
+        16   -> GPIO_EXTILineConfig
+        16   -> GPIO_Init
+        16   -> RCC_APB2PeriphClockCmd
+       8   RFM69CW_GetFrequency
+         8   -> Read_Reg
+      48   RFM69CW_InitializeOOK
+        48   -> RF69CW_SetFrequencyKHz
+        48   -> RFM69CW_SetBitrate
+        48   -> RFM69CW_SetPowerLevel
+        48   -> RF_CS_Assert
+        48   -> RF_CS_Deassert
+        48   -> SPI2_SendByte
+        48   -> SetMode
+        48   -> Write_Reg
+        48   -> __aeabi_memcpy4
+       8   RFM69CW_RcCalibitrateation
+         8   -> RF_CS_Assert
+         8   -> RF_CS_Deassert
+         8   -> SPI2_SendByte
+         8   -> Write_Reg
+      16   RFM69CW_ReadAllRegs
+        16   -> RF_CS_Assert
+        16   -> RF_CS_Deassert
+        16   -> SPI2_SendByte
+       8   RFM69CW_ReadRSSI
+         8   -> RF_CS_Assert
+         8   -> RF_CS_Deassert
+         8   -> Read_Reg
+         8   -> SPI2_SendByte
+         8   -> Write_Reg
+      16   RFM69CW_ReadTemperature
+        16   -> RF_CS_Assert
+        16   -> RF_CS_Deassert
+        16   -> Read_Reg
+        16   -> SPI2_SendByte
+        16   -> SetMode
+        16   -> Write_Reg
+       8   RFM69CW_SetBandwidth
+         8   -> Read_Reg
+         0   -> Write_Reg
+       8   RFM69CW_SetBitrate
+         0   -> Write_Reg
+         8   -> Write_Reg
+       8   RFM69CW_SetFixedThreshold
+         8   -> RF_CS_Assert
+         0   -> RF_CS_Deassert
+         8   -> SPI2_SendByte
+       8   RFM69CW_SetHighPower
+         8   -> Read_Reg
+         0   -> Write_Reg
+         8   -> Write_Reg
+       8   RFM69CW_SetPowerLevel
+         8   -> Read_Reg
+         0   -> Write_Reg
+       8   RFM69CW_SetRSSIThreshold
+         8   -> RF_CS_Assert
+         0   -> RF_CS_Deassert
+         8   -> SPI2_SendByte
+       8   RFM69CW_SetSensitivityBoost
+         8   -> RF_CS_Assert
+         0   -> RF_CS_Deassert
+         8   -> SPI2_SendByte
+       0   RFM69CW_Sleep
+         0   -> SetMode
+       8   Read_Reg
+         8   -> RF_CS_Assert
+         8   -> RF_CS_Deassert
+         8   -> SPI2_SendByte
+       8   SetHighPowerRegs
+         0   -> Write_Reg
+         8   -> Write_Reg
+       8   SetMode
+         8   -> RF_CS_Assert
+         8   -> RF_CS_Deassert
+         8   -> Read_Reg
+         8   -> SPI2_SendByte
+         8   -> Write_Reg
+      16   Write_Reg
+        16   -> RF_CS_Assert
+         0   -> RF_CS_Deassert
+        16   -> SPI2_SendByte
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable6
+       4  ??DataTable6_1
+       4  ??DataTable6_2
+       4  ??DataTable6_3
+       4  ??DataTable6_4
+       4  ??DataTable6_5
+       4  ??DataTable6_6
+       6  ??Subroutine2_0
+      12  ??Subroutine3_0
+       8  ?Subroutine0
+       4  ?Subroutine1
+      36  ?_0
+       6  RF69CW_OOKthdMode
+      20  RF69CW_SetBW
+      72  RF69CW_SetFrequencyKHz
+       2  RF69CW_SetThd
+      92  RFM69CW_ExtiEnabled
+      50  RFM69CW_GetFrequency
+     124  RFM69CW_InitializeOOK
+      38  RFM69CW_RcCalibitrateation
+      42  RFM69CW_ReadAllRegs
+      52  RFM69CW_ReadRSSI
+      58  RFM69CW_ReadTemperature
+      26  RFM69CW_SetBandwidth
+      38  RFM69CW_SetBitrate
+       4  RFM69CW_SetFixedThreshold
+      50  RFM69CW_SetHighPower
+      32  RFM69CW_SetPowerLevel
+      22  RFM69CW_SetRSSIThreshold
+      12  RFM69CW_SetSensitivityBoost
+       4  RFM69CW_Sleep
+      32  Read_Reg
+      32  SetHighPowerRegs
+      52  SetMode
+      32  Write_Reg
+       2  _isRFM69HW
+          _powerLevel
+     112  regVal
+
+ 
+ 112 bytes in section .bss
+   2 bytes in section .data
+ 986 bytes in section .text
+ 
+ 986 bytes of CODE memory
+ 114 bytes of DATA memory
+
+Errors: none
+Warnings: none

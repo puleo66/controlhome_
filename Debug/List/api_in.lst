@@ -1,0 +1,208 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:14:43
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\api_in.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\api_in.c"
+#        -lCN "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List" -o
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\api_in.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\api_in.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\api_in.c
+      1          /*
+      2          **********************************************************************
+      3          *                          Micrium, Inc.
+      4          *                      949 Crestview Circle
+      5          *                     Weston,  FL 33327-1848
+      6          *
+      7          *                            uC/FS
+      8          *
+      9          *             (c) Copyright 2001 - 2003, Micrium, Inc.
+     10          *                      All rights reserved.
+     11          *
+     12          ***********************************************************************
+     13          
+     14          ----------------------------------------------------------------------
+     15          File        : api_in.c
+     16          Purpose     : FS read functions
+     17          ----------------------------------------------------------------------
+     18          Known problems or limitations with current version
+     19          ----------------------------------------------------------------------
+     20          None.
+     21          ---------------------------END-OF-HEADER------------------------------
+     22          */
+     23          
+     24          /*********************************************************************
+     25          *
+     26          *             #include Section
+     27          *
+     28          **********************************************************************
+     29          */
+     30          
+     31          #include "fs_port.h"
+     32          #include "fs_dev.h"
+     33          #include "fs_api.h"
+     34          #include "fs_os.h"
+     35          #include "fs_fsl.h"
+     36          #include "fs_int.h"
+     37          
+     38          
+     39          /*********************************************************************
+     40          *
+     41          *             Global functions
+     42          *
+     43          **********************************************************************
+     44          */
+     45          
+     46          /*********************************************************************
+     47          *
+     48          *             FS_FRead
+     49          *
+     50            Description:
+     51            API function. Read data from a file.
+     52          
+     53            Parameters:
+     54            pData       - Pointer to a data buffer for storing data transferred
+     55                          from file. 
+     56            Size        - Size of an element to be transferred from file to data
+     57                          buffer
+     58            N           - Number of elements to be transferred from the file.
+     59            pFile       - Pointer to a FS_FILE data structure.
+     60            
+     61            Return value:
+     62            Number of elements read.
+     63          */
+     64          
+
+   \                                 In section .text, align 4, keep-with-next
+     65          FS_size_t FS_FRead(void *pData, FS_size_t Size, FS_size_t N, FS_FILE *pFile) {
+   \                     FS_FRead: (+1)
+   \   00000000   0xE92D 0x41F0      PUSH     {R4-R8,LR}
+   \   00000004   0xEA5F 0x0803      MOVS     R8,R3
+   \   00000008   0x4604             MOV      R4,R0
+   \   0000000A   0x460D             MOV      R5,R1
+   \   0000000C   0x4616             MOV      R6,R2
+     66            FS_size_t i;
+     67          
+     68            if (!pFile) {
+   \   0000000E   0xD00C             BEQ.N    ??FS_FRead_0
+     69              return 0;  /* No pointer to a FS_FILE structure */
+     70            }
+     71            FS_X_OS_LockFileOp(pFile);
+   \   00000010   0x4640             MOV      R0,R8
+   \   00000012   0x.... 0x....      BL       FS_X_OS_LockFileOp
+     72            if (!pFile->mode_r) {
+   \   00000016   0xF108 0x001C      ADD      R0,R8,#+28
+   \   0000001A   0x79C1             LDRB     R1,[R0, #+7]
+   \   0000001C   0xB941             CBNZ.N   R1,??FS_FRead_1
+     73              /* File open mode does not allow read ops */
+     74              pFile->error = FS_ERR_WRITEONLY;
+   \   0000001E   0xF06F 0x013F      MVN      R1,#+63
+   \   00000022   0x8081             STRH     R1,[R0, #+4]
+     75              FS_X_OS_UnlockFileOp(pFile);
+   \   00000024   0x4640             MOV      R0,R8
+   \   00000026   0x.... 0x....      BL       FS_X_OS_UnlockFileOp
+     76              return 0;
+   \                     ??FS_FRead_0: (+1)
+   \   0000002A   0x2000             MOVS     R0,#+0
+   \   0000002C   0xE8BD 0x81F0      POP      {R4-R8,PC}
+     77            }
+     78            i = 0;
+     79            if (pFile->dev_index >= 0) {
+   \                     ??FS_FRead_1: (+1)
+   \   00000030   0x6800             LDR      R0,[R0, #+0]
+   \   00000032   0x2700             MOVS     R7,#+0
+   \   00000034   0x2800             CMP      R0,#+0
+   \   00000036   0xD40F             BMI.N    ??FS_FRead_2
+   \   00000038   0x490A             LDR.N    R1,??FS_FRead_3
+   \   0000003A   0x6809             LDR      R1,[R1, #+0]
+   \   0000003C   0xEB01 0x1000      ADD      R0,R1,R0, LSL #+4
+   \   00000040   0x6840             LDR      R0,[R0, #+4]
+   \   00000042   0xF8D0 0xC00C      LDR      R12,[R0, #+12]
+   \   00000046   0xF1BC 0x0F00      CMP      R12,#+0
+   \   0000004A   0xD005             BEQ.N    ??FS_FRead_2
+     80              if (FS__pDevInfo[pFile->dev_index].fs_ptr->fsl_fread) {
+     81                /* Execute the FSL function  */
+     82                i = (FS__pDevInfo[pFile->dev_index].fs_ptr->fsl_fread)(pData, Size, N, pFile);
+   \   0000004C   0x4643             MOV      R3,R8
+   \   0000004E   0x4632             MOV      R2,R6
+   \   00000050   0x4629             MOV      R1,R5
+   \   00000052   0x4620             MOV      R0,R4
+   \   00000054   0x47E0             BLX      R12
+   \   00000056   0x4607             MOV      R7,R0
+     83              }
+     84            }
+     85            FS_X_OS_UnlockFileOp(pFile);
+   \                     ??FS_FRead_2: (+1)
+   \   00000058   0x4640             MOV      R0,R8
+   \   0000005A   0x.... 0x....      BL       FS_X_OS_UnlockFileOp
+     86            return i;  
+   \   0000005E   0x4638             MOV      R0,R7
+   \   00000060   0xE8BD 0x81F0      POP      {R4-R8,PC}       ;; return
+   \                     ??FS_FRead_3:
+   \   00000064   0x........         DC32     FS__pDevInfo
+     87          }
+     88          
+     89          
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      24   FS_FRead
+        24   -- Indirect call
+        24   -> FS_X_OS_LockFileOp
+        24   -> FS_X_OS_UnlockFileOp
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+     104  FS_FRead
+
+ 
+ 104 bytes in section .text
+ 
+ 104 bytes of CODE memory
+
+Errors: none
+Warnings: none

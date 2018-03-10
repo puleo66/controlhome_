@@ -1,0 +1,274 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:15:18
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\uc-terminal\src\usbterm.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome -
+#        RF69w\uc-terminal\src\usbterm.c" -lCN "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\usbterm.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\usbterm.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uc-terminal\src\usbterm.c
+      1          /*
+      2          *********************************************************************************************************
+      3          *                                           USBTerminal Interface
+      4          *
+      5          *
+      6          *
+      7          * Filename   : usbterm.c
+      8          * Version    : V1.00
+      9          * Programmer : Puleo
+     10          *********************************************************************************************************
+     11          */
+     12          
+     13          #define  USBTERM_GLOBALS
+     14          #include <includes.h>
+     15          
+     16          #if USBD_MODULE == DEF_ENABLED
+     17          
+     18          /*
+     19          *********************************************************************************************************
+     20          *                                               CONSTANTS
+     21          *********************************************************************************************************
+     22          */
+     23          
+     24          
+     25          /*
+     26          *********************************************************************************************************
+     27          *                                           LOCAL VARIABLES
+     28          *********************************************************************************************************
+     29          */
+     30          
+     31          #if USBTERM_PARSE_TASK > 0
+
+   \                                 In section .bss, align 4
+     32           OS_STK     USBTerm_TaskStk[USBTERM_TASK_STK_SIZE];
+   \                     USBTerm_TaskStk:
+   \   00000000                      DS8 512
+     33          #endif
+     34          
+     35          extern INT8U ucData; 
+     36          //extern CPU_CHAR str[60];
+     37          
+     38          //INT32U  timeos;
+     39          //void   View_TerminalRxSetCallback(void (*call_back)(INT8U data));
+     40          /*
+     41          *********************************************************************************************************
+     42          *                                      LOCAL FUNCTION PROTOTYPES
+     43          *********************************************************************************************************
+     44          */
+     45          
+     46          #if USBTERM_PARSE_TASK > 0
+     47          void    USBTerm_InitOS(void);
+     48          void    USBTerm_Task(void *p_arg);
+     49          #endif
+     50          
+     51          /*
+     52          *********************************************************************************************************
+     53          *                                       INITIALIZE THERMO
+     54          *********************************************************************************************************
+     55          */
+     56          
+
+   \                                 In section .text, align 2, keep-with-next
+     57          void   USBTerm_Init (void)
+     58          {
+   \                     USBTerm_Init: (+1)
+   \   00000000   0xB500             PUSH     {LR}
+   \   00000002   0xB087             SUB      SP,SP,#+28
+     59          
+     60          #if USBTERM_PARSE_TASK > 0
+     61              USBTerm_InitOS();
+   \   00000004   0x2103             MOVS     R1,#+3
+   \   00000006   0x9104             STR      R1,[SP, #+16]
+   \   00000008   0x2100             MOVS     R1,#+0
+   \   0000000A   0x9103             STR      R1,[SP, #+12]
+   \   0000000C   0x2180             MOVS     R1,#+128
+   \   0000000E   0x9102             STR      R1,[SP, #+8]
+   \   00000010   0x210D             MOVS     R1,#+13
+   \   00000012   0x....             LDR.N    R0,??DataTable2
+   \   00000014   0x9001             STR      R0,[SP, #+4]
+   \   00000016   0x9100             STR      R1,[SP, #+0]
+   \   00000018   0xF500 0x72FE      ADD      R2,R0,#+508
+   \   0000001C   0x2308             MOVS     R3,#+8
+   \   0000001E   0x2100             MOVS     R1,#+0
+   \   00000020   0x.... 0x....      ADR.W    R0,USBTerm_Task
+   \   00000024   0x.... 0x....      BL       OSTaskCreateExt
+   \   00000028   0xAA05             ADD      R2,SP,#+20
+   \   0000002A   0x.... 0x....      ADR.W    R1,?_0
+   \   0000002E   0x2008             MOVS     R0,#+8
+   \   00000030   0x.... 0x....      BL       OSTaskNameSet
+     62          #endif
+     63          
+     64          }
+   \   00000034   0xB007             ADD      SP,SP,#+28
+   \   00000036   0xBD00             POP      {PC}             ;; return
+     65          
+     66          /*
+     67          *********************************************************************************************************
+     68          *                             INITIALIZE THE THERMO TASK AND OS OBJECTS
+     69          *********************************************************************************************************
+     70          */
+     71          
+     72          #if USBTERM_PARSE_TASK > 0
+     73          static  void  USBTerm_InitOS (void)
+     74          {
+     75          #if OS_TASK_NAME_SIZE > 0 || OS_EVENT_NAME_SIZE > 7
+     76              INT8U  err;
+     77          #endif
+     78          
+     79              (void)OSTaskCreateExt(USBTerm_Task,
+     80                                    (void *)0,                                  /* No arguments passed to Wifly_Task() */
+     81                                    &USBTerm_TaskStk[USBTERM_TASK_STK_SIZE - 1],    /* Set Top-Of-Stack                     */
+     82                                    USBTERM_TASK_PRIO,                            /* Lowest priority level                */
+     83                                    USBTERM_TASK_ID,
+     84                                    &USBTerm_TaskStk[0],                           /* Set Bottom-Of-Stack                  */
+     85                                    USBTERM_TASK_STK_SIZE,
+     86                                    (void *)0,                                   /* No TCB extension                     */
+     87                                    OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR);  /* Enable stack checking + clear stack  */
+     88          
+     89          #if OS_TASK_NAME_SIZE > 11
+     90              OSTaskNameSet(USBTERM_TASK_PRIO, (INT8U *)"USBTerm Task", &err);
+     91          #endif
+     92          }
+     93          #endif
+     94          
+     95          /*
+     96          *********************************************************************************************************
+     97          *                                           THERMO TASK
+     98          *********************************************************************************************************
+     99          */
+    100          
+    101          #if USBTERM_PARSE_TASK > 0
+
+   \                                 In section .text, align 4, keep-with-next
+    102          void  USBTerm_Task (void *p_arg)
+    103          {
+   \                     USBTerm_Task: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    104          
+    105              (void)p_arg;
+    106              
+    107              Set_USBSystem();
+   \   00000002   0x.... 0x....      BL       Set_USBSystem
+   \   00000006   0x....             LDR.N    R4,??DataTable2_1
+    108              
+    109                
+    110              while (1) {
+    111                if (usb_GetRxByte() == TRUE){
+   \                     ??USBTerm_Task_0: (+1)
+   \   00000008   0x.... 0x....      BL       usb_GetRxByte
+   \   0000000C   0x2801             CMP      R0,#+1
+   \   0000000E   0xBF04             ITT      EQ 
+    112                  View_RxHandler (ucData);
+   \   00000010   0x7820             LDRBEQ   R0,[R4, #+0]
+   \   00000012   0x.... 0x....      BLEQ     View_RxHandler
+    113                }
+    114          
+    115                OSTimeDlyHMSM(0, 0, 0, 100);
+   \   00000016   0x2364             MOVS     R3,#+100
+   \   00000018   0x2200             MOVS     R2,#+0
+   \   0000001A   0x2100             MOVS     R1,#+0
+   \   0000001C   0x2000             MOVS     R0,#+0
+   \   0000001E   0x.... 0x....      BL       OSTimeDlyHMSM
+   \   00000022   0xE7F1             B.N      ??USBTerm_Task_0
+    116              }  
+    117          }    
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable2:
+   \   00000000   0x........         DC32     USBTerm_TaskStk
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable2_1:
+   \   00000000   0x........         DC32     ucData
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ?_0:
+   \   00000000   0x55 0x53          DC8 "USBTerm Task"
+   \              0x42 0x54    
+   \              0x65 0x72    
+   \              0x6D 0x20    
+   \              0x54 0x61    
+   \              0x73 0x6B    
+   \              0x00         
+   \   0000000D   0x00 0x00          DC8 0, 0, 0
+   \              0x00         
+    118          
+    119          #endif
+    120          
+    121          #endif
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      32   USBTerm_Init
+        32   -> OSTaskCreateExt
+        32   -> OSTaskNameSet
+       8   USBTerm_Task
+         8   -> OSTimeDlyHMSM
+         8   -> Set_USBSystem
+         8   -> View_RxHandler
+         8   -> usb_GetRxByte
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable2
+       4  ??DataTable2_1
+      16  ?_0
+      56  USBTerm_Init
+      36  USBTerm_Task
+     512  USBTerm_TaskStk
+
+ 
+ 512 bytes in section .bss
+ 116 bytes in section .text
+ 
+ 116 bytes of CODE memory
+ 512 bytes of DATA memory
+
+Errors: none
+Warnings: none

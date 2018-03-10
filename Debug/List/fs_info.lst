@@ -1,0 +1,355 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:14:55
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\fs_info.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\fs_info.c"
+#        -lCN "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List" -o
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\fs_info.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\fs_info.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\fs_info.c
+      1          /*
+      2          **********************************************************************
+      3          *                          Micrium, Inc.
+      4          *                      949 Crestview Circle
+      5          *                     Weston,  FL 33327-1848
+      6          *
+      7          *                            uC/FS
+      8          *
+      9          *             (c) Copyright 2001 - 2003, Micrium, Inc.
+     10          *                      All rights reserved.
+     11          *
+     12          ***********************************************************************
+     13          
+     14          ----------------------------------------------------------------------
+     15          File        : fs_conf.c
+     16          Purpose     : File system configurable global data
+     17                        Unless you are going to add own device drivers, or you
+     18                        would like to modify e.g. order in the device table, you
+     19                        do not have to modify this file. Usually all configuration
+     20                        can be made in fs_conf.h.
+     21          ----------------------------------------------------------------------
+     22          Known problems or limitations with current version
+     23          ----------------------------------------------------------------------
+     24          None.
+     25          ---------------------------END-OF-HEADER------------------------------
+     26          */
+     27          
+     28          /*********************************************************************
+     29          *
+     30          *             #include Section
+     31          *
+     32          **********************************************************************
+     33          */
+     34          
+     35          #include "fs_port.h"
+     36          #include "fs_dev.h"
+     37          #include "fs_api.h"
+     38          #include "fs_fsl.h"
+     39          #include "fs_int.h"
+     40          #include "fs_conf.h"
+     41          
+     42          
+     43          /*********************************************************************
+     44          *
+     45          *             Externals
+     46          *
+     47          **********************************************************************
+     48          */
+     49          
+     50          /*********************************************************************
+     51          *
+     52          *             File System Layer Function Tables
+     53          */
+     54          
+     55          /* FAT function table */
+     56          #ifdef FS_USE_FAT_FSL
+     57           extern const FS__fsl_type FS__fat_functable;
+     58          #endif /* FS_USE_FAT_FSL */
+     59          
+     60          
+     61          /*********************************************************************
+     62          *
+     63          *             Device Driver Function Tables
+     64          *
+     65            If you add an own device driver, you will have to add an external
+     66            for its function table here.
+     67          */
+     68          
+     69          /* RAMDISK_DRIVER function table */
+     70          #if FS_USE_RAMDISK_DRIVER
+     71            extern const FS__device_type    FS__ramdevice_driver;
+     72          #endif  /* FS_USE_RAMDISK_DRIVER */
+     73          
+     74          /* WINDRIVE_DRIVER function table */
+     75          #if FS_USE_WINDRIVE_DRIVER
+     76            extern const FS__device_type    FS__windrive_driver;
+     77          #endif  /* FS_USE_WINDRIVE_DRIVER */
+     78          
+     79          /* SMC_DRIVER function table */
+     80          #if FS_USE_SMC_DRIVER
+     81            extern const FS__device_type    FS__smcdevice_driver;
+     82          #endif /* FS_USE_SMC_DRIVER */
+     83          
+     84          /* MMC_DRIVER function table */
+     85          #if FS_USE_MMC_DRIVER
+     86            extern const FS__device_type    FS__mmcdevice_driver;
+     87          #endif /* FS_USE_SMC_DRIVER */
+     88          
+     89          #if FS_USE_IDE_DRIVER
+     90            extern const FS__device_type    FS__idedevice_driver;
+     91          #endif /* FS_USE_IDE_DRIVER */
+     92          
+     93          #if FS_USE_FLASH_DRIVER
+     94            extern const FS__device_type    FS__flashdevice_driver;
+     95          #endif /* FS_USE_FLASH_DRIVER */
+     96          
+     97          
+     98          /*********************************************************************
+     99          *
+    100          *             Local variables        
+    101          *
+    102          **********************************************************************
+    103          */
+    104          
+    105          /*********************************************************************
+    106          *
+    107          *             Logical Block Layer Cache
+    108          *
+    109            If FS_USE_LB_READCACHE is enabled, then the buffer definition
+    110            for each media is done here according to the settings in
+    111            fs_conf.h.
+    112          */
+    113          
+    114          #if FS_USE_LB_READCACHE
+    115            /*
+    116              RAMDISK cache settings.
+    117              There is no cache required for RAM.
+    118            */
+    119            #define FS_CACHEINFO_RAMDISK_DRIVER     0,
+    120          
+    121            /* 
+    122              Windrive cache settings. 
+    123              The driver does have its own cache. Therefore we never
+    124              use LB read cache for it.
+    125            */
+    126            #define FS_CACHEINFO_WINDRIVE_DRIVER    0,
+    127          
+    128            /*
+    129              FLASH cache settings.
+    130              There is no read cache required for flash.
+    131            */
+    132            #define FS_CACHEINFO_FLASH_DRIVER       0,
+    133          
+    134            /* SmartMedia cache settings */
+    135            #ifndef FS_SMC_CACHENUM
+    136              #define FS_SMC_CACHENUM 0
+    137            #endif
+    138            #if ((FS_SMC_CACHENUM) && (FS_USE_SMC_DRIVER))
+    139              static FS__CACHE_BUFFER  _FS__SMC_Buffers[FS_SMC_MAXUNIT][FS_SMC_CACHENUM];
+    140              static FS__LB_CACHE      _FS__SMC_Cache[FS_SMC_MAXUNIT] = 
+    141                #if (FS_SMC_MAXUNIT==1)
+    142                  { {FS_SMC_CACHENUM, 0, &_FS__SMC_Buffers[0][0]} };
+    143                #elif (FS_SMC_MAXUNIT==2)
+    144                  { {FS_SMC_CACHENUM, 0, &_FS__SMC_Buffers[0][0]},
+    145                    {FS_SMC_CACHENUM, 0, &_FS__SMC_Buffers[1][0]} };
+    146                #else
+    147                  #error Please define _FS__SMC_Cache for desired number of units
+    148                #endif
+    149              #define FS_CACHEINFO_SMC_DRIVER     &_FS__SMC_Cache[0],
+    150            #else
+    151              #define FS_CACHEINFO_SMC_DRIVER     0,
+    152            #endif
+    153            
+    154            /* MMC/SD cache settings */
+    155            #ifndef FS_MMC_CACHENUM
+    156              #define FS_MMC_CACHENUM 0
+    157            #endif
+    158            #if ((FS_MMC_CACHENUM) && (FS_USE_MMC_DRIVER))
+    159              static FS__CACHE_BUFFER  _FS__MMC_Buffers[FS_MMC_MAXUNIT][FS_MMC_CACHENUM];
+    160              static FS__LB_CACHE      _FS__MMC_Cache[FS_MMC_MAXUNIT] = 
+    161                #if (FS_MMC_MAXUNIT==1)
+    162                  { {FS_MMC_CACHENUM, 0, &_FS__MMC_Buffers[0][0]} };
+    163                #elif (FS_MMC_MAXUNIT==2)
+    164                  { {FS_MMC_CACHENUM, 0, &_FS__MMC_Buffers[0][0]},
+    165                    {FS_MMC_CACHENUM, 0, &_FS__MMC_Buffers[1][0]} };
+    166                #else
+    167                  #error Please define _FS__MMC_Cache for desired number of units
+    168                #endif
+    169              #define FS_CACHEINFO_MMC_DRIVER     &_FS__MMC_Cache[0],
+    170            #else
+    171              #define FS_CACHEINFO_MMC_DRIVER     0,
+    172            #endif
+    173            
+    174            /* IDE cache settings */
+    175            #ifndef FS_IDE_CACHENUM
+    176              #define FS_IDE_CACHENUM 0
+    177            #endif
+    178            #if ((FS_IDE_CACHENUM) && (FS_USE_IDE_DRIVER))
+    179              static FS__CACHE_BUFFER  _FS__IDE_Buffers[FS_IDE_MAXUNIT][FS_IDE_CACHENUM];
+    180              static FS__LB_CACHE      _FS__IDE_Cache[FS_IDE_MAXUNIT] = 
+    181                #if (FS_IDE_MAXUNIT==1)
+    182                  { {FS_IDE_CACHENUM, 0, &_FS__IDE_Buffers[0][0]} };
+    183                #elif (FS_IDE_MAXUNIT==2)
+    184                  { {FS_IDE_CACHENUM, 0, &_FS__IDE_Buffers[0][0]},
+    185                    {FS_IDE_CACHENUM, 0, &_FS__IDE_Buffers[1][0]} };
+    186                #else
+    187                  #error Please define _FS__IDE_Cache for desired number of units
+    188                #endif
+    189              #define FS_CACHEINFO_IDE_DRIVER     &_FS__IDE_Cache[0],
+    190            #else
+    191              #define FS_CACHEINFO_IDE_DRIVER     0,
+    192            #endif
+    193          #else
+    194            #define FS_CACHEINFO_RAMDISK_DRIVER     
+    195            #define FS_CACHEINFO_WINDRIVE_DRIVER    
+    196            #define FS_CACHEINFO_SMC_DRIVER         
+    197            #define FS_CACHEINFO_MMC_DRIVER         
+    198            #define FS_CACHEINFO_IDE_DRIVER
+    199            #define FS_CACHEINFO_FLASH_DRIVER 
+    200          #endif  /* FS_USE_LB_READCACHE */
+    201          
+    202          
+    203          /*********************************************************************
+    204          *
+    205          *             Global variables        
+    206          *
+    207          **********************************************************************
+    208          */
+    209          
+    210          /*********************************************************************
+    211          *
+    212          *             _FS_devinfo
+    213          *
+    214            This data structure does tell the file system, which file system layer
+    215            (currently FAT only) and device driver (e.g. SmartMedia or RAM disk) is
+    216            used for which device name.
+    217            If you do not specify the device name in an file system API call, the
+    218            first entry in this table will be used.
+    219          */
+    220          
+    221          #ifndef FS_DEVINFO
+    222            #if FS_USE_SMC_DRIVER
+    223              #define FS_DEVINFO_DEVSMC     { "smc",    &FS__fat_functable, &FS__smcdevice_driver, FS_CACHEINFO_SMC_DRIVER 0 },
+    224            #else
+    225              #define FS_DEVINFO_DEVSMC
+    226            #endif
+    227            #if FS_USE_MMC_DRIVER
+    228              #define FS_DEVINFO_DEVMMC     { "mmc",    &FS__fat_functable, &FS__mmcdevice_driver, FS_CACHEINFO_MMC_DRIVER 0 },
+    229            #else
+    230              #define FS_DEVINFO_DEVMMC
+    231            #endif
+    232            #if FS_USE_IDE_DRIVER
+    233              #define FS_DEVINFO_DEVIDE     { "ide",    &FS__fat_functable, &FS__idedevice_driver, FS_CACHEINFO_IDE_DRIVER 0 },
+    234            #else
+    235              #define FS_DEVINFO_DEVIDE
+    236            #endif /* FS_USE_IDE_DRIVER */
+    237            #if FS_USE_FLASH_DRIVER
+    238              #define FS_DEVINFO_DEVFLASH   { "flash",    &FS__fat_functable, &FS__flashdevice_driver, FS_CACHEINFO_FLASH_DRIVER 0 },
+    239            #else
+    240              #define FS_DEVINFO_DEVFLASH
+    241            #endif /* FS_USE_FLASH_DRIVER */
+    242            #if FS_USE_WINDRIVE_DRIVER
+    243              #define FS_DEVINFO_DEVWINDRV  { "windrv", &FS__fat_functable, &FS__windrive_driver, FS_CACHEINFO_WINDRIVE_DRIVER 0 },
+    244            #else
+    245              #define FS_DEVINFO_DEVWINDRV
+    246            #endif
+    247            #if FS_USE_RAMDISK_DRIVER
+    248              #define FS_DEVINFO_DEVRAM     { "ram",    &FS__fat_functable, &FS__ramdevice_driver, FS_CACHEINFO_RAMDISK_DRIVER 0 },
+    249            #else
+    250              #define FS_DEVINFO_DEVRAM
+    251            #endif
+    252            #define FS_DEVINFO FS_DEVINFO_DEVSMC FS_DEVINFO_DEVMMC FS_DEVINFO_DEVIDE FS_DEVINFO_DEVFLASH FS_DEVINFO_DEVWINDRV FS_DEVINFO_DEVRAM
+    253          #endif  /* FS_DEVINFO */
+    254          
+
+   \                                 In section .rodata, align 4, keep-with-next
+    255          const FS__devinfo_type _FS__devinfo[] = { FS_DEVINFO };
+   \                     _FS__devinfo:
+   \   00000000   0x........         DC32 ?_0, FS__fat_functable, FS__mmcdevice_driver, 0H
+   \              0x........   
+   \              0x........   
+   \              0x00000000   
+    256          
+
+   \                                 In section .rodata, align 4, keep-with-next
+    257          const FS__devinfo_type *const FS__pDevInfo = _FS__devinfo;
+   \                     FS__pDevInfo:
+   \   00000000   0x........         DC32 _FS__devinfo
+    258          
+
+   \                                 In section .rodata, align 4, keep-with-next
+    259          const unsigned int FS__maxdev=sizeof(_FS__devinfo)/sizeof(FS__devinfo_type);
+   \                     FS__maxdev:
+   \   00000000   0x00000001         DC32 1
+    260          
+
+   \                                 In section .rodata, align 4, keep-with-next
+    261          const unsigned int FS__fat_maxunit=FS_FAT_MAXUNIT;
+   \                     FS__fat_maxunit:
+   \   00000000   0x00000001         DC32 1
+
+   \                                 In section .rodata, align 4, keep-with-next
+   \                     ?_0:
+   \   00000000   0x6D 0x6D          DC8 "mmc"
+   \              0x63 0x00    
+    262          
+    263          
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ?_0
+       4  FS__fat_maxunit
+       4  FS__maxdev
+       4  FS__pDevInfo
+      16  _FS__devinfo
+
+ 
+ 32 bytes in section .rodata
+ 
+ 32 bytes of CONST memory
+
+Errors: none
+Warnings: none

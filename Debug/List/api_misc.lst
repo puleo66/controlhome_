@@ -1,0 +1,1189 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:14:43
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\api_misc.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\api_misc.c"
+#        -lCN "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List" -o
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\api_misc.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\api_misc.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\api_misc.c
+      1          /*
+      2          **********************************************************************
+      3          *                          Micrium, Inc.
+      4          *                      949 Crestview Circle
+      5          *                     Weston,  FL 33327-1848
+      6          *
+      7          *                            uC/FS
+      8          *
+      9          *             (c) Copyright 2001 - 2003, Micrium, Inc.
+     10          *                      All rights reserved.
+     11          *
+     12          ***********************************************************************
+     13          
+     14          ----------------------------------------------------------------------
+     15          File        : api_misc.c
+     16          Purpose     : Misc. API functions
+     17          ----------------------------------------------------------------------
+     18          Known problems or limitations with current version
+     19          ----------------------------------------------------------------------
+     20          None.
+     21          ---------------------------END-OF-HEADER------------------------------
+     22          */
+     23          
+     24          /*********************************************************************
+     25          *
+     26          *             #include Section
+     27          *
+     28          **********************************************************************
+     29          */
+     30          
+     31          #include "fs_port.h"
+     32          #ifndef FS_FARCHARPTR
+     33            #define FS_FARCHARPTR char *
+     34          #endif
+     35          #include "fs_conf.h"
+     36          #include "fs_dev.h"
+     37          #include "fs_api.h"
+     38          #include "fs_os.h"
+     39          #include "fs_fsl.h"
+     40          #include "fs_int.h"
+     41          #include "api_int.h"
+     42          
+     43          #if FS_USE_FAT_FSL
+     44            #include "fs_fat.h"
+     45          #endif
+     46          
+     47          #include "fs_clib.h"
+     48          
+     49          
+     50          /*********************************************************************
+     51          *
+     52          *             #define constants
+     53          *
+     54          **********************************************************************
+     55          */
+     56          
+     57          #define FS_VALID_MODE_NUM     (sizeof(_FS_valid_modes) / sizeof(_FS_mode_type))
+     58          
+     59          
+     60          /*********************************************************************
+     61          *
+     62          *             Local data types
+     63          *
+     64          **********************************************************************
+     65          */
+     66          
+     67          typedef struct {
+     68            FS_FARCHARPTR mode;
+     69            unsigned char mode_r;     /* mode READ                    */
+     70            unsigned char mode_w;     /* mode WRITE                   */
+     71            unsigned char mode_a;     /* mode APPEND                  */
+     72            unsigned char mode_c;     /* mode CREATE                  */
+     73            unsigned char mode_b;     /* mode BINARY                  */
+     74          } _FS_mode_type;
+     75          
+     76          
+     77          /*********************************************************************
+     78          *
+     79          *             Local variables        
+     80          *
+     81          **********************************************************************
+     82          */
+     83          
+
+   \                                 In section .text, align 4, keep-with-next
+     84          static const _FS_mode_type _FS_valid_modes[] = {
+   \                     _FS_valid_modes:
+   \   00000000   0x........         DC32 ?_0
+   \   00000004   0x01 0x00          DC8 1, 0, 0, 0, 0, 0, 0, 0
+   \              0x00 0x00    
+   \              0x00 0x00    
+   \              0x00 0x00    
+   \   0000000C   0x........         DC32 ?_1
+   \   00000010   0x00 0x01          DC8 0, 1, 0, 1, 0, 0, 0, 0
+   \              0x00 0x01    
+   \              0x00 0x00    
+   \              0x00 0x00    
+   \   00000018   0x........         DC32 ?_2
+   \   0000001C   0x00 0x01          DC8 0, 1, 1, 1, 0, 0, 0, 0
+   \              0x01 0x01    
+   \              0x00 0x00    
+   \              0x00 0x00    
+   \   00000024   0x........         DC32 ?_3
+   \   00000028   0x01 0x00          DC8 1, 0, 0, 0, 1, 0, 0, 0
+   \              0x00 0x00    
+   \              0x01 0x00    
+   \              0x00 0x00    
+   \   00000030   0x........         DC32 ?_4
+   \   00000034   0x00 0x01          DC8 0, 1, 0, 1, 1, 0, 0, 0
+   \              0x00 0x01    
+   \              0x01 0x00    
+   \              0x00 0x00    
+   \   0000003C   0x........         DC32 ?_5
+   \   00000040   0x00 0x01          DC8 0, 1, 1, 1, 1, 0, 0, 0
+   \              0x01 0x01    
+   \              0x01 0x00    
+   \              0x00 0x00    
+   \   00000048   0x........         DC32 ?_6
+   \   0000004C   0x01 0x01          DC8 1, 1, 0, 0, 0, 0, 0, 0
+   \              0x00 0x00    
+   \              0x00 0x00    
+   \              0x00 0x00    
+   \   00000054   0x........         DC32 ?_7
+   \   00000058   0x01 0x01          DC8 1, 1, 0, 1, 0, 0, 0, 0
+   \              0x00 0x01    
+   \              0x00 0x00    
+   \              0x00 0x00    
+   \   00000060   0x........         DC32 ?_8
+   \   00000064   0x01 0x01          DC8 1, 1, 1, 1, 0, 0, 0, 0
+   \              0x01 0x01    
+   \              0x00 0x00    
+   \              0x00 0x00    
+   \   0000006C   0x........         DC32 ?_9
+   \   00000070   0x01 0x01          DC8 1, 1, 0, 0, 1, 0, 0, 0
+   \              0x00 0x00    
+   \              0x01 0x00    
+   \              0x00 0x00    
+   \   00000078   0x........         DC32 ?_10
+   \   0000007C   0x01 0x01          DC8 1, 1, 0, 0, 1, 0, 0, 0
+   \              0x00 0x00    
+   \              0x01 0x00    
+   \              0x00 0x00    
+   \   00000084   0x........         DC32 ?_11
+   \   00000088   0x01 0x01          DC8 1, 1, 0, 1, 1, 0, 0, 0
+   \              0x00 0x01    
+   \              0x01 0x00    
+   \              0x00 0x00    
+   \   00000090   0x........         DC32 ?_12
+   \   00000094   0x01 0x01          DC8 1, 1, 0, 1, 1, 0, 0, 0
+   \              0x00 0x01    
+   \              0x01 0x00    
+   \              0x00 0x00    
+   \   0000009C   0x........         DC32 ?_13
+   \   000000A0   0x01 0x01          DC8 1, 1, 1, 1, 1, 0, 0, 0
+   \              0x01 0x01    
+   \              0x01 0x00    
+   \              0x00 0x00    
+   \   000000A8   0x........         DC32 ?_14
+   \   000000AC   0x01 0x01          DC8 1, 1, 1, 1, 1, 0, 0, 0
+   \              0x01 0x01    
+   \              0x01 0x00    
+   \              0x00 0x00    
+     85            /*       READ  WRITE  APPEND  CREATE  BINARY */
+     86            { "r"   ,  1,    0,     0,       0,     0 },
+     87            { "w"   ,  0,    1,     0,       1,     0 },
+     88            { "a"   ,  0,    1,     1,       1,     0 },
+     89            { "rb"  ,  1,    0,     0,       0,     1 },
+     90            { "wb"  ,  0,    1,     0,       1,     1 },
+     91            { "ab"  ,  0,    1,     1,       1,     1 },
+     92            { "r+"  ,  1,    1,     0,       0,     0 },
+     93            { "w+"  ,  1,    1,     0,       1,     0 },
+     94            { "a+"  ,  1,    1,     1,       1,     0 },
+     95            { "r+b" ,  1,    1,     0,       0,     1 },
+     96            { "rb+" ,  1,    1,     0,       0,     1 },
+     97            { "w+b" ,  1,    1,     0,       1,     1 },
+     98            { "wb+" ,  1,    1,     0,       1,     1 },
+     99            { "a+b" ,  1,    1,     1,       1,     1 },
+    100            { "ab+" ,  1,    1,     1,       1,     1 }
+    101          };
+    102          
+    103          static const unsigned int _FS_maxopen = FS_MAXOPEN;
+
+   \                                 In section .bss, align 4
+    104          static FS_FILE            _FS_filehandle[FS_MAXOPEN];
+   \                     _FS_filehandle:
+   \   00000000                      DS8 40
+    105          
+    106          
+    107          /*********************************************************************
+    108          *
+    109          *             Global functions
+    110          *
+    111          **********************************************************************
+    112          */
+    113          
+    114          /*********************************************************************
+    115          *
+    116          *             FS__find_fsl
+    117          *
+    118            Description:
+    119            FS internal function. Find correct index in the device information
+    120            table referred by FS__pDevInfo for a given fully qualified name.
+    121          
+    122            Parameters:
+    123            pFullName   - Fully qualified name. 
+    124            pFilename   - Address of a pointer, which is modified to point to
+    125                          the file name part of pFullName.
+    126          
+    127            Return value:
+    128            <0          - Unable to find the device.
+    129            >=0         - Index of the device in the device information table.
+    130          */
+    131          
+
+   \                                 In section .text, align 2, keep-with-next
+    132          int FS__find_fsl(const char *pFullName, FS_FARCHARPTR *pFileName) {
+   \                     FS__find_fsl: (+1)
+   \   00000000   0xE92D 0x43F8      PUSH     {R3-R9,LR}
+   \   00000004   0x460D             MOV      R5,R1
+   \   00000006   0x4680             MOV      R8,R0
+    133            int idx;
+    134            int i;
+    135            int j;
+    136            int m;
+    137            FS_FARCHARPTR s;
+    138            /* Find correct FSL (device:unit:name) */
+    139            s = (FS_FARCHARPTR)FS__CLIB_strchr(pFullName, ':');
+   \   00000008   0x213A             MOVS     R1,#+58
+   \   0000000A   0x.... 0x....      BL       FS__CLIB_strchr
+   \   0000000E   0x0006             MOVS     R6,R0
+    140            if (s) {
+   \   00000010   0xD020             BEQ.N    ??FS__find_fsl_0
+    141              /* Scan for device name */
+    142              idx = 0;
+    143              m = (int)((FS_u32)(s) - (FS_u32)(pFullName));
+   \   00000012   0x....             LDR.N    R0,??DataTable21_1
+   \   00000014   0x6807             LDR      R7,[R0, #+0]
+   \   00000016   0x2400             MOVS     R4,#+0
+   \   00000018   0xEBA6 0x0908      SUB      R9,R6,R8
+    144              while (1) {
+    145                j = FS__CLIB_strlen(FS__pDevInfo[idx].devname);
+   \                     ??FS__find_fsl_1: (+1)
+   \   0000001C   0x6838             LDR      R0,[R7, #+0]
+   \   0000001E   0x.... 0x....      BL       FS__CLIB_strlen
+   \   00000022   0x4602             MOV      R2,R0
+    146                if (m > j) {
+   \   00000024   0x454A             CMP      R2,R9
+   \   00000026   0xBFB8             IT       LT 
+   \   00000028   0x464A             MOVLT    R2,R9
+    147                  j = m;
+    148                }
+    149                i = FS__CLIB_strncmp(FS__pDevInfo[idx].devname, pFullName, j);
+   \   0000002A   0xF857 0x0B10      LDR      R0,[R7], #+16
+   \   0000002E   0x4641             MOV      R1,R8
+   \   00000030   0x.... 0x....      BL       FS__CLIB_strncmp
+    150                idx++;
+    151                if (idx >= (int)FS__maxdev) {
+   \   00000034   0x....             LDR.N    R1,??DataTable21_2
+   \   00000036   0x6809             LDR      R1,[R1, #+0]
+   \   00000038   0x1C64             ADDS     R4,R4,#+1
+   \   0000003A   0x428C             CMP      R4,R1
+   \   0000003C   0xDA02             BGE.N    ??FS__find_fsl_2
+    152                  break;  /* End of device information table reached */
+    153                }
+    154                if (i == 0) {
+   \   0000003E   0x2800             CMP      R0,#+0
+   \   00000040   0xD1EC             BNE.N    ??FS__find_fsl_1
+   \   00000042   0xE000             B.N      ??FS__find_fsl_3
+    155                  break;  /* Device found */
+    156                }
+    157              }
+    158              if (i == 0) {
+   \                     ??FS__find_fsl_2: (+1)
+   \   00000044   0xB910             CBNZ.N   R0,??FS__find_fsl_4
+    159                idx--;  /* Correct index */
+   \                     ??FS__find_fsl_3: (+1)
+   \   00000046   0x1E64             SUBS     R4,R4,#+1
+    160              }
+    161              else {
+    162                return -1;  /* Device not found */
+    163              }
+    164              s++;
+   \   00000048   0x1C76             ADDS     R6,R6,#+1
+   \   0000004A   0xE005             B.N      ??FS__find_fsl_5
+   \                     ??FS__find_fsl_4: (+1)
+   \   0000004C   0xF04F 0x30FF      MOV      R0,#-1
+   \   00000050   0xE8BD 0x83F2      POP      {R1,R4-R9,PC}
+    165            }
+    166            else {
+    167              /* use 1st FSL as default */
+    168              idx = 0;
+   \                     ??FS__find_fsl_0: (+1)
+   \   00000054   0x2400             MOVS     R4,#+0
+    169              s = (FS_FARCHARPTR) pFullName;
+   \   00000056   0x4646             MOV      R6,R8
+    170            }
+    171            *pFileName = s;
+   \                     ??FS__find_fsl_5: (+1)
+   \   00000058   0x602E             STR      R6,[R5, #+0]
+    172            return idx;
+   \   0000005A   0x4620             MOV      R0,R4
+   \   0000005C   0xE8BD 0x83F2      POP      {R1,R4-R9,PC}    ;; return
+    173          }
+    174          
+    175          
+    176          /*********************************************************************
+    177          *
+    178          *             FS_FOpen
+    179          *
+    180            Description:
+    181            API function. Open an existing file or create a new one.
+    182          
+    183            Parameters:
+    184            pFileName   - Fully qualified file name. 
+    185            pMode       - Mode for opening the file.
+    186            
+    187            Return value:
+    188            ==0         - Unable to open the file.
+    189            !=0         - Address of an FS_FILE data structure.
+    190          */
+    191          
+
+   \                                 In section .text, align 2, keep-with-next
+    192          FS_FILE *FS_FOpen(const char *pFileName, const char *pMode) {
+   \                     FS_FOpen: (+1)
+   \   00000000   0xE92D 0x4FF8      PUSH     {R3-R11,LR}
+   \   00000004   0x4688             MOV      R8,R1
+    193            FS_FARCHARPTR s;
+    194            FS_FILE *handle;
+    195            unsigned int i;
+    196            int idx;
+    197            int j;
+    198            int c;
+    199          
+    200            /* Find correct FSL  (device:unit:name) */
+    201            idx = FS__find_fsl(pFileName, &s);
+   \   00000006   0x4669             MOV      R1,SP
+   \   00000008   0x.... 0x....      BL       FS__find_fsl
+   \   0000000C   0x0005             MOVS     R5,R0
+    202            if (idx < 0) {
+   \   0000000E   0xD410             BMI.N    ??FS_FOpen_0
+    203              return 0;  /* Device not found */
+    204            }
+    205            if (FS__pDevInfo[idx].fs_ptr->fsl_fopen) {
+   \   00000010   0x....             LDR.N    R0,??DataTable21_1
+   \   00000012   0x6800             LDR      R0,[R0, #+0]
+   \   00000014   0xEB00 0x1605      ADD      R6,R0,R5, LSL #+4
+   \   00000018   0x6870             LDR      R0,[R6, #+4]
+   \   0000001A   0x6840             LDR      R0,[R0, #+4]
+   \   0000001C   0xB148             CBZ.N    R0,??FS_FOpen_0
+   \   0000001E   0x.... 0x....      LDR.W    R9,??DataTable21_3
+    206              /*  Find next free entry in _FS_filehandle */
+    207              FS_X_OS_LockFileHandle();
+   \   00000022   0x.... 0x....      BL       FS_X_OS_LockFileHandle
+    208              i = 0;
+   \   00000026   0xF109 0x041C      ADD      R4,R9,#+28
+    209              while (1) {
+    210                if (i >= _FS_maxopen) {
+    211                  break;  /* No free entry found. */
+    212                }
+    213                if (!_FS_filehandle[i].inuse) {
+   \   0000002A   0x79A0             LDRB     R0,[R4, #+6]
+   \   0000002C   0xB120             CBZ.N    R0,??FS_FOpen_1
+    214                  break;  /* Unused entry found */
+    215                }
+    216                i++;
+    217              }
+    218              if (i < _FS_maxopen) {
+    219                /*
+    220                   Check for valid mode string and set flags in file
+    221                   handle
+    222                */
+    223                j = 0;
+    224                while (1) {
+    225                  if (j >= FS_VALID_MODE_NUM) {
+    226                    break;  /* Not in list of valid modes */
+    227                  }
+    228                  c = FS__CLIB_strcmp(pMode, _FS_valid_modes[j].mode);
+    229                  if (c == 0) {
+    230                    break;  /* Mode found in list */
+    231                  }
+    232                  j++;
+    233                }
+    234                if (j < FS_VALID_MODE_NUM) {
+    235                  /* Set mode flags according to the mode string */
+    236                  _FS_filehandle[i].mode_r = _FS_valid_modes[j].mode_r;
+    237                  _FS_filehandle[i].mode_w = _FS_valid_modes[j].mode_w;
+    238                  _FS_filehandle[i].mode_a = _FS_valid_modes[j].mode_a;
+    239                  _FS_filehandle[i].mode_c = _FS_valid_modes[j].mode_c;
+    240                  _FS_filehandle[i].mode_b = _FS_valid_modes[j].mode_b;
+    241                }
+    242                else {
+    243                  FS_X_OS_UnlockFileHandle();
+    244                  return 0;
+    245                }
+    246                _FS_filehandle[i].dev_index = idx;
+    247                /* Execute the FSL function */
+    248                handle = (FS__pDevInfo[idx].fs_ptr->fsl_fopen)(s, pMode, &_FS_filehandle[i]);
+    249                FS_X_OS_UnlockFileHandle();
+    250                return handle;
+    251              }
+    252              FS_X_OS_UnlockFileHandle();
+   \   0000002E   0x.... 0x....      BL       FS_X_OS_UnlockFileHandle
+    253            }
+    254            return 0;
+   \                     ??FS_FOpen_0: (+1)
+   \   00000032   0x2000             MOVS     R0,#+0
+   \   00000034   0xE8BD 0x8FF2      POP      {R1,R4-R11,PC}   ;; return
+   \                     ??FS_FOpen_1: (+1)
+   \   00000038   0x.... 0x....      ADR.W    R10,_FS_valid_modes
+   \   0000003C   0x2700             MOVS     R7,#+0
+   \   0000003E   0x46D3             MOV      R11,R10
+   \                     ??FS_FOpen_2: (+1)
+   \   00000040   0xF85B 0x1B0C      LDR      R1,[R11], #+12
+   \   00000044   0x4640             MOV      R0,R8
+   \   00000046   0x.... 0x....      BL       FS__CLIB_strcmp
+   \   0000004A   0xB110             CBZ.N    R0,??FS_FOpen_3
+   \   0000004C   0x1C7F             ADDS     R7,R7,#+1
+   \   0000004E   0x2F0F             CMP      R7,#+15
+   \   00000050   0xD3F6             BCC.N    ??FS_FOpen_2
+   \                     ??FS_FOpen_3: (+1)
+   \   00000052   0x2F0F             CMP      R7,#+15
+   \   00000054   0xD21A             BCS.N    ??FS_FOpen_4
+   \   00000056   0xEB07 0x0047      ADD      R0,R7,R7, LSL #+1
+   \   0000005A   0xEB0A 0x0080      ADD      R0,R10,R0, LSL #+2
+   \   0000005E   0x464A             MOV      R2,R9
+   \   00000060   0x7901             LDRB     R1,[R0, #+4]
+   \   00000062   0x71E1             STRB     R1,[R4, #+7]
+   \   00000064   0x7941             LDRB     R1,[R0, #+5]
+   \   00000066   0x7221             STRB     R1,[R4, #+8]
+   \   00000068   0x7981             LDRB     R1,[R0, #+6]
+   \   0000006A   0x7261             STRB     R1,[R4, #+9]
+   \   0000006C   0x79C1             LDRB     R1,[R0, #+7]
+   \   0000006E   0x72A1             STRB     R1,[R4, #+10]
+   \   00000070   0x4641             MOV      R1,R8
+   \   00000072   0x7A00             LDRB     R0,[R0, #+8]
+   \   00000074   0x72E0             STRB     R0,[R4, #+11]
+   \   00000076   0x6025             STR      R5,[R4, #+0]
+   \   00000078   0x6873             LDR      R3,[R6, #+4]
+   \   0000007A   0x9800             LDR      R0,[SP, #+0]
+   \   0000007C   0x685B             LDR      R3,[R3, #+4]
+   \   0000007E   0x4798             BLX      R3
+   \   00000080   0x4604             MOV      R4,R0
+   \   00000082   0x.... 0x....      BL       FS_X_OS_UnlockFileHandle
+   \   00000086   0x4620             MOV      R0,R4
+   \   00000088   0xE8BD 0x8FF2      POP      {R1,R4-R11,PC}
+   \                     ??FS_FOpen_4: (+1)
+   \   0000008C   0x.... 0x....      BL       FS_X_OS_UnlockFileHandle
+   \   00000090   0xE7CF             B.N      ??FS_FOpen_0
+    255          }
+    256          
+    257          
+    258          /*********************************************************************
+    259          *
+    260          *             FS_FClose
+    261          *
+    262            Description:
+    263            API function. Close a file referred by pFile.
+    264          
+    265            Parameters:
+    266            pFile       - Pointer to a FS_FILE data structure. 
+    267            
+    268            Return value:
+    269            None.
+    270          */
+    271          
+
+   \                                 In section .text, align 2, keep-with-next
+    272          void FS_FClose(FS_FILE *pFile) {
+   \                     FS_FClose: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0x0004             MOVS     R4,R0
+    273            if (!pFile) {
+   \   00000004   0xD016             BEQ.N    ??FS_FClose_0
+    274              return;  /* No pointer to a FS_FILE structure */
+    275            }
+    276            FS_X_OS_LockFileHandle();
+   \   00000006   0x.... 0x....      BL       FS_X_OS_LockFileHandle
+    277            if (!pFile->inuse) {
+   \   0000000A   0xF104 0x001C      ADD      R0,R4,#+28
+   \   0000000E   0x7981             LDRB     R1,[R0, #+6]
+   \   00000010   0xB161             CBZ.N    R1,??FS_FClose_1
+    278              FS_X_OS_UnlockFileHandle(); /* The FS_FILE structure is not in use */
+    279              return;
+    280            }
+    281            if (pFile->dev_index >= 0) {
+   \   00000012   0x6800             LDR      R0,[R0, #+0]
+   \   00000014   0x2800             CMP      R0,#+0
+   \   00000016   0xD409             BMI.N    ??FS_FClose_1
+   \   00000018   0x....             LDR.N    R1,??DataTable21_1
+   \   0000001A   0x6809             LDR      R1,[R1, #+0]
+   \   0000001C   0xEB01 0x1000      ADD      R0,R1,R0, LSL #+4
+   \   00000020   0x6840             LDR      R0,[R0, #+4]
+   \   00000022   0x6881             LDR      R1,[R0, #+8]
+   \   00000024   0x0008             MOVS     R0,R1
+   \   00000026   0xBF1C             ITT      NE 
+    282              if (FS__pDevInfo[pFile->dev_index].fs_ptr->fsl_fclose) {
+    283                /* Execute the FSL function */
+    284                (FS__pDevInfo[pFile->dev_index].fs_ptr->fsl_fclose)(pFile);
+   \   00000028   0x4620             MOVNE    R0,R4
+   \   0000002A   0x4788             BLXNE    R1
+    285              }
+    286            }
+    287            FS_X_OS_UnlockFileHandle();
+   \                     ??FS_FClose_1: (+1)
+   \   0000002C   0xE8BD 0x4010      POP      {R4,LR}
+   \   00000030   0x.... 0x....      B.W      FS_X_OS_UnlockFileHandle
+   \                     ??FS_FClose_0: (+1)
+   \   00000034   0xBD10             POP      {R4,PC}          ;; return
+    288          }
+    289          
+    290          
+    291          /*********************************************************************
+    292          *
+    293          *             FS_Remove
+    294          *
+    295            Description:
+    296            API function. Remove a file.
+    297            There is no real 'delete' function in the FSL, but the FSL's 'open'
+    298            function can delete a file. 
+    299          
+    300            Parameters:
+    301            pFileName   - Fully qualified file name. 
+    302            
+    303            Return value:
+    304            ==0         - File has been removed.
+    305            ==-1        - An error has occured.
+    306          */
+    307          
+
+   \                                 In section .text, align 2, keep-with-next
+    308          int FS_Remove(const char *pFileName) {
+   \                     FS_Remove: (+1)
+   \   00000000   0xB570             PUSH     {R4-R6,LR}
+   \   00000002   0xB082             SUB      SP,SP,#+8
+    309            FS_FARCHARPTR s;
+    310            unsigned int i;
+    311            int idx;
+    312            int x;
+    313          
+    314            /* Find correct FSL  (device:unit:name) */
+    315            idx = FS__find_fsl(pFileName, &s);
+   \   00000004   0x4669             MOV      R1,SP
+   \   00000006   0x.... 0x....      BL       FS__find_fsl
+   \   0000000A   0x0004             MOVS     R4,R0
+    316            if (idx < 0) {
+   \   0000000C   0xD40F             BMI.N    ??FS_Remove_0
+    317              return -1;  /* Device not found */
+    318            }
+    319            if (FS__pDevInfo[idx].fs_ptr->fsl_fopen) {
+   \   0000000E   0x....             LDR.N    R0,??DataTable21_1
+   \   00000010   0x6800             LDR      R0,[R0, #+0]
+   \   00000012   0xEB00 0x1504      ADD      R5,R0,R4, LSL #+4
+   \   00000016   0x6868             LDR      R0,[R5, #+4]
+   \   00000018   0x6840             LDR      R0,[R0, #+4]
+   \   0000001A   0xB140             CBZ.N    R0,??FS_Remove_0
+    320              /*  Find next free entry in _FS_filehandle */
+    321              FS_X_OS_LockFileHandle();
+   \   0000001C   0x.... 0x....      BL       FS_X_OS_LockFileHandle
+    322              i = 0;
+   \   00000020   0x....             LDR.N    R2,??DataTable21_3
+   \   00000022   0xF102 0x061C      ADD      R6,R2,#+28
+    323              while (1) {
+    324                if (i >= _FS_maxopen) {
+    325                  break;  /* No free file handle found */
+    326                }
+    327                if (!_FS_filehandle[i].inuse) {
+   \   00000026   0x79B0             LDRB     R0,[R6, #+6]
+   \   00000028   0xB120             CBZ.N    R0,??FS_Remove_1
+    328                  break;  /* Free file handle found */
+    329                }
+    330                i++;
+    331              }
+    332              if (i < _FS_maxopen) {
+    333                /* Set file open mode to write & truncate */
+    334                _FS_filehandle[i].mode_r = 0;
+    335                _FS_filehandle[i].mode_w = 1;
+    336                _FS_filehandle[i].mode_a = 0;
+    337                _FS_filehandle[i].mode_c = 0;
+    338                _FS_filehandle[i].mode_b = 0;
+    339                _FS_filehandle[i].dev_index = idx;
+    340                /* 
+    341                   Call the FSL function 'open' with the parameter 'del' to indicate,
+    342                   that we want to delete the file.
+    343                */
+    344                (FS__pDevInfo[idx].fs_ptr->fsl_fopen)(s, "del", &_FS_filehandle[i]);
+    345                x = _FS_filehandle[i].error;
+    346                FS_X_OS_UnlockFileHandle();
+    347                return x;
+    348              }
+    349              FS_X_OS_UnlockFileHandle();
+   \   0000002A   0x.... 0x....      BL       FS_X_OS_UnlockFileHandle
+    350            }
+    351            return -1;
+   \                     ??FS_Remove_0: (+1)
+   \   0000002E   0xF04F 0x30FF      MOV      R0,#-1
+   \   00000032   0xBD76             POP      {R1,R2,R4-R6,PC}  ;; return
+   \                     ??FS_Remove_1: (+1)
+   \   00000034   0x71F0             STRB     R0,[R6, #+7]
+   \   00000036   0x6034             STR      R4,[R6, #+0]
+   \   00000038   0x2001             MOVS     R0,#+1
+   \   0000003A   0x7230             STRB     R0,[R6, #+8]
+   \   0000003C   0x....             ADR.N    R1,??DataTable21  ;; "del"
+   \   0000003E   0x2000             MOVS     R0,#+0
+   \   00000040   0x7270             STRB     R0,[R6, #+9]
+   \   00000042   0x8170             STRH     R0,[R6, #+10]
+   \   00000044   0x686B             LDR      R3,[R5, #+4]
+   \   00000046   0x9800             LDR      R0,[SP, #+0]
+   \   00000048   0x685B             LDR      R3,[R3, #+4]
+   \   0000004A   0x4798             BLX      R3
+   \   0000004C   0xF9B6 0x4004      LDRSH    R4,[R6, #+4]
+   \   00000050   0x.... 0x....      BL       FS_X_OS_UnlockFileHandle
+   \   00000054   0x4620             MOV      R0,R4
+   \   00000056   0xBD76             POP      {R1,R2,R4-R6,PC}
+    352          }
+    353          
+    354          
+    355          /*********************************************************************
+    356          *
+    357          *             FS_IoCtl
+    358          *
+    359            Description:
+    360            API function. Execute device command.
+    361          
+    362            Parameters:
+    363            pDevName    - Fully qualified directory name. 
+    364            Cmd         - Command to be executed.
+    365            Aux         - Parameter depending on command.
+    366            pBuffer     - Pointer to a buffer used for the command.
+    367            
+    368            Return value:
+    369            Command specific. In general a negative value means an error.
+    370          */
+    371          
+
+   \                                 In section .text, align 2, keep-with-next
+    372          int FS_IoCtl(const char *pDevName, FS_i32 Cmd, FS_i32 Aux, void *pBuffer) {
+   \                     FS_IoCtl: (+1)
+   \   00000000   0xB5F0             PUSH     {R4-R7,LR}
+   \   00000002   0xB083             SUB      SP,SP,#+12
+   \   00000004   0x460C             MOV      R4,R1
+   \   00000006   0x4615             MOV      R5,R2
+   \   00000008   0x461E             MOV      R6,R3
+    373            int idx;
+    374            int unit;
+    375            FS_FARCHARPTR s;
+    376            FS_FARCHARPTR t;
+    377          
+    378            idx = FS__find_fsl(pDevName, &s);
+   \   0000000A   0xA901             ADD      R1,SP,#+4
+   \   0000000C   0x.... 0x....      BL       FS__find_fsl
+   \   00000010   0x0007             MOVS     R7,R0
+    379            if (idx < 0) {
+   \   00000012   0xBF48             IT       MI 
+   \   00000014   0xF04F 0x30FF      MOVMI    R0,#-1
+    380              return -1;  /* Device not found */
+   \   00000018   0xD41E             BMI.N    ??FS_IoCtl_0
+    381            }
+    382            t = FS__CLIB_strchr(s, ':');  /* Find correct unit (unit:name) */
+    383            if (t) {
+   \   0000001A   0x9801             LDR      R0,[SP, #+4]
+   \   0000001C   0x213A             MOVS     R1,#+58
+   \   0000001E   0x.... 0x....      BL       FS__CLIB_strchr
+   \   00000022   0xB120             CBZ.N    R0,??FS_IoCtl_1
+    384              unit = FS__CLIB_atoi(s);  /* Scan for unit number */
+   \   00000024   0x9801             LDR      R0,[SP, #+4]
+   \   00000026   0x.... 0x....      BL       FS__CLIB_atoi
+   \   0000002A   0x4601             MOV      R1,R0
+   \   0000002C   0xE000             B.N      ??FS_IoCtl_2
+    385            }
+    386            else {
+    387              unit = 0;  /* Use 1st unit as default */
+   \                     ??FS_IoCtl_1: (+1)
+   \   0000002E   0x2100             MOVS     R1,#+0
+   \                     ??FS_IoCtl_2: (+1)
+   \   00000030   0x....             LDR.N    R0,??DataTable21_1
+   \   00000032   0x6800             LDR      R0,[R0, #+0]
+   \   00000034   0xEB00 0x1007      ADD      R0,R0,R7, LSL #+4
+   \   00000038   0x6840             LDR      R0,[R0, #+4]
+   \   0000003A   0xF8D0 0xC01C      LDR      R12,[R0, #+28]
+   \   0000003E   0xF1BC 0x0F00      CMP      R12,#+0
+   \   00000042   0xD006             BEQ.N    ??FS_IoCtl_3
+    388            }
+    389            if (FS__pDevInfo[idx].fs_ptr->fsl_ioctl) {
+    390              /* Execute the FSL function */
+    391              idx = (FS__pDevInfo[idx].fs_ptr->fsl_ioctl)(idx, unit, Cmd, Aux, pBuffer);
+   \   00000044   0x9600             STR      R6,[SP, #+0]
+   \   00000046   0x462B             MOV      R3,R5
+   \   00000048   0x4622             MOV      R2,R4
+   \   0000004A   0x4638             MOV      R0,R7
+   \   0000004C   0x47E0             BLX      R12
+   \   0000004E   0x4607             MOV      R7,R0
+   \   00000050   0xE001             B.N      ??FS_IoCtl_4
+    392            }
+    393            else {
+    394              idx = -1;
+   \                     ??FS_IoCtl_3: (+1)
+   \   00000052   0xF04F 0x37FF      MOV      R7,#-1
+    395            }
+    396            return idx;
+   \                     ??FS_IoCtl_4: (+1)
+   \   00000056   0x4638             MOV      R0,R7
+   \                     ??FS_IoCtl_0: (+1)
+   \   00000058   0xB003             ADD      SP,SP,#+12
+   \   0000005A   0xBDF0             POP      {R4-R7,PC}       ;; return
+    397          }
+    398          
+    399          
+    400          /*********************************************************************
+    401          *
+    402          *             FS_FSeek
+    403          *
+    404            Description:
+    405            API function. Set current position of a file pointer.
+    406            FS_fseek does not support to position the fp behind end of a file. 
+    407          
+    408            Parameters:
+    409            pFile       - Pointer to a FS_FILE data structure.
+    410            Offset      - Offset for setting the file pointer position.
+    411            Whence      - Mode for positioning the file pointer.
+    412            
+    413            Return value:
+    414            ==0         - File pointer has been positioned according to the
+    415                          parameters.
+    416            ==-1        - An error has occured.
+    417          */
+    418          
+
+   \                                 In section .text, align 2, keep-with-next
+    419          int FS_FSeek(FS_FILE *pFile, FS_i32 Offset, int Whence) {
+    420            FS_i32 value;
+    421            
+    422            if (!pFile) {
+   \                     FS_FSeek: (+1)
+   \   00000000   0xB910             CBNZ.N   R0,??FS_FSeek_0
+    423              return -1;
+   \                     ??FS_FSeek_1: (+1)
+   \   00000002   0xF04F 0x30FF      MOV      R0,#-1
+   \   00000006   0x4770             BX       LR
+    424            }
+    425            pFile->error     = FS_ERR_OK;    /* Clear any previous error */
+   \                     ??FS_FSeek_0: (+1)
+   \   00000008   0x2300             MOVS     R3,#+0
+   \   0000000A   0x8403             STRH     R3,[R0, #+32]
+    426            pFile->CurClust  = 0;            /* Invalidate current cluster */
+   \   0000000C   0x6103             STR      R3,[R0, #+16]
+    427            if (Whence == FS_SEEK_SET) {
+   \   0000000E   0xB92A             CBNZ.N   R2,??FS_FSeek_2
+    428              if (Offset <= pFile->size) {
+   \                     ??FS_FSeek_3: (+1)
+   \   00000010   0x6982             LDR      R2,[R0, #+24]
+   \   00000012   0x428A             CMP      R2,R1
+   \   00000014   0xDB07             BLT.N    ??FS_FSeek_4
+    429                pFile->filepos = Offset;
+   \   00000016   0x6141             STR      R1,[R0, #+20]
+    430              }
+    431              else {
+    432                /* New position would be behind EOF */
+    433                pFile->error = FS_ERR_INVALIDPAR;
+    434                return -1;
+    435              }
+    436            }
+    437            else if (Whence == FS_SEEK_CUR) {
+    438              value = pFile->filepos + Offset;
+    439              if (value <= pFile->size) {
+    440                pFile->filepos += Offset;
+    441              }
+    442              else {
+    443                /* New position would be behind EOF */
+    444                pFile->error = FS_ERR_INVALIDPAR;
+    445                return -1;
+    446              }
+    447            }
+    448            else if (Whence == FS_SEEK_END) {
+    449              /* The file system does not support this */
+    450              pFile->error = FS_ERR_INVALIDPAR;
+    451              return -1;
+    452            }
+    453            else {
+    454              /* Parameter 'Whence' is invalid */
+    455              pFile->error = FS_ERR_INVALIDPAR;
+    456              return -1;
+    457            }
+    458            return 0;
+   \   00000018   0x2000             MOVS     R0,#+0
+   \   0000001A   0x4770             BX       LR               ;; return
+   \                     ??FS_FSeek_2: (+1)
+   \   0000001C   0x2A01             CMP      R2,#+1
+   \   0000001E   0xD102             BNE.N    ??FS_FSeek_4
+   \   00000020   0x6942             LDR      R2,[R0, #+20]
+   \   00000022   0x1889             ADDS     R1,R1,R2
+   \   00000024   0xE7F4             B.N      ??FS_FSeek_3
+   \                     ??FS_FSeek_4: (+1)
+   \   00000026   0xF06F 0x012F      MVN      R1,#+47
+   \   0000002A   0x8401             STRH     R1,[R0, #+32]
+   \   0000002C   0xE7E9             B.N      ??FS_FSeek_1
+    459          }
+    460          
+    461          
+    462          /*********************************************************************
+    463          *
+    464          *             FS_FTell
+    465          *
+    466            Description:
+    467            API function. Return position of a file pointer.
+    468          
+    469            Parameters:
+    470            pFile       - Pointer to a FS_FILE data structure.
+    471            
+    472            Return value:
+    473            >=0         - Current position of the file pointer.
+    474            ==-1        - An error has occured.
+    475          */
+    476          
+
+   \                                 In section .text, align 2, keep-with-next
+    477          FS_i32 FS_FTell(FS_FILE *pFile) {
+    478            if (!pFile) {
+   \                     FS_FTell: (+1)
+   \   00000000   0x2800             CMP      R0,#+0
+   \   00000002   0xBF0C             ITE      EQ 
+   \   00000004   0xF04F 0x30FF      MOVEQ    R0,#-1
+   \   00000008   0x6940             LDRNE    R0,[R0, #+20]
+    479              return -1;
+    480            }
+    481            return pFile->filepos;
+   \   0000000A   0x4770             BX       LR
+    482          }
+    483          
+    484          
+    485          /*********************************************************************
+    486          *
+    487          *             FS_FError
+    488          *
+    489            Description:
+    490            API function. Return error status of a file.
+    491          
+    492            Parameters:
+    493            pFile       - Pointer to a FS_FILE data structure.
+    494            
+    495            Return value:
+    496            ==FS_ERR_OK - No error.
+    497            !=FS_ERR_OK - An error has occured.
+    498          */
+    499          
+
+   \                                 In section .text, align 2, keep-with-next
+    500          FS_i16 FS_FError(FS_FILE *pFile) {
+    501            if (!pFile) {
+   \                     FS_FError: (+1)
+   \   00000000   0xB108             CBZ.N    R0,??FS_FError_0
+    502              return 0;
+    503            }
+    504            return pFile->error;
+   \   00000002   0xF9B0 0x0020      LDRSH    R0,[R0, #+32]
+   \                     ??FS_FError_0: (+1)
+   \   00000006   0x4770             BX       LR               ;; return
+    505          }
+    506          
+    507          
+    508          /*********************************************************************
+    509          *
+    510          *             FS_ClearErr
+    511          *
+    512            Description:
+    513            API function. Clear error status of a file.
+    514          
+    515            Parameters:
+    516            pFile       - Pointer to a FS_FILE data structure.
+    517            
+    518            Return value:
+    519            None.
+    520          */
+    521          
+
+   \                                 In section .text, align 2, keep-with-next
+    522          void FS_ClearErr(FS_FILE *pFile) {
+    523            if (!pFile) {
+   \                     FS_ClearErr: (+1)
+   \   00000000   0xB108             CBZ.N    R0,??FS_ClearErr_0
+    524              return;
+    525            }
+    526            pFile->error = FS_ERR_OK;
+   \   00000002   0x2100             MOVS     R1,#+0
+   \   00000004   0x8401             STRH     R1,[R0, #+32]
+    527          }
+   \                     ??FS_ClearErr_0: (+1)
+   \   00000006   0x4770             BX       LR               ;; return
+    528          
+    529          
+    530          /*********************************************************************
+    531          *
+    532          *             FS_Init
+    533          *
+    534            Description:
+    535            API function. Start the file system.
+    536          
+    537            Parameters:
+    538            None.
+    539            
+    540            Return value:
+    541            ==0         - File system has been started.
+    542            !=0         - An error has occured.
+    543          */
+    544          
+
+   \                                 In section .text, align 2, keep-with-next
+    545          int FS_Init(void) {
+   \                     FS_Init: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    546            int x;
+    547            
+    548            x = FS_X_OS_Init();  /* Init the OS, e.g. create semaphores  */
+   \   00000002   0x.... 0x....      BL       FS_X_OS_Init
+   \   00000006   0x0004             MOVS     R4,R0
+    549          #if FS_USE_FAT_FSL
+    550            if (x == 0) {
+   \   00000008   0xBF08             IT       EQ 
+    551              FS__fat_block_init(); /* Init the FAT layers memory pool */
+   \   0000000A   0x.... 0x....      BLEQ     FS__fat_block_init
+    552            }
+    553          #endif
+    554            return x;
+   \   0000000E   0x4620             MOV      R0,R4
+   \   00000010   0xBD10             POP      {R4,PC}          ;; return
+    555          }
+    556          
+    557          /*********************************************************************
+    558          *
+    559          *             FS_Exit
+    560          *
+    561            Description:
+    562            API function. Stop the file system.
+    563          
+    564            Parameters:
+    565            None.
+    566            
+    567            Return value:
+    568            ==0         - File system has been stopped.
+    569            !=0         - An error has occured.
+    570          */
+    571          
+
+   \                                 In section .text, align 2, keep-with-next
+    572          int FS_Exit(void) {
+    573            return FS_X_OS_Exit();
+   \                     FS_Exit: (+1)
+   \   00000000   0x.... 0x....      B.W      FS_X_OS_Exit
+    574          }
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable21:
+   \   00000000   0x64 0x65          DC8      "del"
+   \              0x6C 0x00    
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable21_1:
+   \   00000000   0x........         DC32     FS__pDevInfo
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable21_2:
+   \   00000000   0x........         DC32     FS__maxdev
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable21_3:
+   \   00000000   0x........         DC32     _FS_filehandle
+
+   \                                 In section .rodata, align 2, keep-with-next
+   \                     ?_0:
+   \   00000000   0x72 0x00          DC8 "r"
+
+   \                                 In section .rodata, align 2, keep-with-next
+   \                     ?_1:
+   \   00000000   0x77 0x00          DC8 "w"
+
+   \                                 In section .rodata, align 2, keep-with-next
+   \                     ?_2:
+   \   00000000   0x61 0x00          DC8 "a"
+
+   \                                 In section .rodata, align 4, keep-with-next
+   \                     ?_3:
+   \   00000000   0x72 0x62          DC8 "rb"
+   \              0x00         
+   \   00000003   0x00               DC8 0
+
+   \                                 In section .rodata, align 4, keep-with-next
+   \                     ?_4:
+   \   00000000   0x77 0x62          DC8 "wb"
+   \              0x00         
+   \   00000003   0x00               DC8 0
+
+   \                                 In section .rodata, align 4, keep-with-next
+   \                     ?_5:
+   \   00000000   0x61 0x62          DC8 "ab"
+   \              0x00         
+   \   00000003   0x00               DC8 0
+
+   \                                 In section .rodata, align 4, keep-with-next
+   \                     ?_6:
+   \   00000000   0x72 0x2B          DC8 "r+"
+   \              0x00         
+   \   00000003   0x00               DC8 0
+
+   \                                 In section .rodata, align 4, keep-with-next
+   \                     ?_7:
+   \   00000000   0x77 0x2B          DC8 "w+"
+   \              0x00         
+   \   00000003   0x00               DC8 0
+
+   \                                 In section .rodata, align 4, keep-with-next
+   \                     ?_8:
+   \   00000000   0x61 0x2B          DC8 "a+"
+   \              0x00         
+   \   00000003   0x00               DC8 0
+
+   \                                 In section .rodata, align 4, keep-with-next
+   \                     ?_9:
+   \   00000000   0x72 0x2B          DC8 "r+b"
+   \              0x62 0x00    
+
+   \                                 In section .rodata, align 4, keep-with-next
+   \                     ?_10:
+   \   00000000   0x72 0x62          DC8 "rb+"
+   \              0x2B 0x00    
+
+   \                                 In section .rodata, align 4, keep-with-next
+   \                     ?_11:
+   \   00000000   0x77 0x2B          DC8 "w+b"
+   \              0x62 0x00    
+
+   \                                 In section .rodata, align 4, keep-with-next
+   \                     ?_12:
+   \   00000000   0x77 0x62          DC8 "wb+"
+   \              0x2B 0x00    
+
+   \                                 In section .rodata, align 4, keep-with-next
+   \                     ?_13:
+   \   00000000   0x61 0x2B          DC8 "a+b"
+   \              0x62 0x00    
+
+   \                                 In section .rodata, align 4, keep-with-next
+   \                     ?_14:
+   \   00000000   0x61 0x62          DC8 "ab+"
+   \              0x2B 0x00    
+
+   \                                 In section .rodata, align 4, keep-with-next
+   \                     ?_15:
+   \   00000000   0x64 0x65          DC8 "del"
+   \              0x6C 0x00    
+    575          
+    576          
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   FS_ClearErr
+       0   FS_Exit
+         0   -> FS_X_OS_Exit
+       8   FS_FClose
+         8   -- Indirect call
+         8   -> FS_X_OS_LockFileHandle
+         0   -> FS_X_OS_UnlockFileHandle
+       0   FS_FError
+      40   FS_FOpen
+        40   -- Indirect call
+        40   -> FS_X_OS_LockFileHandle
+        40   -> FS_X_OS_UnlockFileHandle
+        40   -> FS__CLIB_strcmp
+        40   -> FS__find_fsl
+       0   FS_FSeek
+       0   FS_FTell
+       8   FS_Init
+         8   -> FS_X_OS_Init
+         8   -> FS__fat_block_init
+      32   FS_IoCtl
+        32   -- Indirect call
+        32   -> FS__CLIB_atoi
+        32   -> FS__CLIB_strchr
+        32   -> FS__find_fsl
+      24   FS_Remove
+        24   -- Indirect call
+        24   -> FS_X_OS_LockFileHandle
+        24   -> FS_X_OS_UnlockFileHandle
+        24   -> FS__find_fsl
+      32   FS__find_fsl
+        32   -> FS__CLIB_strchr
+        32   -> FS__CLIB_strlen
+        32   -> FS__CLIB_strncmp
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable21
+       4  ??DataTable21_1
+       4  ??DataTable21_2
+       4  ??DataTable21_3
+       2  ?_0
+       2  ?_1
+       4  ?_10
+       4  ?_11
+       4  ?_12
+       4  ?_13
+       4  ?_14
+       4  ?_15
+       2  ?_2
+       4  ?_3
+       4  ?_4
+       4  ?_5
+       4  ?_6
+       4  ?_7
+       4  ?_8
+       4  ?_9
+       8  FS_ClearErr
+       4  FS_Exit
+      54  FS_FClose
+       8  FS_FError
+     146  FS_FOpen
+      46  FS_FSeek
+      12  FS_FTell
+      18  FS_Init
+      92  FS_IoCtl
+      88  FS_Remove
+      96  FS__find_fsl
+      40  _FS_filehandle
+     180  _FS_valid_modes
+
+ 
+  40 bytes in section .bss
+  58 bytes in section .rodata
+ 768 bytes in section .text
+ 
+ 768 bytes of CODE  memory
+  58 bytes of CONST memory
+  40 bytes of DATA  memory
+
+Errors: none
+Warnings: none

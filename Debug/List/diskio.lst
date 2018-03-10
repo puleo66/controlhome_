@@ -1,0 +1,149 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       08/Oct/2017  11:20:39
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\uC-FatFS\diskio.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\uC-FatFS\diskio.c" -lCN
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\diskio.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\diskio.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uC-FatFS\diskio.c
+      1          /*-----------------------------------------------------------------------*/
+      2          /* Low level disk I/O module skeleton for Petit FatFs (C)ChaN, 2014      */
+      3          /*-----------------------------------------------------------------------*/
+      4          
+      5          #include "diskio.h"
+      6          
+      7          
+      8          /*-----------------------------------------------------------------------*/
+      9          /* Initialize Disk Drive                                                 */
+     10          /*-----------------------------------------------------------------------*/
+     11          
+
+   \                                 In section .text, align 2, keep-with-next
+     12          DSTATUS disk_initialize (void)
+     13          {
+     14          	DSTATUS stat;
+     15          
+     16          	// Put your code here
+     17          
+     18          	return stat;
+   \                     disk_initialize: (+1)
+   \   00000000   0x2000             MOVS     R0,#+0
+   \   00000002   0x4770             BX       LR               ;; return
+     19          }
+     20          
+     21          
+     22          
+     23          /*-----------------------------------------------------------------------*/
+     24          /* Read Partial Sector                                                   */
+     25          /*-----------------------------------------------------------------------*/
+     26          
+
+   \                                 In section .text, align 2, keep-with-next
+     27          DRESULT disk_readp (
+     28          	BYTE* buff,		/* Pointer to the destination object */
+     29          	DWORD sector,	/* Sector number (LBA) */
+     30          	UINT offset,	/* Offset in the sector */
+     31          	UINT count		/* Byte count (bit15:destination) */
+     32          )
+     33          {
+     34          	DRESULT res;
+     35          
+     36          	// Put your code here
+     37          
+     38          	return res;
+   \                     disk_readp: (+1)
+   \   00000000   0x2000             MOVS     R0,#+0
+   \   00000002   0x4770             BX       LR               ;; return
+     39          }
+     40          
+     41          
+     42          
+     43          /*-----------------------------------------------------------------------*/
+     44          /* Write Partial Sector                                                  */
+     45          /*-----------------------------------------------------------------------*/
+     46          
+
+   \                                 In section .text, align 2, keep-with-next
+     47          DRESULT disk_writep (const BYTE* buff, DWORD sc)
+     48          {
+     49          	DRESULT res;
+     50          
+     51          
+     52          	if (!buff) {
+     53          		if (sc) {
+     54          
+     55          			// Initiate write process
+     56          
+     57          		} else {
+     58          
+     59          			// Finalize write process
+     60          
+     61          		}
+     62          	} else {
+     63          
+     64          		// Send data to the disk
+     65          
+     66          	}
+     67          
+     68          	return res;
+   \                     disk_writep: (+1)
+   \   00000000   0x2000             MOVS     R0,#+0
+   \   00000002   0x4770             BX       LR               ;; return
+     69          }
+     70          
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   disk_initialize
+       0   disk_readp
+       0   disk_writep
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  disk_initialize
+       4  disk_readp
+       4  disk_writep
+
+ 
+ 12 bytes in section .text
+ 
+ 12 bytes of CODE memory
+
+Errors: none
+Warnings: 3

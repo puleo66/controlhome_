@@ -1,0 +1,221 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:14:57
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\uC-LCD\lcd_os.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\uC-LCD\lcd_os.c" -lCN
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\lcd_os.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\lcd_os.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uC-LCD\lcd_os.c
+      1          /*
+      2          *********************************************************************************************************
+      3          *                                               uC/LCD
+      4          *                                         LCD Module Driver
+      5          *
+      6          *                              (c) Copyright 2005; Micrium; Weston, FL
+      7          *
+      8          *                   All rights reserved.  Protected by international copyright laws.
+      9          *                   Knowledge of the source code may not be used to write a similar
+     10          *                   product.  This file may only be used in accordance with a license
+     11          *                   and should not be redistributed in any way.
+     12          *********************************************************************************************************
+     13          */
+     14          
+     15          
+     16          /*
+     17          *********************************************************************************************************
+     18          *                                 LCD MODULE RTOS INTERFACE SOURCE FILE
+     19          *
+     20          * Filename      : lcd_os.c
+     21          * Programmer(s) : Puleo
+     22          * Version       : V2.11
+     23          *********************************************************************************************************
+     24          */
+     25          
+     26          /*
+     27          *********************************************************************************************************
+     28          *                                              INCLUDE FILES
+     29          *********************************************************************************************************
+     30          */
+     31          
+     32          #include "includes.h"
+     33          
+     34          /*
+     35          *********************************************************************************************************
+     36          *                                              VARIABLES
+     37          *********************************************************************************************************
+     38          */
+     39          
+
+   \                                 In section .bss, align 4
+     40          static  OS_EVENT   *DispSem;                /* Semaphore used to access display functions              */
+   \                     DispSem:
+   \   00000000                      DS8 4
+     41          
+     42          /*
+     43          *********************************************************************************************************
+     44          *                                       INITIALIZE RTOS SERVICES
+     45          *
+     46          * Description : This function creates a semaphore to ensure exclusive access to the LCD module and thus
+     47          *               provide thread safe access to the display.
+     48          *
+     49          * Arguments   : none
+     50          *
+     51          * Returns     : none
+     52          *********************************************************************************************************
+     53          */
+     54          
+
+   \                                 In section .text, align 2, keep-with-next
+     55          void  DispInitOS (void)
+     56          {
+   \                     DispInitOS: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+     57          #if OS_EVENT_NAME_SIZE > 11
+     58              INT8U  err;
+     59          #endif
+     60          
+     61          
+     62              DispSem  = OSSemCreate(1);              /* Create display access semaphore                         */
+   \   00000002   0x2001             MOVS     R0,#+1
+   \   00000004   0x.... 0x....      BL       OSSemCreate
+   \   00000008   0x....             LDR.N    R1,??DataTable3
+   \   0000000A   0x6008             STR      R0,[R1, #+0]
+     63          #if OS_EVENT_NAME_SIZE > 11
+     64              OSEventNameSet(DispSem, (INT8U *)"uC/LCD Lock", &err);
+   \   0000000C   0x466A             MOV      R2,SP
+   \   0000000E   0x.... 0x....      ADR.W    R1,?_0
+   \   00000012   0x.... 0x....      BL       OSEventNameSet
+     65          #endif
+     66          }
+   \   00000016   0xBD01             POP      {R0,PC}          ;; return
+     67          
+     68          /*
+     69          *********************************************************************************************************
+     70          *                              EXCLUSIVE ACCESS FUNCTIONS TO THE DISPLAY
+     71          *
+     72          * Description : These functions are used to gain and release exclusive access to the LCD display.
+     73          *
+     74          * Arguments   : none
+     75          *
+     76          * Returns     : none
+     77          *********************************************************************************************************
+     78          */
+     79          
+
+   \                                 In section .text, align 2, keep-with-next
+     80          void  DispLock (void)
+     81          {
+   \                     DispLock: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+     82              INT8U  err;
+     83          
+     84          
+     85              OSSemPend(DispSem, 0, &err);            /* Obtain exclusive access to the display                  */
+   \   00000002   0x....             LDR.N    R0,??DataTable3
+   \   00000004   0x6800             LDR      R0,[R0, #+0]
+   \   00000006   0x466A             MOV      R2,SP
+   \   00000008   0x2100             MOVS     R1,#+0
+   \   0000000A   0x.... 0x....      BL       OSSemPend
+     86          }
+   \   0000000E   0xBD01             POP      {R0,PC}          ;; return
+     87          
+     88          
+     89          
+
+   \                                 In section .text, align 2, keep-with-next
+     90          void  DispUnlock (void)
+     91          {
+     92              OSSemPost(DispSem);                     /* Release access to display                               */
+   \                     DispUnlock: (+1)
+   \   00000000   0x....             LDR.N    R0,??DataTable3
+   \   00000002   0x6800             LDR      R0,[R0, #+0]
+   \   00000004   0x.... 0x....      B.W      OSSemPost
+     93          }
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable3:
+   \   00000000   0x........         DC32     DispSem
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ?_0:
+   \   00000000   0x75 0x43          DC8 "uC/LCD Lock"
+   \              0x2F 0x4C    
+   \              0x43 0x44    
+   \              0x20 0x4C    
+   \              0x6F 0x63    
+   \              0x6B 0x00    
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       8   DispInitOS
+         8   -> OSEventNameSet
+         8   -> OSSemCreate
+       8   DispLock
+         8   -> OSSemPend
+       0   DispUnlock
+         0   -> OSSemPost
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable3
+      12  ?_0
+      24  DispInitOS
+      16  DispLock
+       4  DispSem
+       8  DispUnlock
+
+ 
+  4 bytes in section .bss
+ 64 bytes in section .text
+ 
+ 64 bytes of CODE memory
+  4 bytes of DATA memory
+
+Errors: none
+Warnings: none

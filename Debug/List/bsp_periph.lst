@@ -1,0 +1,576 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:14:47
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp_periph.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp_periph.c" -lCN
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\bsp_periph.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\bsp_periph.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\BSP\bsp_periph.c
+      1          /*
+      2          *********************************************************************************************************
+      3          *
+      4          *                                        BOARD SUPPORT PACKAGE
+      5          *
+      6          *                                     
+      7          *
+      8          * Filename      : bsp_periph.c
+      9          * Version       : V1.1
+     10          * Programmer(s) : Puleo
+     11          *********************************************************************************************************
+     12          */
+     13          
+     14          /*
+     15          *********************************************************************************************************
+     16          *                                             INCLUDE FILES
+     17          *********************************************************************************************************
+     18          */
+     19          
+     20          #define  BSP_PERIPH_MODULE
+     21          #include <bsp.h>
+     22          
+     23          
+     24          /*
+     25          *********************************************************************************************************
+     26          *                                            LOCAL DEFINES
+     27          *********************************************************************************************************
+     28          */
+     29          
+     30          #define  BSP_PERIPH_REG_RCC_BASE                 0x40021000
+     31          #define  BSP_PERIPH_REG_RCC_CFGR            (*(volatile  CPU_INT32U *)(BSP_PERIPH_REG_RCC_BASE + 0x004))
+     32          #define  BSP_PERIPH_REG_RCC_AHBENR          (*(volatile  CPU_INT32U *)(BSP_PERIPH_REG_RCC_BASE + 0x014))
+     33          #define  BSP_PERIPH_REG_RCC_APB2ENR         (*(volatile  CPU_INT32U *)(BSP_PERIPH_REG_RCC_BASE + 0x018))
+     34          #define  BSP_PERIPH_REG_RCC_APB1ENR         (*(volatile  CPU_INT32U *)(BSP_PERIPH_REG_RCC_BASE + 0x01C))
+     35          
+     36          /*
+     37          *********************************************************************************************************
+     38          *                                           LOCAL CONSTANTS
+     39          *********************************************************************************************************
+     40          */
+     41          
+     42          
+     43          /*
+     44          *********************************************************************************************************
+     45          *                                          LOCAL DATA TYPES
+     46          *********************************************************************************************************
+     47          */
+     48          
+     49          
+     50          /*
+     51          *********************************************************************************************************
+     52          *                                            LOCAL TABLES
+     53          *********************************************************************************************************
+     54          */
+     55          
+     56          
+     57          /*
+     58          *********************************************************************************************************
+     59          *                                       LOCAL GLOBAL VARIABLES
+     60          *********************************************************************************************************
+     61          */
+     62          
+     63          
+     64          /*
+     65          *********************************************************************************************************
+     66          *                                      LOCAL FUNCTION PROTOTYPES
+     67          *********************************************************************************************************
+     68          */
+     69          
+     70          
+     71          /*
+     72          *********************************************************************************************************
+     73          *                                     LOCAL CONFIGURATION ERRORS
+     74          *********************************************************************************************************
+     75          */
+     76          
+     77          
+     78          /*
+     79          *********************************************************************************************************
+     80          *                                         BSP_PeriphClkFreqGet()
+     81          *
+     82          * Description : Get clock frequency of a peripheral.
+     83          *
+     84          * Argument(s) : pwr_clk_id      Power/clock ID.
+     85          *
+     86          * Return(s)   : none.
+     87          *
+     88          * Caller(s)   : Application.
+     89          *
+     90          * Note(s)     : none.
+     91          *********************************************************************************************************
+     92          */
+     93          
+
+   \                                 In section .text, align 2, keep-with-next
+     94          CPU_INT32U  BSP_PeriphClkFreqGet (CPU_DATA  pwr_clk_id)
+     95          {
+   \                     BSP_PeriphClkFreqGet: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0x4604             MOV      R4,R0
+     96              CPU_INT32U  clk_freq;
+     97              CPU_INT32U  clk_div;
+     98          
+     99          
+    100              clk_freq = BSP_CPU_ClkFreq();
+   \   00000004   0x.... 0x....      BL       BSP_CPU_ClkFreq
+    101          
+    102              switch (pwr_clk_id) {
+   \   00000008   0x2C02             CMP      R4,#+2
+   \   0000000A   0xD92E             BLS.N    ??BSP_PeriphClkFreqGet_0
+   \   0000000C   0x1F24             SUBS     R4,R4,#+4
+   \   0000000E   0xD02C             BEQ.N    ??BSP_PeriphClkFreqGet_0
+   \   00000010   0x1EA4             SUBS     R4,R4,#+2
+   \   00000012   0xD02A             BEQ.N    ??BSP_PeriphClkFreqGet_0
+   \   00000014   0x1EA4             SUBS     R4,R4,#+2
+   \   00000016   0xD028             BEQ.N    ??BSP_PeriphClkFreqGet_0
+   \   00000018   0x1EA4             SUBS     R4,R4,#+2
+   \   0000001A   0xD026             BEQ.N    ??BSP_PeriphClkFreqGet_0
+   \   0000001C   0x3C16             SUBS     R4,R4,#+22
+   \   0000001E   0xD013             BEQ.N    ??BSP_PeriphClkFreqGet_1
+   \   00000020   0x1EA4             SUBS     R4,R4,#+2
+   \   00000022   0x2C0D             CMP      R4,#+13
+   \   00000024   0xD910             BLS.N    ??BSP_PeriphClkFreqGet_1
+   \   00000026   0x3C1E             SUBS     R4,R4,#+30
+   \   00000028   0x2C05             CMP      R4,#+5
+   \   0000002A   0xD912             BLS.N    ??BSP_PeriphClkFreqGet_2
+   \   0000002C   0x3C0B             SUBS     R4,R4,#+11
+   \   0000002E   0xD010             BEQ.N    ??BSP_PeriphClkFreqGet_2
+   \   00000030   0x1EE4             SUBS     R4,R4,#+3
+   \   00000032   0x2C01             CMP      R4,#+1
+   \   00000034   0xBF84             ITT      HI 
+   \   00000036   0x1EE4             SUBHI    R4,R4,#+3
+   \   00000038   0x2C06             CMPHI    R4,#+6
+   \   0000003A   0xD90A             BLS.N    ??BSP_PeriphClkFreqGet_2
+   \   0000003C   0x3C08             SUBS     R4,R4,#+8
+   \   0000003E   0xD008             BEQ.N    ??BSP_PeriphClkFreqGet_2
+   \   00000040   0x1EA4             SUBS     R4,R4,#+2
+   \   00000042   0x2C02             CMP      R4,#+2
+   \   00000044   0xD905             BLS.N    ??BSP_PeriphClkFreqGet_2
+   \   00000046   0xE00F             B.N      ??BSP_PeriphClkFreqGet_3
+    103                  case BSP_PERIPH_ID_DMA1:
+    104                  case BSP_PERIPH_ID_DMA2:
+    105                  case BSP_PERIPH_ID_SRAM:
+    106                  case BSP_PERIPH_ID_FLITF:
+    107                  case BSP_PERIPH_ID_CRC:
+    108                  case BSP_PERIPH_ID_FSMC:
+    109                  case BSP_PERIPH_ID_SDIO:
+    110                       return (clk_freq);
+    111          
+    112                  case BSP_PERIPH_ID_AFIO:
+    113                  case BSP_PERIPH_ID_IOPA:
+    114                  case BSP_PERIPH_ID_IOPB:
+    115                  case BSP_PERIPH_ID_IOPC:
+    116                  case BSP_PERIPH_ID_IOPD:
+    117                  case BSP_PERIPH_ID_IOPE:
+    118                  case BSP_PERIPH_ID_IOPF:
+    119                  case BSP_PERIPH_ID_IOPG:
+    120                  case BSP_PERIPH_ID_ADC1:
+    121                  case BSP_PERIPH_ID_ADC2:
+    122                  case BSP_PERIPH_ID_TIM1:
+    123                  case BSP_PERIPH_ID_SPI1:
+    124                  case BSP_PERIPH_ID_TIM8:
+    125                  case BSP_PERIPH_ID_USART1:
+    126                  case BSP_PERIPH_ID_ADC3:
+    127                       clk_div = (BSP_PERIPH_REG_RCC_CFGR & 0x00003800) >> 11;
+   \                     ??BSP_PeriphClkFreqGet_1: (+1)
+   \   00000048   0x....             LDR.N    R1,??DataTable2  ;; 0x40021004
+   \   0000004A   0x6809             LDR      R1,[R1, #+0]
+   \   0000004C   0xF3C1 0x21C2      UBFX     R1,R1,#+11,#+3
+    128                       if (clk_div < 4) {
+   \   00000050   0xE003             B.N      ??BSP_PeriphClkFreqGet_4
+    129                           return (clk_freq);
+    130                       }
+    131                       clk_div   = (clk_div - 3) << 1;
+    132                       clk_freq /= clk_div;
+    133                       return (clk_freq);
+    134          
+    135                  case BSP_PERIPH_ID_TIM2:
+    136                  case BSP_PERIPH_ID_TIM3:
+    137                  case BSP_PERIPH_ID_TIM4:
+    138                  case BSP_PERIPH_ID_TIM5:
+    139                  case BSP_PERIPH_ID_TIM6:
+    140                  case BSP_PERIPH_ID_TIM7:
+    141                  case BSP_PERIPH_ID_WWDG:
+    142                  case BSP_PERIPH_ID_SPI2:
+    143                  case BSP_PERIPH_ID_SPI3:
+    144                  case BSP_PERIPH_ID_USART2:
+    145                  case BSP_PERIPH_ID_USART3:
+    146                  case BSP_PERIPH_ID_USART4:
+    147                  case BSP_PERIPH_ID_USART5:
+    148                  case BSP_PERIPH_ID_I2C1:
+    149                  case BSP_PERIPH_ID_I2C2:
+    150                  case BSP_PERIPH_ID_USB:
+    151                  case BSP_PERIPH_ID_CAN:
+    152                  case BSP_PERIPH_ID_BKP:
+    153                  case BSP_PERIPH_ID_PWR:
+    154                  case BSP_PERIPH_ID_DAC:
+    155                       clk_div = (BSP_PERIPH_REG_RCC_CFGR & 0x00000700) >> 8;
+   \                     ??BSP_PeriphClkFreqGet_2: (+1)
+   \   00000052   0x....             LDR.N    R1,??DataTable2  ;; 0x40021004
+   \   00000054   0x6809             LDR      R1,[R1, #+0]
+   \   00000056   0xF3C1 0x2102      UBFX     R1,R1,#+8,#+3
+    156                       if (clk_div < 4) {
+   \                     ??BSP_PeriphClkFreqGet_4: (+1)
+   \   0000005A   0x2904             CMP      R1,#+4
+   \   0000005C   0xD305             BCC.N    ??BSP_PeriphClkFreqGet_0
+    157                           return (clk_freq);
+    158                       }
+    159                       clk_div   = (clk_div - 3) << 1;
+    160                       clk_freq /= clk_div;
+    161                       return (clk_freq);
+   \   0000005E   0x1EC9             SUBS     R1,R1,#+3
+   \   00000060   0x0049             LSLS     R1,R1,#+1
+   \   00000062   0xFBB0 0xF0F1      UDIV     R0,R0,R1
+   \   00000066   0xBD10             POP      {R4,PC}
+    162              }
+    163          
+    164              return ((CPU_INT32U)0);
+   \                     ??BSP_PeriphClkFreqGet_3: (+1)
+   \   00000068   0x2000             MOVS     R0,#+0
+   \                     ??BSP_PeriphClkFreqGet_0: (+1)
+   \   0000006A   0xBD10             POP      {R4,PC}          ;; return
+    165          }
+    166          
+    167          
+    168          /*
+    169          *********************************************************************************************************
+    170          *                                             BSP_PeriphEn()
+    171          *
+    172          * Description : Enable clock for peripheral.
+    173          *
+    174          * Argument(s) : pwr_clk_id      Power/clock ID.
+    175          *
+    176          * Return(s)   : none.
+    177          *
+    178          * Caller(s)   : Application.
+    179          *
+    180          * Note(s)     : none.
+    181          *********************************************************************************************************
+    182          */
+    183          
+
+   \                                 In section .text, align 2, keep-with-next
+    184          void  BSP_PeriphEn (CPU_DATA  pwr_clk_id)
+    185          {
+    186              switch (pwr_clk_id) {
+   \                     BSP_PeriphEn: (+1)
+   \   00000000   0x2802             CMP      R0,#+2
+   \   00000002   0xD91D             BLS.N    ??BSP_PeriphEn_0
+   \   00000004   0x1F01             SUBS     R1,R0,#+4
+   \   00000006   0xD01B             BEQ.N    ??BSP_PeriphEn_0
+   \   00000008   0x1E89             SUBS     R1,R1,#+2
+   \   0000000A   0xD019             BEQ.N    ??BSP_PeriphEn_0
+   \   0000000C   0x1E89             SUBS     R1,R1,#+2
+   \   0000000E   0xD017             BEQ.N    ??BSP_PeriphEn_0
+   \   00000010   0x1E89             SUBS     R1,R1,#+2
+   \   00000012   0xD015             BEQ.N    ??BSP_PeriphEn_0
+   \   00000014   0x3916             SUBS     R1,R1,#+22
+   \   00000016   0xD01B             BEQ.N    ??BSP_PeriphEn_1
+   \   00000018   0x1E89             SUBS     R1,R1,#+2
+   \   0000001A   0x290D             CMP      R1,#+13
+   \   0000001C   0xD918             BLS.N    ??BSP_PeriphEn_1
+   \   0000001E   0x391E             SUBS     R1,R1,#+30
+   \   00000020   0x2905             CMP      R1,#+5
+   \   00000022   0xD91E             BLS.N    ??BSP_PeriphEn_2
+   \   00000024   0x390B             SUBS     R1,R1,#+11
+   \   00000026   0xD01C             BEQ.N    ??BSP_PeriphEn_2
+   \   00000028   0x1EC9             SUBS     R1,R1,#+3
+   \   0000002A   0x2901             CMP      R1,#+1
+   \   0000002C   0xBF84             ITT      HI 
+   \   0000002E   0x1EC9             SUBHI    R1,R1,#+3
+   \   00000030   0x2906             CMPHI    R1,#+6
+   \   00000032   0xD916             BLS.N    ??BSP_PeriphEn_2
+   \   00000034   0x3908             SUBS     R1,R1,#+8
+   \   00000036   0xD014             BEQ.N    ??BSP_PeriphEn_2
+   \   00000038   0x1E89             SUBS     R1,R1,#+2
+   \   0000003A   0x2902             CMP      R1,#+2
+   \   0000003C   0xD911             BLS.N    ??BSP_PeriphEn_2
+   \   0000003E   0x4770             BX       LR
+    187                  case BSP_PERIPH_ID_DMA1:
+    188                  case BSP_PERIPH_ID_DMA2:
+    189                  case BSP_PERIPH_ID_SRAM:
+    190                  case BSP_PERIPH_ID_FLITF:
+    191                  case BSP_PERIPH_ID_CRC:
+    192                  case BSP_PERIPH_ID_FSMC:
+    193                  case BSP_PERIPH_ID_SDIO:
+    194                       BSP_PERIPH_REG_RCC_AHBENR |= DEF_BIT(pwr_clk_id);
+   \                     ??BSP_PeriphEn_0: (+1)
+   \   00000040   0x....             LDR.N    R1,??DataTable2_1  ;; 0x40021014
+   \   00000042   0x680A             LDR      R2,[R1, #+0]
+   \   00000044   0x2301             MOVS     R3,#+1
+   \   00000046   0xFA03 0xF000      LSL      R0,R3,R0
+   \   0000004A   0x4310             ORRS     R0,R0,R2
+   \   0000004C   0x6008             STR      R0,[R1, #+0]
+    195                       break;
+   \   0000004E   0x4770             BX       LR
+    196          
+    197                  case BSP_PERIPH_ID_AFIO:
+    198                  case BSP_PERIPH_ID_IOPA:
+    199                  case BSP_PERIPH_ID_IOPB:
+    200                  case BSP_PERIPH_ID_IOPC:
+    201                  case BSP_PERIPH_ID_IOPD:
+    202                  case BSP_PERIPH_ID_IOPE:
+    203                  case BSP_PERIPH_ID_IOPF:
+    204                  case BSP_PERIPH_ID_IOPG:
+    205                  case BSP_PERIPH_ID_ADC1:
+    206                  case BSP_PERIPH_ID_ADC2:
+    207                  case BSP_PERIPH_ID_TIM1:
+    208                  case BSP_PERIPH_ID_SPI1:
+    209                  case BSP_PERIPH_ID_TIM8:
+    210                  case BSP_PERIPH_ID_USART1:
+    211                  case BSP_PERIPH_ID_ADC3:
+    212                       BSP_PERIPH_REG_RCC_APB2ENR |= DEF_BIT(pwr_clk_id - 32);
+   \                     ??BSP_PeriphEn_1: (+1)
+   \   00000050   0x....             LDR.N    R1,??DataTable2_1  ;; 0x40021014
+   \   00000052   0x2301             MOVS     R3,#+1
+   \   00000054   0x684A             LDR      R2,[R1, #+4]
+   \   00000056   0x3820             SUBS     R0,R0,#+32
+   \   00000058   0xFA03 0xF000      LSL      R0,R3,R0
+   \   0000005C   0x4310             ORRS     R0,R0,R2
+   \   0000005E   0x6048             STR      R0,[R1, #+4]
+    213                       break;
+   \   00000060   0x4770             BX       LR
+    214          
+    215                  case BSP_PERIPH_ID_TIM2:
+    216                  case BSP_PERIPH_ID_TIM3:
+    217                  case BSP_PERIPH_ID_TIM4:
+    218                  case BSP_PERIPH_ID_TIM5:
+    219                  case BSP_PERIPH_ID_TIM6:
+    220                  case BSP_PERIPH_ID_TIM7:
+    221                  case BSP_PERIPH_ID_WWDG:
+    222                  case BSP_PERIPH_ID_SPI2:
+    223                  case BSP_PERIPH_ID_SPI3:
+    224                  case BSP_PERIPH_ID_USART2:
+    225                  case BSP_PERIPH_ID_USART3:
+    226                  case BSP_PERIPH_ID_USART4:
+    227                  case BSP_PERIPH_ID_USART5:
+    228                  case BSP_PERIPH_ID_I2C1:
+    229                  case BSP_PERIPH_ID_I2C2:
+    230                  case BSP_PERIPH_ID_USB:
+    231                  case BSP_PERIPH_ID_CAN:
+    232                  case BSP_PERIPH_ID_BKP:
+    233                  case BSP_PERIPH_ID_PWR:
+    234                  case BSP_PERIPH_ID_DAC:
+    235                       BSP_PERIPH_REG_RCC_APB1ENR |= DEF_BIT(pwr_clk_id - 64);
+   \                     ??BSP_PeriphEn_2: (+1)
+   \   00000062   0x....             LDR.N    R1,??DataTable2_1  ;; 0x40021014
+   \   00000064   0x2301             MOVS     R3,#+1
+   \   00000066   0x688A             LDR      R2,[R1, #+8]
+   \   00000068   0x3840             SUBS     R0,R0,#+64
+   \   0000006A   0xFA03 0xF000      LSL      R0,R3,R0
+   \   0000006E   0x4310             ORRS     R0,R0,R2
+   \   00000070   0x6088             STR      R0,[R1, #+8]
+    236                       break;
+    237              }
+    238          }
+   \   00000072   0x4770             BX       LR               ;; return
+    239          
+    240          
+    241          /*
+    242          *********************************************************************************************************
+    243          *                                             BSP_PeriphDis()
+    244          *
+    245          * Description : Disable clock for peripheral.
+    246          *
+    247          * Argument(s) : pwr_clk_id      Power/clock ID.
+    248          *
+    249          * Return(s)   : none.
+    250          *
+    251          * Caller(s)   : Application.
+    252          *
+    253          * Note(s)     : none.
+    254          *********************************************************************************************************
+    255          */
+    256          
+
+   \                                 In section .text, align 2, keep-with-next
+    257          void  BSP_PeriphDis (CPU_DATA  pwr_clk_id)
+    258          {
+    259              switch (pwr_clk_id) {
+   \                     BSP_PeriphDis: (+1)
+   \   00000000   0x2802             CMP      R0,#+2
+   \   00000002   0xD91D             BLS.N    ??BSP_PeriphDis_0
+   \   00000004   0x1F01             SUBS     R1,R0,#+4
+   \   00000006   0xD01B             BEQ.N    ??BSP_PeriphDis_0
+   \   00000008   0x1E89             SUBS     R1,R1,#+2
+   \   0000000A   0xD019             BEQ.N    ??BSP_PeriphDis_0
+   \   0000000C   0x1E89             SUBS     R1,R1,#+2
+   \   0000000E   0xD017             BEQ.N    ??BSP_PeriphDis_0
+   \   00000010   0x1E89             SUBS     R1,R1,#+2
+   \   00000012   0xD015             BEQ.N    ??BSP_PeriphDis_0
+   \   00000014   0x3916             SUBS     R1,R1,#+22
+   \   00000016   0xD01C             BEQ.N    ??BSP_PeriphDis_1
+   \   00000018   0x1E89             SUBS     R1,R1,#+2
+   \   0000001A   0x290D             CMP      R1,#+13
+   \   0000001C   0xD919             BLS.N    ??BSP_PeriphDis_1
+   \   0000001E   0x391E             SUBS     R1,R1,#+30
+   \   00000020   0x2905             CMP      R1,#+5
+   \   00000022   0xD920             BLS.N    ??BSP_PeriphDis_2
+   \   00000024   0x390B             SUBS     R1,R1,#+11
+   \   00000026   0xD01E             BEQ.N    ??BSP_PeriphDis_2
+   \   00000028   0x1EC9             SUBS     R1,R1,#+3
+   \   0000002A   0x2901             CMP      R1,#+1
+   \   0000002C   0xBF84             ITT      HI 
+   \   0000002E   0x1EC9             SUBHI    R1,R1,#+3
+   \   00000030   0x2906             CMPHI    R1,#+6
+   \   00000032   0xD918             BLS.N    ??BSP_PeriphDis_2
+   \   00000034   0x3908             SUBS     R1,R1,#+8
+   \   00000036   0xD016             BEQ.N    ??BSP_PeriphDis_2
+   \   00000038   0x1E89             SUBS     R1,R1,#+2
+   \   0000003A   0x2902             CMP      R1,#+2
+   \   0000003C   0xD913             BLS.N    ??BSP_PeriphDis_2
+   \   0000003E   0x4770             BX       LR
+    260                  case BSP_PERIPH_ID_DMA1:
+    261                  case BSP_PERIPH_ID_DMA2:
+    262                  case BSP_PERIPH_ID_SRAM:
+    263                  case BSP_PERIPH_ID_FLITF:
+    264                  case BSP_PERIPH_ID_CRC:
+    265                  case BSP_PERIPH_ID_FSMC:
+    266                  case BSP_PERIPH_ID_SDIO:
+    267                       BSP_PERIPH_REG_RCC_AHBENR &= ~DEF_BIT(pwr_clk_id);
+   \                     ??BSP_PeriphDis_0: (+1)
+   \   00000040   0x....             LDR.N    R1,??DataTable2_1  ;; 0x40021014
+   \   00000042   0x680A             LDR      R2,[R1, #+0]
+   \   00000044   0x2301             MOVS     R3,#+1
+   \   00000046   0xFA03 0xF000      LSL      R0,R3,R0
+   \   0000004A   0xEA22 0x0000      BIC      R0,R2,R0
+   \   0000004E   0x6008             STR      R0,[R1, #+0]
+    268                       break;
+   \   00000050   0x4770             BX       LR
+    269          
+    270                  case BSP_PERIPH_ID_AFIO:
+    271                  case BSP_PERIPH_ID_IOPA:
+    272                  case BSP_PERIPH_ID_IOPB:
+    273                  case BSP_PERIPH_ID_IOPC:
+    274                  case BSP_PERIPH_ID_IOPD:
+    275                  case BSP_PERIPH_ID_IOPE:
+    276                  case BSP_PERIPH_ID_IOPF:
+    277                  case BSP_PERIPH_ID_IOPG:
+    278                  case BSP_PERIPH_ID_ADC1:
+    279                  case BSP_PERIPH_ID_ADC2:
+    280                  case BSP_PERIPH_ID_TIM1:
+    281                  case BSP_PERIPH_ID_SPI1:
+    282                  case BSP_PERIPH_ID_TIM8:
+    283                  case BSP_PERIPH_ID_USART1:
+    284                  case BSP_PERIPH_ID_ADC3:
+    285                       BSP_PERIPH_REG_RCC_APB2ENR &= ~DEF_BIT(pwr_clk_id - 32);
+   \                     ??BSP_PeriphDis_1: (+1)
+   \   00000052   0x....             LDR.N    R1,??DataTable2_1  ;; 0x40021014
+   \   00000054   0x2301             MOVS     R3,#+1
+   \   00000056   0x684A             LDR      R2,[R1, #+4]
+   \   00000058   0x3820             SUBS     R0,R0,#+32
+   \   0000005A   0xFA03 0xF000      LSL      R0,R3,R0
+   \   0000005E   0xEA22 0x0000      BIC      R0,R2,R0
+   \   00000062   0x6048             STR      R0,[R1, #+4]
+    286                       break;
+   \   00000064   0x4770             BX       LR
+    287          
+    288                  case BSP_PERIPH_ID_TIM2:
+    289                  case BSP_PERIPH_ID_TIM3:
+    290                  case BSP_PERIPH_ID_TIM4:
+    291                  case BSP_PERIPH_ID_TIM5:
+    292                  case BSP_PERIPH_ID_TIM6:
+    293                  case BSP_PERIPH_ID_TIM7:
+    294                  case BSP_PERIPH_ID_WWDG:
+    295                  case BSP_PERIPH_ID_SPI2:
+    296                  case BSP_PERIPH_ID_SPI3:
+    297                  case BSP_PERIPH_ID_USART2:
+    298                  case BSP_PERIPH_ID_USART3:
+    299                  case BSP_PERIPH_ID_USART4:
+    300                  case BSP_PERIPH_ID_USART5:
+    301                  case BSP_PERIPH_ID_I2C1:
+    302                  case BSP_PERIPH_ID_I2C2:
+    303                  case BSP_PERIPH_ID_USB:
+    304                  case BSP_PERIPH_ID_CAN:
+    305                  case BSP_PERIPH_ID_BKP:
+    306                  case BSP_PERIPH_ID_PWR:
+    307                  case BSP_PERIPH_ID_DAC:
+    308                       BSP_PERIPH_REG_RCC_APB1ENR &= ~DEF_BIT(pwr_clk_id - 64);
+   \                     ??BSP_PeriphDis_2: (+1)
+   \   00000066   0x....             LDR.N    R1,??DataTable2_1  ;; 0x40021014
+   \   00000068   0x2301             MOVS     R3,#+1
+   \   0000006A   0x688A             LDR      R2,[R1, #+8]
+   \   0000006C   0x3840             SUBS     R0,R0,#+64
+   \   0000006E   0xFA03 0xF000      LSL      R0,R3,R0
+   \   00000072   0xEA22 0x0000      BIC      R0,R2,R0
+   \   00000076   0x6088             STR      R0,[R1, #+8]
+    309                       break;
+    310              }
+    311          }
+   \   00000078   0x4770             BX       LR               ;; return
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable2:
+   \   00000000   0x40021004         DC32     0x40021004
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable2_1:
+   \   00000000   0x40021014         DC32     0x40021014
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       8   BSP_PeriphClkFreqGet
+         8   -> BSP_CPU_ClkFreq
+       0   BSP_PeriphDis
+       0   BSP_PeriphEn
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable2
+       4  ??DataTable2_1
+     108  BSP_PeriphClkFreqGet
+     122  BSP_PeriphDis
+     116  BSP_PeriphEn
+
+ 
+ 354 bytes in section .text
+ 
+ 354 bytes of CODE memory
+
+Errors: none
+Warnings: none

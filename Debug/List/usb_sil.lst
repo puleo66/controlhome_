@@ -1,0 +1,266 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:15:18
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\uc-terminal\src\usb_sil.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome -
+#        RF69w\uc-terminal\src\usb_sil.c" -lCN "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\usb_sil.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\usb_sil.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uc-terminal\src\usb_sil.c
+      1          /******************** (C) COPYRIGHT 2011 STMicroelectronics ********************
+      2          * File Name          : usb_sil.c
+      3          * Author             : MCD Application Team
+      4          * Version            : V3.3.0
+      5          * Date               : 21-March-2011
+      6          * Description        : Simplified Interface Layer for Global Initialization and 
+      7          *                      Endpoint Rea/Write operations.
+      8          ********************************************************************************
+      9          * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+     10          * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE TIME.
+     11          * AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY DIRECT,
+     12          * INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING FROM THE
+     13          * CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE CODING
+     14          * INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+     15          *******************************************************************************/
+     16          
+     17          /* Includes ------------------------------------------------------------------*/
+     18          #include "includes.h"
+     19          #if USBD_MODULE == DEF_ENABLED
+     20          
+     21          /* Private typedef -----------------------------------------------------------*/
+     22          /* Private define ------------------------------------------------------------*/
+     23          /* Private macro -------------------------------------------------------------*/
+     24          /* Private variables ---------------------------------------------------------*/
+     25          /* Extern variables ----------------------------------------------------------*/
+     26          /* Private function prototypes -----------------------------------------------*/
+     27          /* Private functions ---------------------------------------------------------*/
+     28          
+     29          /*******************************************************************************
+     30          * Function Name  : USB_SIL_Init
+     31          * Description    : Initialize the USB Device IP and the Endpoint 0.
+     32          * Input          : None.
+     33          * Output         : None.
+     34          * Return         : Status.
+     35          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+     36          INT32U USB_SIL_Init(void)
+     37          {
+     38          #ifndef STM32F10X_CL
+     39            
+     40            /* USB interrupts initialization */
+     41            /* clear pending interrupts */
+     42            _SetISTR(0);
+   \                     USB_SIL_Init: (+1)
+   \   00000000   0x....             LDR.N    R0,??DataTable0  ;; 0x40005c40
+     43            wInterrupt_Mask = IMR_MSK;
+   \   00000002   0x....             LDR.N    R2,??DataTable0_1
+   \   00000004   0x2100             MOVS     R1,#+0
+   \   00000006   0x6041             STR      R1,[R0, #+4]
+   \   00000008   0xF44F 0x4106      MOV      R1,#+34304
+   \   0000000C   0x8011             STRH     R1,[R2, #+0]
+     44            /* set interrupts mask */
+     45            _SetCNTR(wInterrupt_Mask);
+   \   0000000E   0x6001             STR      R1,[R0, #+0]
+     46            
+     47          #else
+     48            
+     49            /* Perform OTG Device initialization procedure (including EP0 init) */
+     50            OTG_DEV_Init();
+     51            
+     52          #endif /* STM32F10X_CL */
+     53          
+     54            return 0;
+   \   00000010   0x2000             MOVS     R0,#+0
+   \   00000012   0x4770             BX       LR               ;; return
+     55          }
+     56          
+     57          /*******************************************************************************
+     58          * Function Name  : USB_SIL_Write
+     59          * Description    : Write a buffer of data to a selected endpoint.
+     60          * Input          : - bEpAddr: The address of the non control endpoint.
+     61          *                  - pBufferPointer: The pointer to the buffer of data to be written
+     62          *                    to the endpoint.
+     63          *                  - wBufferSize: Number of data to be written (in bytes).
+     64          * Output         : None.
+     65          * Return         : Status.
+     66          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+     67          INT32U USB_SIL_Write(INT8U bEpAddr, INT8U* pBufferPointer, INT32U wBufferSize)
+     68          {
+   \                     USB_SIL_Write: (+1)
+   \   00000000   0xB570             PUSH     {R4-R6,LR}
+     69          #ifndef STM32F10X_CL
+     70          
+     71            /* Use the memory interface function to write to the selected endpoint */
+     72            UserToPMABufferCopy(pBufferPointer, GetEPTxAddr(bEpAddr & 0x7F), wBufferSize);
+   \   00000002   0xF000 0x067F      AND      R6,R0,#0x7F
+   \   00000006   0x460C             MOV      R4,R1
+   \   00000008   0x4615             MOV      R5,R2
+   \   0000000A   0x4630             MOV      R0,R6
+   \   0000000C   0x.... 0x....      BL       GetEPTxAddr
+   \   00000010   0x4601             MOV      R1,R0
+   \   00000012   0xB2AA             UXTH     R2,R5
+   \   00000014   0x4620             MOV      R0,R4
+   \   00000016   0x.... 0x....      BL       UserToPMABufferCopy
+     73          
+     74            /* Update the data length in the control register */
+     75            SetEPTxCount((bEpAddr & 0x7F), wBufferSize);
+   \   0000001A   0xB2A9             UXTH     R1,R5
+   \   0000001C   0x4630             MOV      R0,R6
+   \   0000001E   0x.... 0x....      BL       SetEPTxCount
+     76            
+     77          #else
+     78            
+     79             /* Use the PCD interface layer function to write to the selected endpoint */
+     80             PCD_EP_Write (bEpAddr, pBufferPointer, wBufferSize); 
+     81             
+     82          #endif /* STM32F10X_CL */
+     83          
+     84            return 0;
+   \   00000022   0x2000             MOVS     R0,#+0
+   \   00000024   0xBD70             POP      {R4-R6,PC}       ;; return
+     85          }
+     86          
+     87          /*******************************************************************************
+     88          * Function Name  : USB_SIL_Read
+     89          * Description    : Write a buffer of data to a selected endpoint.
+     90          * Input          : - bEpAddr: The address of the non control endpoint.
+     91          *                  - pBufferPointer: The pointer to which will be saved the 
+     92          *                     received data buffer.
+     93          * Output         : None.
+     94          * Return         : Number of received data (in Bytes).
+     95          *******************************************************************************/
+
+   \                                 In section .text, align 2, keep-with-next
+     96          INT32U USB_SIL_Read(INT8U bEpAddr, INT8U* pBufferPointer)
+     97          {
+   \                     USB_SIL_Read: (+1)
+   \   00000000   0xB570             PUSH     {R4-R6,LR}
+     98            INT32U DataLength = 0;
+     99          
+    100          #ifndef STM32F10X_CL
+    101          
+    102            /* Get the number of received data on the selected Endpoint */
+    103            DataLength = GetEPRxCount(bEpAddr & 0x7F);
+   \   00000002   0xF000 0x057F      AND      R5,R0,#0x7F
+   \   00000006   0x460C             MOV      R4,R1
+   \   00000008   0x4628             MOV      R0,R5
+   \   0000000A   0x.... 0x....      BL       GetEPRxCount
+   \   0000000E   0x4606             MOV      R6,R0
+    104            
+    105            /* Use the memory interface function to write to the selected endpoint */
+    106            PMAToUserBufferCopy(pBufferPointer, GetEPRxAddr(bEpAddr & 0x7F), DataLength);
+   \   00000010   0x4628             MOV      R0,R5
+   \   00000012   0x.... 0x....      BL       GetEPRxAddr
+   \   00000016   0x4601             MOV      R1,R0
+   \   00000018   0x4632             MOV      R2,R6
+   \   0000001A   0x4620             MOV      R0,R4
+   \   0000001C   0x.... 0x....      BL       PMAToUserBufferCopy
+    107          
+    108          #else
+    109            
+    110            USB_OTG_EP *ep;
+    111          
+    112            /* Get the structure pointer of the selected Endpoint */
+    113            ep = PCD_GetOutEP(bEpAddr);
+    114            
+    115            /* Get the number of received data */
+    116            DataLength = ep->xfer_len;
+    117            
+    118            /* Use the PCD interface layer function to read the selected endpoint */
+    119            PCD_EP_Read (bEpAddr, pBufferPointer, DataLength);
+    120            
+    121          #endif /* STM32F10X_CL */
+    122          
+    123            /* Return the number of received data */
+    124            return DataLength;
+   \   00000020   0x4630             MOV      R0,R6
+   \   00000022   0xBD70             POP      {R4-R6,PC}       ;; return
+    125          }
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable0:
+   \   00000000   0x40005C40         DC32     0x40005c40
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable0_1:
+   \   00000000   0x........         DC32     wInterrupt_Mask
+    126          
+    127          /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
+    128          #endif
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   USB_SIL_Init
+      16   USB_SIL_Read
+        16   -> GetEPRxAddr
+        16   -> GetEPRxCount
+        16   -> PMAToUserBufferCopy
+      16   USB_SIL_Write
+        16   -> GetEPTxAddr
+        16   -> SetEPTxCount
+        16   -> UserToPMABufferCopy
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable0
+       4  ??DataTable0_1
+      20  USB_SIL_Init
+      36  USB_SIL_Read
+      38  USB_SIL_Write
+
+ 
+ 102 bytes in section .text
+ 
+ 102 bytes of CODE memory
+
+Errors: none
+Warnings: none

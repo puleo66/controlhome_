@@ -1,0 +1,635 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:14:43
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\api_dir.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\api_dir.c"
+#        -lCN "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List" -o
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\api_dir.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\api_dir.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\api_dir.c
+      1          /*
+      2          **********************************************************************
+      3          *                          Micrium, Inc.
+      4          *                      949 Crestview Circle
+      5          *                     Weston,  FL 33327-1848
+      6          *
+      7          *                            uC/FS
+      8          *
+      9          *             (c) Copyright 2001 - 2003, Micrium, Inc.
+     10          *                      All rights reserved.
+     11          *
+     12          ***********************************************************************
+     13          
+     14          ----------------------------------------------------------------------
+     15          File        : api_dir.c
+     16          Purpose     : POSIX 1003.1 like directory support
+     17          ----------------------------------------------------------------------
+     18          Known problems or limitations with current version
+     19          ----------------------------------------------------------------------
+     20          None.
+     21          ---------------------------END-OF-HEADER------------------------------
+     22          */
+     23          
+     24          /*********************************************************************
+     25          *
+     26          *             #include Section
+     27          *
+     28          **********************************************************************
+     29          */
+     30          
+     31          #include "fs_port.h"
+     32          #include "fs_conf.h"
+     33          #include "fs_dev.h"
+     34          #include "fs_api.h"
+     35          #include "fs_os.h"
+     36          #include "fs_fsl.h"
+     37          #include "fs_int.h"
+     38          #include "api_int.h"
+     39          
+     40          
+     41          #if FS_POSIX_DIR_SUPPORT
+     42          
+     43          /*********************************************************************
+     44          *
+     45          *             Local variables        
+     46          *
+     47          **********************************************************************
+     48          */
+     49          
+     50          static const unsigned int _FS_dir_maxopen = FS_DIR_MAXOPEN;
+
+   \                                 In section .bss, align 4
+     51          static FS_DIR             _FS_dirhandle[FS_DIR_MAXOPEN];
+   \                     _FS_dirhandle:
+   \   00000000                      DS8 1152
+     52          
+     53          
+     54          /*********************************************************************
+     55          *
+     56          *             Global functions
+     57          *
+     58          **********************************************************************
+     59          */
+     60          
+     61          /*********************************************************************
+     62          *
+     63          *             FS_OpenDir
+     64          *
+     65            Description:
+     66            API function. Open an existing directory for reading.
+     67          
+     68            Parameters:
+     69            pDirName    - Fully qualified directory name. 
+     70            
+     71            Return value:
+     72            ==0         - Unable to open the directory.
+     73            !=0         - Address of an FS_DIR data structure.
+     74          */
+     75          
+
+   \                                 In section .text, align 2, keep-with-next
+     76          FS_DIR *FS_OpenDir(const char *pDirName) {
+   \                     FS_OpenDir: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+     77            FS_DIR *handle;
+     78            unsigned int i;
+     79            int idx;
+     80            char *s;
+     81          
+     82            /* Find correct FSL (device:unit:name) */
+     83            idx = FS__find_fsl(pDirName, &s);
+   \   00000002   0x4669             MOV      R1,SP
+   \   00000004   0x.... 0x....      BL       FS__find_fsl
+   \   00000008   0x0004             MOVS     R4,R0
+     84            if (idx < 0) {
+   \   0000000A   0xD41F             BMI.N    ??FS_OpenDir_0
+     85              return 0;  /* Device not found */
+     86            }
+     87            if (FS__pDevInfo[idx].fs_ptr->fsl_opendir) {
+   \   0000000C   0x....             LDR.N    R0,??DataTable2
+   \   0000000E   0x6800             LDR      R0,[R0, #+0]
+   \   00000010   0xEB00 0x1504      ADD      R5,R0,R4, LSL #+4
+   \   00000014   0x6868             LDR      R0,[R5, #+4]
+   \   00000016   0x6A00             LDR      R0,[R0, #+32]
+   \   00000018   0xB1C0             CBZ.N    R0,??FS_OpenDir_0
+     88              /*  Find next free entry in _FS_dirhandle */
+     89              FS_X_OS_LockDirHandle();
+   \   0000001A   0x.... 0x....      BL       FS_X_OS_LockDirHandle
+     90              i = 0;
+   \   0000001E   0x....             LDR.N    R1,??DataTable2_1
+     91              while (1) {
+     92                if (i >= _FS_dir_maxopen) {
+     93                  break;  /* No free entry in _FS_dirhandle */
+     94                }
+     95                if (!_FS_dirhandle[i].inuse) {
+   \   00000020   0xF891 0x211E      LDRB     R2,[R1, #+286]
+   \   00000024   0x2000             MOVS     R0,#+0
+   \   00000026   0x2A00             CMP      R2,#+0
+   \   00000028   0xBF1E             ITTT     NE 
+   \   0000002A   0x2001             MOVNE    R0,#+1
+   \   0000002C   0xF891 0x223E      LDRBNE   R2,[R1, #+574]
+   \   00000030   0x2A00             CMPNE    R2,#+0
+     96                  break;  /* Free entry found */
+     97                }
+     98                i++;
+   \   00000032   0xD00D             BEQ.N    ??FS_OpenDir_1
+   \   00000034   0xF891 0x235E      LDRB     R2,[R1, #+862]
+   \   00000038   0x2002             MOVS     R0,#+2
+   \   0000003A   0x2A00             CMP      R2,#+0
+   \   0000003C   0xBF1E             ITTT     NE 
+   \   0000003E   0x2003             MOVNE    R0,#+3
+   \   00000040   0xF891 0x247E      LDRBNE   R2,[R1, #+1150]
+   \   00000044   0x2A00             CMPNE    R2,#+0
+   \   00000046   0xD003             BEQ.N    ??FS_OpenDir_1
+     99              }
+    100              if (i < _FS_dir_maxopen) {
+    101                /* Execute open function of the found FSL */
+    102                _FS_dirhandle[i].dev_index = idx; 
+    103                handle = (FS__pDevInfo[idx].fs_ptr->fsl_opendir)(s, &_FS_dirhandle[i]);
+    104                FS_X_OS_UnlockDirHandle();
+    105                return handle;
+    106              }
+    107              FS_X_OS_UnlockDirHandle();
+   \   00000048   0x.... 0x....      BL       FS_X_OS_UnlockDirHandle
+    108            }
+    109            return 0;
+   \                     ??FS_OpenDir_0: (+1)
+   \   0000004C   0x2000             MOVS     R0,#+0
+   \   0000004E   0xBD32             POP      {R1,R4,R5,PC}    ;; return
+   \                     ??FS_OpenDir_1: (+1)
+   \   00000050   0xEB00 0x02C0      ADD      R2,R0,R0, LSL #+3
+   \   00000054   0xEB01 0x1142      ADD      R1,R1,R2, LSL #+5
+   \   00000058   0xF8C1 0x4118      STR      R4,[R1, #+280]
+   \   0000005C   0x686A             LDR      R2,[R5, #+4]
+   \   0000005E   0x9800             LDR      R0,[SP, #+0]
+   \   00000060   0x6A12             LDR      R2,[R2, #+32]
+   \   00000062   0x4790             BLX      R2
+   \   00000064                      REQUIRE ?Subroutine0
+   \   00000064                      ;; // Fall through to label ?Subroutine0
+    110          }
+
+   \                                 In section .text, align 2, keep-with-next
+   \                     ?Subroutine0: (+1)
+   \   00000000   0x4604             MOV      R4,R0
+   \   00000002   0x.... 0x....      BL       FS_X_OS_UnlockDirHandle
+   \   00000006   0x4620             MOV      R0,R4
+   \   00000008   0xBD32             POP      {R1,R4,R5,PC}
+    111          
+    112          
+    113          /*********************************************************************
+    114          *
+    115          *             FS_CloseDir
+    116          *
+    117            Description:
+    118            API function. Close a directory referred by pDir.
+    119          
+    120            Parameters:
+    121            pDir        - Pointer to a FS_DIR data structure. 
+    122            
+    123            Return value:
+    124            ==0         - Directory has been closed.
+    125            ==-1        - Unable to close directory.
+    126          */
+    127          
+
+   \                                 In section .text, align 2, keep-with-next
+    128          int FS_CloseDir(FS_DIR *pDir) {
+   \                     FS_CloseDir: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+   \   00000002   0x0004             MOVS     R4,R0
+    129            int i;
+    130          
+    131            if (!pDir) {
+   \   00000004   0xD007             BEQ.N    ??FS_CloseDir_0
+    132              return -1;  /* No pointer to a FS_DIR data structure */
+    133            }
+    134            FS_X_OS_LockDirHandle();
+   \   00000006   0x.... 0x....      BL       FS_X_OS_LockDirHandle
+    135            if (!pDir->inuse) {
+   \   0000000A   0xF504 0x708C      ADD      R0,R4,#+280
+   \   0000000E   0x7981             LDRB     R1,[R0, #+6]
+   \   00000010   0xB911             CBNZ.N   R1,??FS_CloseDir_1
+    136              /* FS_DIR structure is not in use and cannot be closed */
+    137              FS_X_OS_UnlockDirHandle();
+   \   00000012   0x.... 0x....      BL       FS_X_OS_UnlockDirHandle
+    138              return -1;
+    139            }
+   \                     ??FS_CloseDir_0: (+1)
+   \   00000016   0x....             B.N      ?Subroutine1
+    140            i = -1;
+    141            if (pDir->dev_index >= 0) {
+   \                     ??FS_CloseDir_1: (+1)
+   \   00000018   0x6800             LDR      R0,[R0, #+0]
+   \   0000001A   0x2800             CMP      R0,#+0
+   \   0000001C   0xF04F 0x35FF      MOV      R5,#-1
+   \   00000020   0xD40A             BMI.N    ??FS_CloseDir_2
+   \   00000022   0x....             LDR.N    R1,??DataTable2
+   \   00000024   0x6809             LDR      R1,[R1, #+0]
+   \   00000026   0xEB01 0x1000      ADD      R0,R1,R0, LSL #+4
+   \   0000002A   0x6840             LDR      R0,[R0, #+4]
+   \   0000002C   0x6A41             LDR      R1,[R0, #+36]
+   \   0000002E   0x0008             MOVS     R0,R1
+   \   00000030   0xD002             BEQ.N    ??FS_CloseDir_2
+    142              if (FS__pDevInfo[pDir->dev_index].fs_ptr->fsl_closedir) {
+    143                /* Execute close function of the corresponding FSL */
+    144                i = (FS__pDevInfo[pDir->dev_index].fs_ptr->fsl_closedir)(pDir);
+   \   00000032   0x4620             MOV      R0,R4
+   \   00000034   0x4788             BLX      R1
+   \   00000036   0x4605             MOV      R5,R0
+    145              }
+    146            }
+    147            FS_X_OS_UnlockDirHandle();
+   \                     ??FS_CloseDir_2: (+1)
+   \   00000038   0x.... 0x....      BL       FS_X_OS_UnlockDirHandle
+    148            return i;
+   \   0000003C   0x4628             MOV      R0,R5
+   \   0000003E   0xBD32             POP      {R1,R4,R5,PC}    ;; return
+    149          }
+
+   \                                 In section .text, align 2, keep-with-next
+   \                     ?Subroutine1: (+1)
+   \   00000000   0xF04F 0x30FF      MOV      R0,#-1
+   \   00000004   0xBD32             POP      {R1,R4,R5,PC}
+    150          
+    151          
+    152          /*********************************************************************
+    153          *
+    154          *             FS_ReadDir
+    155          *
+    156            Description:
+    157            API function. Read next directory entry in directory specified by 
+    158            pDir.
+    159          
+    160            Parameters:
+    161            pDir        - Pointer to a FS_DIR data structure. 
+    162            
+    163            Return value:
+    164            ==0         - No more directory entries or error.
+    165            !=0         - Pointer to a directory entry.
+    166          */
+    167          
+
+   \                                 In section .text, align 2, keep-with-next
+    168          struct FS_DIRENT *FS_ReadDir(FS_DIR *pDir) {
+   \                     FS_ReadDir: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+   \   00000002   0x0004             MOVS     R4,R0
+    169            struct FS_DIRENT *entry;
+    170          
+    171            if (!pDir) {
+   \   00000004   0xD101             BNE.N    ??FS_ReadDir_0
+    172              return 0;  /* No pointer to a FS_DIR data structure */
+   \   00000006   0x2000             MOVS     R0,#+0
+   \   00000008   0xBD32             POP      {R1,R4,R5,PC}
+    173            }
+    174            FS_X_OS_LockDirOp(pDir);
+   \                     ??FS_ReadDir_0: (+1)
+   \   0000000A   0x.... 0x....      BL       FS_X_OS_LockDirOp
+    175            entry = 0;
+    176            if (pDir->dev_index >= 0) {
+   \   0000000E   0xF8D4 0x0118      LDR      R0,[R4, #+280]
+   \   00000012   0x2500             MOVS     R5,#+0
+   \   00000014   0x2800             CMP      R0,#+0
+   \   00000016   0xD40A             BMI.N    ??FS_ReadDir_1
+   \   00000018   0x....             LDR.N    R1,??DataTable2
+   \   0000001A   0x6809             LDR      R1,[R1, #+0]
+   \   0000001C   0xEB01 0x1000      ADD      R0,R1,R0, LSL #+4
+   \   00000020   0x6840             LDR      R0,[R0, #+4]
+   \   00000022   0x6A81             LDR      R1,[R0, #+40]
+   \   00000024   0x0008             MOVS     R0,R1
+   \   00000026   0xD002             BEQ.N    ??FS_ReadDir_1
+    177              if (FS__pDevInfo[pDir->dev_index].fs_ptr->fsl_readdir) {
+    178                /* Execute FSL function */
+    179                entry = (FS__pDevInfo[pDir->dev_index].fs_ptr->fsl_readdir)(pDir);
+   \   00000028   0x4620             MOV      R0,R4
+   \   0000002A   0x4788             BLX      R1
+   \   0000002C   0x4605             MOV      R5,R0
+    180              }
+    181            }
+    182            FS_X_OS_UnlockDirOp(pDir);
+   \                     ??FS_ReadDir_1: (+1)
+   \   0000002E   0x4620             MOV      R0,R4
+   \   00000030   0x.... 0x....      BL       FS_X_OS_UnlockDirOp
+    183            return entry;  
+   \   00000034   0x4628             MOV      R0,R5
+   \   00000036   0xBD32             POP      {R1,R4,R5,PC}    ;; return
+    184          }
+    185          
+    186          
+    187          /*********************************************************************
+    188          *
+    189          *             FS_RewindDir
+    190          *
+    191            Description:
+    192            API function. Set pointer for reading the next directory entry to 
+    193            the first entry in the directory.
+    194          
+    195            Parameters:
+    196            pDir        - Pointer to a FS_DIR data structure. 
+    197            
+    198            Return value:
+    199            None.
+    200          */
+    201          
+
+   \                                 In section .text, align 2, keep-with-next
+    202          void FS_RewindDir(FS_DIR *pDir) {
+    203            if (!pDir) {
+   \                     FS_RewindDir: (+1)
+   \   00000000   0xB110             CBZ.N    R0,??FS_RewindDir_0
+    204              return;  /* No pointer to a FS_DIR data structure */
+    205            }
+    206            pDir->dirpos = 0;
+   \   00000002   0x2100             MOVS     R1,#+0
+   \   00000004   0xF8C0 0x1110      STR      R1,[R0, #+272]
+    207          }
+   \                     ??FS_RewindDir_0: (+1)
+   \   00000008   0x4770             BX       LR               ;; return
+    208          
+    209          
+    210          /*********************************************************************
+    211          *
+    212          *             FS_MkDir
+    213          *
+    214            Description:
+    215            API function. Create a directory.
+    216          
+    217            Parameters:
+    218            pDirName    - Fully qualified directory name. 
+    219            
+    220            Return value:
+    221            ==0         - Directory has been created.
+    222            ==-1        - An error has occured.
+    223          */
+    224          
+
+   \                                 In section .text, align 2, keep-with-next
+    225          int FS_MkDir(const char *pDirName) {
+   \                     FS_MkDir: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+    226            int idx;
+    227            int i;
+    228            char *s;
+    229          
+    230            /* Find correct FSL (device:unit:name) */
+    231            idx = FS__find_fsl(pDirName, &s);
+   \   00000002   0x4669             MOV      R1,SP
+   \   00000004   0x.... 0x....      BL       FS__find_fsl
+   \   00000008   0x0004             MOVS     R4,R0
+    232            if (idx < 0) {
+   \   0000000A   0xD40F             BMI.N    ??FS_MkDir_0
+    233              return -1;  /* Device not found */
+    234            }
+    235            if (FS__pDevInfo[idx].fs_ptr->fsl_mkdir) {
+   \   0000000C   0x....             LDR.N    R0,??DataTable2
+   \   0000000E   0x6800             LDR      R0,[R0, #+0]
+   \   00000010   0xEB00 0x1504      ADD      R5,R0,R4, LSL #+4
+   \   00000014   0x6868             LDR      R0,[R5, #+4]
+   \   00000016   0x6B00             LDR      R0,[R0, #+48]
+   \   00000018   0xB140             CBZ.N    R0,??FS_MkDir_0
+    236              /* Execute the FSL function */
+    237              FS_X_OS_LockDirHandle();
+   \   0000001A   0x.... 0x....      BL       FS_X_OS_LockDirHandle
+    238              i = (FS__pDevInfo[idx].fs_ptr->fsl_mkdir)(s, idx, 1);
+   \   0000001E   0x686B             LDR      R3,[R5, #+4]
+   \   00000020   0x9800             LDR      R0,[SP, #+0]
+   \   00000022   0x6B1B             LDR      R3,[R3, #+48]
+   \   00000024   0x2201             MOVS     R2,#+1
+   \   00000026   0x4621             MOV      R1,R4
+   \   00000028   0x4798             BLX      R3
+   \   0000002A   0x....             B.N      ?Subroutine0
+    239              FS_X_OS_UnlockDirHandle();
+    240              return i;
+    241            }
+    242            return -1;
+   \                     ??FS_MkDir_0: (+1)
+   \   0000002C                      REQUIRE ?Subroutine1
+   \   0000002C                      ;; // Fall through to label ?Subroutine1
+    243          }
+    244          
+    245          
+    246          /*********************************************************************
+    247          *
+    248          *             FS_RmDir
+    249          *
+    250            Description:
+    251            API function. Remove a directory.
+    252          
+    253            Parameters:
+    254            pDirName    - Fully qualified directory name. 
+    255            
+    256            Return value:
+    257            ==0         - Directory has been removed.
+    258            ==-1        - An error has occured.
+    259          */
+    260          
+
+   \                                 In section .text, align 2, keep-with-next
+    261          int FS_RmDir(const char *pDirName) {
+   \                     FS_RmDir: (+1)
+   \   00000000   0xB570             PUSH     {R4-R6,LR}
+   \   00000002   0xB082             SUB      SP,SP,#+8
+   \   00000004   0x4604             MOV      R4,R0
+    262            FS_DIR *dirp;
+    263            struct FS_DIRENT *direntp;
+    264            int idx;
+    265            int i;
+    266            char *s;
+    267            
+    268            /* Check if directory is empty */
+    269            dirp = FS_OpenDir(pDirName);
+   \   00000006   0x.... 0x....      BL       FS_OpenDir
+   \   0000000A   0x0005             MOVS     R5,R0
+    270            if (!dirp) {
+   \   0000000C   0xD030             BEQ.N    ??FS_RmDir_0
+    271              /* Directory not found */
+    272              return -1;
+    273            } 
+    274            i=0;
+    275            while (1) {
+    276              direntp = FS_ReadDir(dirp);
+   \   0000000E   0x.... 0x....      BL       FS_ReadDir
+    277              i++;
+   \   00000012   0x2601             MOVS     R6,#+1
+    278              if (i >= 4) {
+    279                break;  /* There is more than '..' and '.' */
+    280              }
+    281              if (!direntp) {
+   \   00000014   0xB168             CBZ.N    R0,??FS_RmDir_1
+   \   00000016   0x4628             MOV      R0,R5
+   \   00000018   0x.... 0x....      BL       FS_ReadDir
+   \   0000001C   0x2602             MOVS     R6,#+2
+   \   0000001E   0xB140             CBZ.N    R0,??FS_RmDir_1
+   \   00000020   0x4628             MOV      R0,R5
+   \   00000022   0x.... 0x....      BL       FS_ReadDir
+   \   00000026   0x2603             MOVS     R6,#+3
+   \   00000028   0xB118             CBZ.N    R0,??FS_RmDir_1
+   \   0000002A   0x4628             MOV      R0,R5
+   \   0000002C   0x.... 0x....      BL       FS_ReadDir
+   \   00000030   0x2604             MOVS     R6,#+4
+    282                break;  /* There is no more entry in this directory. */
+    283              }
+    284            }
+    285            FS_CloseDir(dirp);
+   \                     ??FS_RmDir_1: (+1)
+   \   00000032   0x4628             MOV      R0,R5
+   \   00000034   0x.... 0x....      BL       FS_CloseDir
+    286            if (i >= 4) {
+   \   00000038   0x2E04             CMP      R6,#+4
+   \   0000003A   0xDA19             BGE.N    ??FS_RmDir_0
+    287              /* 
+    288                  There is more than '..' and '.' in the directory, so you 
+    289                  must not delete it.
+    290              */
+    291              return -1;
+    292            }
+    293            /* Find correct FSL (device:unit:name) */
+    294            idx = FS__find_fsl(pDirName, &s);
+   \   0000003C   0x4669             MOV      R1,SP
+   \   0000003E   0x4620             MOV      R0,R4
+   \   00000040   0x.... 0x....      BL       FS__find_fsl
+   \   00000044   0x0004             MOVS     R4,R0
+    295            if (idx < 0) {
+   \   00000046   0xD413             BMI.N    ??FS_RmDir_0
+    296              return -1;  /* Device not found */
+    297            }
+    298            if (FS__pDevInfo[idx].fs_ptr->fsl_rmdir) {
+   \   00000048   0x....             LDR.N    R0,??DataTable2
+   \   0000004A   0x6800             LDR      R0,[R0, #+0]
+   \   0000004C   0xEB00 0x1504      ADD      R5,R0,R4, LSL #+4
+   \   00000050   0x6868             LDR      R0,[R5, #+4]
+   \   00000052   0x6B40             LDR      R0,[R0, #+52]
+   \   00000054   0xB160             CBZ.N    R0,??FS_RmDir_0
+    299              /* Execute the FSL function */
+    300              FS_X_OS_LockDirHandle();
+   \   00000056   0x.... 0x....      BL       FS_X_OS_LockDirHandle
+    301              i = (FS__pDevInfo[idx].fs_ptr->fsl_rmdir)(s, idx, 0);
+   \   0000005A   0x686B             LDR      R3,[R5, #+4]
+   \   0000005C   0x9800             LDR      R0,[SP, #+0]
+   \   0000005E   0x6B5B             LDR      R3,[R3, #+52]
+   \   00000060   0x2200             MOVS     R2,#+0
+   \   00000062   0x4621             MOV      R1,R4
+   \   00000064   0x4798             BLX      R3
+   \   00000066   0x4606             MOV      R6,R0
+    302              FS_X_OS_UnlockDirHandle();
+   \   00000068   0x.... 0x....      BL       FS_X_OS_UnlockDirHandle
+    303              return i;
+   \   0000006C   0x4630             MOV      R0,R6
+   \   0000006E   0xBD76             POP      {R1,R2,R4-R6,PC}
+    304            }
+    305            return -1;
+   \                     ??FS_RmDir_0: (+1)
+   \   00000070   0xF04F 0x30FF      MOV      R0,#-1
+   \   00000074   0xBD76             POP      {R1,R2,R4-R6,PC}  ;; return
+    306          }
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable2:
+   \   00000000   0x........         DC32     FS__pDevInfo
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable2_1:
+   \   00000000   0x........         DC32     _FS_dirhandle
+    307          
+    308          
+    309          #endif  /* FS_POSIX_DIR_SUPPORT */
+    310          
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      16   FS_CloseDir
+        16   -- Indirect call
+        16   -> FS_X_OS_LockDirHandle
+        16   -> FS_X_OS_UnlockDirHandle
+      16   FS_MkDir
+        16   -- Indirect call
+        16   -> FS_X_OS_LockDirHandle
+        16   -> FS_X_OS_UnlockDirHandle
+        16   -> FS__find_fsl
+      16   FS_OpenDir
+        16   -- Indirect call
+        16   -> FS_X_OS_LockDirHandle
+        16   -> FS_X_OS_UnlockDirHandle
+        16   -> FS__find_fsl
+      16   FS_ReadDir
+        16   -- Indirect call
+        16   -> FS_X_OS_LockDirOp
+        16   -> FS_X_OS_UnlockDirOp
+       0   FS_RewindDir
+      24   FS_RmDir
+        24   -- Indirect call
+        24   -> FS_CloseDir
+        24   -> FS_OpenDir
+        24   -> FS_ReadDir
+        24   -> FS_X_OS_LockDirHandle
+        24   -> FS_X_OS_UnlockDirHandle
+        24   -> FS__find_fsl
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable2
+       4  ??DataTable2_1
+      10  ?Subroutine0
+       6  ?Subroutine1
+      64  FS_CloseDir
+      44  FS_MkDir
+     100  FS_OpenDir
+      56  FS_ReadDir
+      10  FS_RewindDir
+     118  FS_RmDir
+    1152  _FS_dirhandle
+
+ 
+ 1 152 bytes in section .bss
+   416 bytes in section .text
+ 
+   416 bytes of CODE memory
+ 1 152 bytes of DATA memory
+
+Errors: none
+Warnings: none

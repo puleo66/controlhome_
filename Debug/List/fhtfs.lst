@@ -1,0 +1,221 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       07/Oct/2017  14:14:37
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  E:\HW Projects\ControlHome\CntrHome - RF69w\uC-RF\fhtfs.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\uC-RF\fhtfs.c" -lCN
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List" -o "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\fhtfs.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\fhtfs.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uC-RF\fhtfs.c
+      1          /*
+      2          *********************************************************************************************************
+      3          *                                           FHT FS Interface
+      4          *
+      5          *
+      6          *
+      7          * Filename   : fhtfs.c
+      8          * Version    : V1.00
+      9          * Programmer : Puleo
+     10          *********************************************************************************************************
+     11          */
+     12          
+     13          #define  FHTFS_GLOBALS
+     14          #include <includes.h>
+     15          
+     16          /*
+     17          *********************************************************************************************************
+     18          *                                               CONSTANTS
+     19          *********************************************************************************************************
+     20          */
+     21          
+     22          /*
+     23          *********************************************************************************************************
+     24          *                                           LOCAL VARIABLES
+     25          *********************************************************************************************************
+     26          */
+     27          INT16U resFS = 0;
+     28          
+     29          FIL fsrc;               // file objects
+     30          FRESULT res;            // FatFs function common result code   
+     31          UINT br,bw;             // File R/W count 
+     32          
+     33          
+     34          extern char FileBuffer[40];
+     35          extern INT8U anz;
+     36          extern BOOLEAN mount(BOOLEAN flag);
+     37          /*
+     38          *********************************************************************************************************
+     39          *                                      LOCAL FUNCTION PROTOTYPES
+     40          *********************************************************************************************************
+     41          */
+     42          
+     43          INT16U WriteMem(INT16U start,INT8U *daten, INT16U count)
+     44          {
+     45               
+     46            mount(TRUE);
+     47            
+     48            res = f_open(&fsrc, "0:/module.dat", FA_OPEN_EXISTING | FA_WRITE);
+     49            if (res != FR_OK)
+     50              return 0;
+     51            
+     52            res = f_lseek(&fsrc, start);
+     53            if (res != FR_OK)
+     54              return 0;
+     55            
+     56            res = f_write(&fsrc, daten, count, &bw);
+     57             if (res != FR_OK || count != bw)
+     58               return 0;
+     59            
+     60            f_sync(&fsrc);
+     61            
+     62            f_close(&fsrc);
+     63            
+     64            mount(FALSE);
+     65            
+     66            return bw;
+     67          }
+     68          
+     69          /*
+     70          *********************************************************************************************************
+     71          */
+     72          INT16U ReadMem(INT16S start,INT8U *daten,INT16S count)
+     73          {
+     74              
+     75            mount(TRUE);
+     76            
+     77            res = f_open(&fsrc, "0:/module.dat", FA_READ);
+     78            if (res != FR_OK)
+     79              return 0;
+     80            
+     81            res = f_lseek(&fsrc, start);
+     82            if (res != FR_OK)
+     83              return 0;
+     84            
+     85            res = f_read(&fsrc, daten, count, &br);
+     86            if (res || br == 0)
+     87              return 0;
+     88            
+     89            f_close(&fsrc);
+     90            
+     91            mount(FALSE);
+     92            
+     93            return br;
+     94          }
+     95          
+     96          /*
+     97          *********************************************************************************************************
+     98          */
+     99          
+    100          INT8U DeviceCount(INT8S type) //-1 für alle Typen - oder Typenangabe. type 1 = fht's
+    101          {
+    102            anz = 0;
+    103            
+    104            for (int nr= 0; nr < maxDevices; nr++)
+    105            {
+    106              resFS = ReadMem(nr*32,(unsigned char*)FileBuffer,5);
+    107              if (resFS == 0)
+    108                return anz;
+    109              
+    110              if (FileBuffer[0] == 0xFF)
+    111                return anz;
+    112              
+    113              if ((type == -1) || (FileBuffer[4] == type))
+    114                anz++;
+    115            }
+    116            return anz;
+    117          }
+    118          
+    119          /*
+    120          *********************************************************************************************************
+    121          */
+    122          void DeviceDat(uint8_t nr,uint8_t buf[])
+    123          {
+    124            ReadMem((nr*32),buf,5);
+    125          }
+    126          
+    127          /*
+    128          *********************************************************************************************************
+    129          */
+    130          int DeviceByName(char *name)
+    131          {
+    132            if (name=="")
+    133              return -1;
+    134            
+    135            INT8U len=strlen(name);
+    136            
+    137            for (int i= 0; i < len; i++)
+    138            {
+    139              if (name[i] >= 65 &&  name[i] <= 90)
+    140                name[i] = name[i]+32; // A->a char buf[len];
+    141            }
+    142            
+    143            for (int nr = 0; nr < maxDevices; nr++)
+    144            {
+    145              if (ReadMem((nr*32)+5,(unsigned char*)FileBuffer,len) == 0)
+    146                break;
+    147              
+    148              if (FileBuffer[0] == 0xFF)
+    149                return -1; //Ende der Liste
+    150              
+    151              for (int i = 0; i < len; i++)
+    152              {
+    153                if (FileBuffer[i] >= 65 &&  FileBuffer[i] <= 90)
+    154                  FileBuffer[i]=(FileBuffer[i] + 32); // A->a
+    155              }
+    156              
+    157              if (strncmp(name, FileBuffer, len) == 0)
+    158                return nr;
+    159            }
+    160            return -1; //nicht gefunden
+    161          }
+    162          
+    163          /*
+    164          *********************************************************************************************************
+    165          */
+    166          char *DeviceName(uint8_t nr)
+    167          {
+    168            
+    169            ReadMem((nr*32)+5,(unsigned char*)FileBuffer,28);
+    170            for (int i=0; i < 28; i++)
+    171            {
+    172              if (FileBuffer[i] == 0xFF)
+    173              {
+    174                FileBuffer[i]='\0';
+    175                break;
+    176              }
+    177            }
+    178            return FileBuffer;
+    179          }
+    180          
+
+Errors: 14
+Warnings: 9

@@ -1,0 +1,560 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.50.2.10312/W32 for ARM       09/Feb/2018  16:15:03
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\os_time.c
+#    Command line =  
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\os_time.c"
+#        -lCN "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List" -o
+#        "E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj" --debug
+#        --endian=little --cpu=Cortex-M3 -e --fpu=None --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.3\arm\INC\c\DLib_Config_Normal.h" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\APP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\BSP\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\CPU\inc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-CPU\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RTC\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LIB\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Ports\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\I2C-Out\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Direct_Sw\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\Wdt_led\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-LCD\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-RF\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\api\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\config\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\os\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\fsl\fat\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\clib\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\lbl\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\device\mmc\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-FatFS\file\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\src\" -I "E:\HW
+#        Projects\ControlHome\CntrHome - RF69w\uC-Terminal\inc\" -Oh
+#    List file    =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\List\os_time.lst
+#    Object file  =  
+#        E:\HW Projects\ControlHome\CntrHome - RF69w\Debug\Obj\os_time.o
+#
+###############################################################################
+
+E:\HW Projects\ControlHome\CntrHome - RF69w\uCOS-II\Source\os_time.c
+      1          /*
+      2          *********************************************************************************************************
+      3          *                                                uC/OS-II
+      4          *                                          The Real-Time Kernel
+      5          *                                             TIME MANAGEMENT
+      6          *
+      7          *                              (c) Copyright 1992-2007, Micrium, Weston, FL
+      8          *                                           All Rights Reserved
+      9          *
+     10          * File    : OS_TIME.C
+     11          * By      : Jean J. Labrosse
+     12          * Version : V2.86
+     13          *
+     14          * LICENSING TERMS:
+     15          * ---------------
+     16          *   uC/OS-II is provided in source form for FREE evaluation, for educational use or for peaceful research.  
+     17          * If you plan on using  uC/OS-II  in a commercial product you need to contact Micriµm to properly license 
+     18          * its use in your product. We provide ALL the source code for your convenience and to help you experience 
+     19          * uC/OS-II.   The fact that the  source is provided does  NOT  mean that you can use it without  paying a 
+     20          * licensing fee.
+     21          *********************************************************************************************************
+     22          */
+     23          
+     24          #ifndef  OS_MASTER_FILE
+     25          #include <ucos_ii.h>
+     26          #endif
+     27          
+     28          /*
+     29          *********************************************************************************************************
+     30          *                                DELAY TASK 'n' TICKS   (n from 0 to 65535)
+     31          *
+     32          * Description: This function is called to delay execution of the currently running task until the
+     33          *              specified number of system ticks expires.  This, of course, directly equates to delaying
+     34          *              the current task for some time to expire.  No delay will result If the specified delay is
+     35          *              0.  If the specified delay is greater than 0 then, a context switch will result.
+     36          *
+     37          * Arguments  : ticks     is the time delay that the task will be suspended in number of clock 'ticks'.
+     38          *                        Note that by specifying 0, the task will not be delayed.
+     39          *
+     40          * Returns    : none
+     41          *********************************************************************************************************
+     42          */
+     43          
+
+   \                                 In section .text, align 2, keep-with-next
+     44          void  OSTimeDly (INT16U ticks)
+     45          {
+   \                     OSTimeDly: (+1)
+   \   00000000   0xB570             PUSH     {R4-R6,LR}
+   \   00000002   0x4604             MOV      R4,R0
+     46              INT8U      y;
+     47          #if OS_CRITICAL_METHOD == 3                      /* Allocate storage for CPU status register           */
+     48              OS_CPU_SR  cpu_sr = 0;
+     49          #endif
+     50          
+     51          
+     52          
+     53              if (OSIntNesting > 0) {                      /* See if trying to call from an ISR                  */
+   \   00000004   0x....             LDR.N    R0,??DataTable4
+   \   00000006   0x7800             LDRB     R0,[R0, #+0]
+   \   00000008   0xB9C0             CBNZ.N   R0,??OSTimeDly_0
+     54                  return;
+     55              }
+     56              if (ticks > 0) {                             /* 0 means no delay!                                  */
+   \   0000000A   0xB1BC             CBZ.N    R4,??OSTimeDly_0
+     57                  OS_ENTER_CRITICAL();
+   \   0000000C   0x.... 0x....      BL       OS_CPU_SR_Save
+     58                  y            =  OSTCBCur->OSTCBY;        /* Delay current task                                 */
+   \   00000010   0x....             LDR.N    R1,??DataTable4_1
+     59                  OSRdyTbl[y] &= ~OSTCBCur->OSTCBBitX;
+   \   00000012   0x....             LDR.N    R3,??DataTable4_2
+   \   00000014   0x6809             LDR      R1,[R1, #+0]
+   \   00000016   0x312E             ADDS     R1,R1,#+46
+   \   00000018   0x798A             LDRB     R2,[R1, #+6]
+   \   0000001A   0x79CE             LDRB     R6,[R1, #+7]
+   \   0000001C   0x5CD5             LDRB     R5,[R2, R3]
+   \   0000001E   0x43B5             BICS     R5,R5,R6
+   \   00000020   0x54D5             STRB     R5,[R2, R3]
+     60                  if (OSRdyTbl[y] == 0) {
+   \   00000022   0xD104             BNE.N    ??OSTimeDly_1
+     61                      OSRdyGrp &= ~OSTCBCur->OSTCBBitY;
+   \   00000024   0x....             LDR.N    R2,??DataTable4_3
+   \   00000026   0x7A0D             LDRB     R5,[R1, #+8]
+   \   00000028   0x7813             LDRB     R3,[R2, #+0]
+   \   0000002A   0x43AB             BICS     R3,R3,R5
+   \   0000002C   0x7013             STRB     R3,[R2, #+0]
+     62                  }
+     63                  OSTCBCur->OSTCBDly = ticks;              /* Load ticks in TCB                                  */
+   \                     ??OSTimeDly_1: (+1)
+   \   0000002E   0x800C             STRH     R4,[R1, #+0]
+     64                  OS_EXIT_CRITICAL();
+   \   00000030   0x.... 0x....      BL       OS_CPU_SR_Restore
+     65                  OS_Sched();                              /* Find next task to run!                             */
+   \   00000034   0xE8BD 0x4070      POP      {R4-R6,LR}
+   \   00000038   0x.... 0x....      B.W      OS_Sched
+     66              }
+     67          }
+   \                     ??OSTimeDly_0: (+1)
+   \   0000003C   0xBD70             POP      {R4-R6,PC}       ;; return
+     68          /*$PAGE*/
+     69          /*
+     70          *********************************************************************************************************
+     71          *                                     DELAY TASK FOR SPECIFIED TIME
+     72          *
+     73          * Description: This function is called to delay execution of the currently running task until some time
+     74          *              expires.  This call allows you to specify the delay time in HOURS, MINUTES, SECONDS and
+     75          *              MILLISECONDS instead of ticks.
+     76          *
+     77          * Arguments  : hours     specifies the number of hours that the task will be delayed (max. is 255)
+     78          *              minutes   specifies the number of minutes (max. 59)
+     79          *              seconds   specifies the number of seconds (max. 59)
+     80          *              milli     specifies the number of milliseconds (max. 999)
+     81          *
+     82          * Returns    : OS_ERR_NONE
+     83          *              OS_ERR_TIME_INVALID_MINUTES
+     84          *              OS_ERR_TIME_INVALID_SECONDS
+     85          *              OS_ERR_TIME_INVALID_MS
+     86          *              OS_ERR_TIME_ZERO_DLY
+     87          *              OS_ERR_TIME_DLY_ISR
+     88          *
+     89          * Note(s)    : The resolution on the milliseconds depends on the tick rate.  For example, you can't do
+     90          *              a 10 mS delay if the ticker interrupts every 100 mS.  In this case, the delay would be
+     91          *              set to 0.  The actual delay is rounded to the nearest tick.
+     92          *********************************************************************************************************
+     93          */
+     94          
+     95          #if OS_TIME_DLY_HMSM_EN > 0
+
+   \                                 In section .text, align 2, keep-with-next
+     96          INT8U  OSTimeDlyHMSM (INT8U hours, INT8U minutes, INT8U seconds, INT16U ms)
+     97          {
+   \                     OSTimeDlyHMSM: (+1)
+   \   00000000   0xE92D 0x41F0      PUSH     {R4-R8,LR}
+     98              INT32U ticks;
+     99              INT16U loops;
+    100          
+    101          
+    102              if (OSIntNesting > 0) {                      /* See if trying to call from an ISR                  */
+   \   00000004   0x....             LDR.N    R4,??DataTable4
+   \   00000006   0x7825             LDRB     R5,[R4, #+0]
+   \   00000008   0xB115             CBZ.N    R5,??OSTimeDlyHMSM_0
+    103                  return (OS_ERR_TIME_DLY_ISR);
+   \   0000000A   0x2055             MOVS     R0,#+85
+   \   0000000C   0xE8BD 0x81F0      POP      {R4-R8,PC}
+    104              }
+    105          #if OS_ARG_CHK_EN > 0
+    106              if (hours == 0) {
+    107                  if (minutes == 0) {
+    108                      if (seconds == 0) {
+    109                          if (ms == 0) {
+    110                              return (OS_ERR_TIME_ZERO_DLY);
+    111                          }
+    112                      }
+    113                  }
+    114              }
+    115              if (minutes > 59) {
+    116                  return (OS_ERR_TIME_INVALID_MINUTES);    /* Validate arguments to be within range              */
+    117              }
+    118              if (seconds > 59) {
+    119                  return (OS_ERR_TIME_INVALID_SECONDS);
+    120              }
+    121              if (ms > 999) {
+    122                  return (OS_ERR_TIME_INVALID_MS);
+    123              }
+    124          #endif
+    125                                                           /* Compute the total number of clock ticks required.. */
+    126                                                           /* .. (rounded to the nearest tick)                   */
+    127              ticks = ((INT32U)hours * 3600L + (INT32U)minutes * 60L + (INT32U)seconds) * OS_TICKS_PER_SEC
+    128                    + OS_TICKS_PER_SEC * ((INT32U)ms + 500L / OS_TICKS_PER_SEC) / 1000L;
+   \                     ??OSTimeDlyHMSM_0: (+1)
+   \   00000010   0xEBC1 0x1701      RSB      R7,R1,R1, LSL #+4
+   \   00000014   0xF44F 0x757A      MOV      R5,#+1000
+   \   00000018   0xF44F 0x6661      MOV      R6,#+3600
+   \   0000001C   0x00B9             LSLS     R1,R7,#+2
+   \   0000001E   0xFB06 0x1000      MLA      R0,R6,R0,R1
+   \   00000022   0xFB05 0xF103      MUL      R1,R5,R3
+   \   00000026   0x1810             ADDS     R0,R2,R0
+   \   00000028   0xFBB1 0xF1F5      UDIV     R1,R1,R5
+   \   0000002C   0xFB05 0x1500      MLA      R5,R5,R0,R1
+    129              loops = (INT16U)(ticks >> 16);               /* Compute the integral number of 65536 tick delays   */
+    130              ticks = ticks & 0xFFFFL;                     /* Obtain  the fractional number of ticks             */
+    131              OSTimeDly((INT16U)ticks);
+   \   00000030   0xB2A8             UXTH     R0,R5
+   \   00000032   0x.... 0x....      BL       OSTimeDly
+   \   00000036   0xEA5F 0x4815      LSRS     R8,R5,#+16
+   \   0000003A   0xD021             BEQ.N    ??OSTimeDlyHMSM_1
+   \   0000003C   0x....             LDR.N    R5,??DataTable4_3
+   \   0000003E   0x....             LDR.N    R6,??DataTable4_2
+   \   00000040   0xF44F 0x4700      MOV      R7,#+32768
+    132              while (loops > 0) {
+    133                  OSTimeDly((INT16U)32768u);
+   \                     ??OSTimeDlyHMSM_2: (+1)
+   \   00000044   0x4638             MOV      R0,R7
+   \   00000046   0x.... 0x....      BL       OSTimeDly
+    134                  OSTimeDly((INT16U)32768u);
+   \   0000004A   0x7820             LDRB     R0,[R4, #+0]
+   \   0000004C   0xB9A8             CBNZ.N   R0,??OSTimeDlyHMSM_3
+   \   0000004E   0x.... 0x....      BL       OS_CPU_SR_Save
+   \   00000052   0x....             LDR.N    R1,??DataTable4_1
+   \   00000054   0x6809             LDR      R1,[R1, #+0]
+   \   00000056   0x312E             ADDS     R1,R1,#+46
+   \   00000058   0x798A             LDRB     R2,[R1, #+6]
+   \   0000005A   0xF891 0xC007      LDRB     R12,[R1, #+7]
+   \   0000005E   0x5D93             LDRB     R3,[R2, R6]
+   \   00000060   0xEA33 0x030C      BICS     R3,R3,R12
+   \   00000064   0x5593             STRB     R3,[R2, R6]
+   \   00000066   0xD103             BNE.N    ??OSTimeDlyHMSM_4
+   \   00000068   0x782A             LDRB     R2,[R5, #+0]
+   \   0000006A   0x7A0B             LDRB     R3,[R1, #+8]
+   \   0000006C   0x439A             BICS     R2,R2,R3
+   \   0000006E   0x702A             STRB     R2,[R5, #+0]
+   \                     ??OSTimeDlyHMSM_4: (+1)
+   \   00000070   0x800F             STRH     R7,[R1, #+0]
+   \   00000072   0x.... 0x....      BL       OS_CPU_SR_Restore
+   \   00000076   0x.... 0x....      BL       OS_Sched
+    135                  loops--;
+   \                     ??OSTimeDlyHMSM_3: (+1)
+   \   0000007A   0xF1B8 0x0801      SUBS     R8,R8,#+1
+    136              }
+   \   0000007E   0xD1E1             BNE.N    ??OSTimeDlyHMSM_2
+    137              return (OS_ERR_NONE);
+   \                     ??OSTimeDlyHMSM_1: (+1)
+   \   00000080   0x2000             MOVS     R0,#+0
+   \   00000082   0xE8BD 0x81F0      POP      {R4-R8,PC}       ;; return
+    138          }
+    139          #endif
+    140          /*$PAGE*/
+    141          /*
+    142          *********************************************************************************************************
+    143          *                                         RESUME A DELAYED TASK
+    144          *
+    145          * Description: This function is used resume a task that has been delayed through a call to either
+    146          *              OSTimeDly() or OSTimeDlyHMSM().  Note that you can call this function to resume a
+    147          *              task that is waiting for an event with timeout.  This would make the task look
+    148          *              like a timeout occurred.
+    149          *
+    150          *              Also, you cannot resume a task that has called OSTimeDlyHMSM() with a combined time that
+    151          *              exceeds 65535 clock ticks.  In other words, if the clock tick runs at 100 Hz then, you will
+    152          *              not be able to resume a delayed task that called OSTimeDlyHMSM(0, 10, 55, 350) or higher:
+    153          *
+    154          *                  (10 Minutes * 60 + 55 Seconds + 0.35) * 100 ticks/second.
+    155          *
+    156          * Arguments  : prio                      specifies the priority of the task to resume
+    157          *
+    158          * Returns    : OS_ERR_NONE               Task has been resumed
+    159          *              OS_ERR_PRIO_INVALID       if the priority you specify is higher that the maximum allowed
+    160          *                                        (i.e. >= OS_LOWEST_PRIO)
+    161          *              OS_ERR_TIME_NOT_DLY       Task is not waiting for time to expire
+    162          *              OS_ERR_TASK_NOT_EXIST     The desired task has not been created or has been assigned to a Mutex.
+    163          *********************************************************************************************************
+    164          */
+    165          
+    166          #if OS_TIME_DLY_RESUME_EN > 0
+
+   \                                 In section .text, align 2, keep-with-next
+    167          INT8U  OSTimeDlyResume (INT8U prio)
+    168          {
+   \                     OSTimeDlyResume: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0x4604             MOV      R4,R0
+    169              OS_TCB    *ptcb;
+    170          #if OS_CRITICAL_METHOD == 3                                    /* Storage for CPU status register      */
+    171              OS_CPU_SR  cpu_sr = 0;
+    172          #endif
+    173          
+    174          
+    175          
+    176              if (prio >= OS_LOWEST_PRIO) {
+   \   00000004   0x2C1F             CMP      R4,#+31
+   \   00000006   0xDB01             BLT.N    ??OSTimeDlyResume_0
+    177                  return (OS_ERR_PRIO_INVALID);
+   \   00000008   0x202A             MOVS     R0,#+42
+   \   0000000A   0xBD10             POP      {R4,PC}
+    178              }
+    179              OS_ENTER_CRITICAL();
+   \                     ??OSTimeDlyResume_0: (+1)
+   \   0000000C   0x.... 0x....      BL       OS_CPU_SR_Save
+    180              ptcb = OSTCBPrioTbl[prio];                                 /* Make sure that task exist            */
+   \   00000010   0x....             LDR.N    R1,??DataTable4_4
+   \   00000012   0xF851 0x1024      LDR      R1,[R1, R4, LSL #+2]
+    181              if (ptcb == (OS_TCB *)0) {
+   \   00000016   0x2900             CMP      R1,#+0
+   \   00000018   0xBF18             IT       NE 
+   \   0000001A   0x2901             CMPNE    R1,#+1
+    182                  OS_EXIT_CRITICAL();
+    183                  return (OS_ERR_TASK_NOT_EXIST);                        /* The task does not exist              */
+    184              }
+    185              if (ptcb == OS_TCB_RESERVED) {
+   \   0000001C   0xD103             BNE.N    ??OSTimeDlyResume_1
+    186                  OS_EXIT_CRITICAL();
+   \   0000001E   0x.... 0x....      BL       OS_CPU_SR_Restore
+    187                  return (OS_ERR_TASK_NOT_EXIST);                        /* The task does not exist              */
+   \   00000022   0x2043             MOVS     R0,#+67
+   \   00000024   0xBD10             POP      {R4,PC}
+    188              }
+    189              if (ptcb->OSTCBDly == 0) {                                 /* See if task is delayed               */
+   \                     ??OSTimeDlyResume_1: (+1)
+   \   00000026   0xF831 0x2F2E      LDRH     R2,[R1, #+46]!
+   \   0000002A   0xB91A             CBNZ.N   R2,??OSTimeDlyResume_2
+    190                  OS_EXIT_CRITICAL();
+   \   0000002C   0x.... 0x....      BL       OS_CPU_SR_Restore
+    191                  return (OS_ERR_TIME_NOT_DLY);                          /* Indicate that task was not delayed   */
+   \   00000030   0x2050             MOVS     R0,#+80
+   \   00000032   0xBD10             POP      {R4,PC}
+    192              }
+    193          
+    194              ptcb->OSTCBDly = 0;                                        /* Clear the time delay                 */
+   \                     ??OSTimeDlyResume_2: (+1)
+   \   00000034   0x2200             MOVS     R2,#+0
+   \   00000036   0x800A             STRH     R2,[R1, #+0]
+    195              if ((ptcb->OSTCBStat & OS_STAT_PEND_ANY) != OS_STAT_RDY) {
+   \   00000038   0x2337             MOVS     R3,#+55
+   \   0000003A   0x788A             LDRB     R2,[R1, #+2]
+   \   0000003C   0x421A             TST      R2,R3
+   \   0000003E   0xBF1D             ITTTE    NE 
+   \   00000040   0xF002 0x02C8      ANDNE    R2,R2,#0xC8
+   \   00000044   0x708A             STRBNE   R2,[R1, #+2]
+   \   00000046   0x2201             MOVNE    R2,#+1
+   \   00000048   0x2200             MOVEQ    R2,#+0
+    196                  ptcb->OSTCBStat     &= ~OS_STAT_PEND_ANY;              /* Yes, Clear status flag               */
+    197                  ptcb->OSTCBStatPend  =  OS_STAT_PEND_TO;               /* Indicate PEND timeout                */
+    198              } else {
+    199                  ptcb->OSTCBStatPend  =  OS_STAT_PEND_OK;
+   \   0000004A   0x70CA             STRB     R2,[R1, #+3]
+    200              }
+    201              if ((ptcb->OSTCBStat & OS_STAT_SUSPEND) == OS_STAT_RDY) {  /* Is task suspended?                   */
+   \   0000004C   0x788A             LDRB     R2,[R1, #+2]
+   \   0000004E   0x0712             LSLS     R2,R2,#+28
+   \   00000050   0xD40F             BMI.N    ??OSTimeDlyResume_3
+    202                  OSRdyGrp               |= ptcb->OSTCBBitY;             /* No,  Make ready                      */
+   \   00000052   0x....             LDR.N    R2,??DataTable4_3
+   \   00000054   0x7A0C             LDRB     R4,[R1, #+8]
+   \   00000056   0x7813             LDRB     R3,[R2, #+0]
+   \   00000058   0x4323             ORRS     R3,R4,R3
+   \   0000005A   0x7013             STRB     R3,[R2, #+0]
+   \   0000005C   0x798A             LDRB     R2,[R1, #+6]
+   \   0000005E   0x....             LDR.N    R3,??DataTable4_2
+   \   00000060   0x79C9             LDRB     R1,[R1, #+7]
+   \   00000062   0x5CD4             LDRB     R4,[R2, R3]
+   \   00000064   0x4321             ORRS     R1,R1,R4
+   \   00000066   0x54D1             STRB     R1,[R2, R3]
+    203                  OSRdyTbl[ptcb->OSTCBY] |= ptcb->OSTCBBitX;
+    204                  OS_EXIT_CRITICAL();
+   \   00000068   0x.... 0x....      BL       OS_CPU_SR_Restore
+    205                  OS_Sched();                                            /* See if this is new highest priority  */
+   \   0000006C   0x.... 0x....      BL       OS_Sched
+   \   00000070   0xE001             B.N      ??OSTimeDlyResume_4
+    206              } else {
+    207                  OS_EXIT_CRITICAL();                                    /* Task may be suspended                */
+   \                     ??OSTimeDlyResume_3: (+1)
+   \   00000072   0x.... 0x....      BL       OS_CPU_SR_Restore
+    208              }
+    209              return (OS_ERR_NONE);
+   \                     ??OSTimeDlyResume_4: (+1)
+   \   00000076   0x2000             MOVS     R0,#+0
+   \   00000078   0xBD10             POP      {R4,PC}          ;; return
+    210          }
+    211          #endif
+    212          /*$PAGE*/
+    213          /*
+    214          *********************************************************************************************************
+    215          *                                         GET CURRENT SYSTEM TIME
+    216          *
+    217          * Description: This function is used by your application to obtain the current value of the 32-bit
+    218          *              counter which keeps track of the number of clock ticks.
+    219          *
+    220          * Arguments  : none
+    221          *
+    222          * Returns    : The current value of OSTime
+    223          *********************************************************************************************************
+    224          */
+    225          
+    226          #if OS_TIME_GET_SET_EN > 0
+
+   \                                 In section .text, align 2, keep-with-next
+    227          INT32U  OSTimeGet (void)
+    228          {
+   \                     OSTimeGet: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    229              INT32U     ticks;
+    230          #if OS_CRITICAL_METHOD == 3                      /* Allocate storage for CPU status register           */
+    231              OS_CPU_SR  cpu_sr = 0;
+    232          #endif
+    233          
+    234          
+    235          
+    236              OS_ENTER_CRITICAL();
+   \   00000002   0x.... 0x....      BL       OS_CPU_SR_Save
+    237              ticks = OSTime;
+   \   00000006   0x....             LDR.N    R1,??DataTable4_5
+   \   00000008   0x680C             LDR      R4,[R1, #+0]
+    238              OS_EXIT_CRITICAL();
+   \   0000000A   0x.... 0x....      BL       OS_CPU_SR_Restore
+    239              return (ticks);
+   \   0000000E   0x4620             MOV      R0,R4
+   \   00000010   0xBD10             POP      {R4,PC}          ;; return
+    240          }
+    241          #endif
+    242          
+    243          /*
+    244          *********************************************************************************************************
+    245          *                                            SET SYSTEM CLOCK
+    246          *
+    247          * Description: This function sets the 32-bit counter which keeps track of the number of clock ticks.
+    248          *
+    249          * Arguments  : ticks      specifies the new value that OSTime needs to take.
+    250          *
+    251          * Returns    : none
+    252          *********************************************************************************************************
+    253          */
+    254          
+    255          #if OS_TIME_GET_SET_EN > 0
+
+   \                                 In section .text, align 2, keep-with-next
+    256          void  OSTimeSet (INT32U ticks)
+    257          {
+   \                     OSTimeSet: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0x4604             MOV      R4,R0
+    258          #if OS_CRITICAL_METHOD == 3                      /* Allocate storage for CPU status register           */
+    259              OS_CPU_SR  cpu_sr = 0;
+    260          #endif
+    261          
+    262          
+    263          
+    264              OS_ENTER_CRITICAL();
+   \   00000004   0x.... 0x....      BL       OS_CPU_SR_Save
+    265              OSTime = ticks;
+   \   00000008   0x....             LDR.N    R1,??DataTable4_5
+   \   0000000A   0x600C             STR      R4,[R1, #+0]
+    266              OS_EXIT_CRITICAL();
+   \   0000000C   0xE8BD 0x4010      POP      {R4,LR}
+   \   00000010   0x.... 0x....      B.W      OS_CPU_SR_Restore
+    267          }
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4:
+   \   00000000   0x........         DC32     OSIntNesting
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_1:
+   \   00000000   0x........         DC32     OSTCBCur
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_2:
+   \   00000000   0x........         DC32     OSRdyTbl
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_3:
+   \   00000000   0x........         DC32     OSRdyGrp
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_4:
+   \   00000000   0x........         DC32     OSTCBPrioTbl
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4_5:
+   \   00000000   0x........         DC32     OSTime
+    268          #endif
+    269          
+    270          
+    271          
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      16   OSTimeDly
+        16   -> OS_CPU_SR_Restore
+        16   -> OS_CPU_SR_Save
+         0   -> OS_Sched
+      24   OSTimeDlyHMSM
+        24   -> OSTimeDly
+        24   -> OS_CPU_SR_Restore
+        24   -> OS_CPU_SR_Save
+        24   -> OS_Sched
+       8   OSTimeDlyResume
+         8   -> OS_CPU_SR_Restore
+         8   -> OS_CPU_SR_Save
+         8   -> OS_Sched
+       8   OSTimeGet
+         8   -> OS_CPU_SR_Restore
+         8   -> OS_CPU_SR_Save
+       8   OSTimeSet
+         0   -> OS_CPU_SR_Restore
+         8   -> OS_CPU_SR_Save
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable4
+       4  ??DataTable4_1
+       4  ??DataTable4_2
+       4  ??DataTable4_3
+       4  ??DataTable4_4
+       4  ??DataTable4_5
+      62  OSTimeDly
+     134  OSTimeDlyHMSM
+     122  OSTimeDlyResume
+      18  OSTimeGet
+      20  OSTimeSet
+
+ 
+ 380 bytes in section .text
+ 
+ 380 bytes of CODE memory
+
+Errors: none
+Warnings: none
